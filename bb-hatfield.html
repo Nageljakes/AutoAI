@@ -1163,6 +1163,30 @@
                     <div class="metric-label">Gross Profit</div>
                     <div class="metric-value" id="leadDetailGP">R0</div>
                 </div>
+
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                    <label class="form-label">Schedule Follow-Up</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="date" id="followUpDate" class="input" style="flex: 1;">
+                        <button class="btn btn-secondary" onclick="setFollowUp()">Set</button>
+                    </div>
+                    <div id="followUpStatus" style="font-size: 12px; color: var(--text-muted); margin-top: 8px;"></div>
+                </div>
+
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                    <label class="form-label">Quick Actions</label>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <button class="btn btn-secondary" style="width: 100%;" onclick="copyWhatsAppTemplate()">
+                            <i class="fas fa-message"></i> WhatsApp Message
+                        </button>
+                        <button class="btn btn-secondary" style="width: 100%;" onclick="copyProposalTemplate()">
+                            <i class="fas fa-file"></i> Copy Proposal Text
+                        </button>
+                        <button class="btn btn-secondary" style="width: 100%;" onclick="exportSingleLead()">
+                            <i class="fas fa-download"></i> Export Lead Data
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- NOTES & TIMELINE TAB -->
@@ -1747,6 +1771,9 @@ function openLeadDetail(leadId) {
     // Display recommendations (if pre-qual exists)
     displayLeadRecommendations();
 
+    // Display follow-up status
+    updateFollowUpStatus();
+
     // Reset to Overview tab
     switchLeadTab('overview');
 
@@ -2006,6 +2033,169 @@ function displayLeadRecommendations() {
             `).join('')}
         </div>
     `;
+}
+
+function setFollowUp() {
+    const leadId = window.currentLeadId;
+    const followUpDate = document.getElementById('followUpDate').value;
+
+    if (!followUpDate) {
+        showToast('Please select a date');
+        return;
+    }
+
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const followUpTime = new Date(followUpDate).toISOString();
+    lead.followUp = followUpTime;
+
+    // Add note about follow-up
+    const now = new Date().toISOString();
+    if (!lead.notes) lead.notes = [];
+    lead.notes.push({
+        time: now,
+        text: `Follow-up scheduled for ${new Date(followUpDate).toLocaleDateString()}`,
+        agent: currentAgent
+    });
+
+    saveState();
+    updateAllMetrics();
+    showToast('Follow-up scheduled');
+
+    // Update display
+    updateFollowUpStatus();
+}
+
+function updateFollowUpStatus() {
+    const leadId = window.currentLeadId;
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const statusDiv = document.getElementById('followUpStatus');
+    const dateInput = document.getElementById('followUpDate');
+
+    if (lead.followUp) {
+        const followUpDate = new Date(lead.followUp);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        dateInput.value = lead.followUp.split('T')[0];
+
+        if (followUpDate < today) {
+            statusDiv.innerHTML = `<span style="color: var(--accent-red);">⚠ OVERDUE: ${followUpDate.toLocaleDateString()}</span>`;
+        } else if (followUpDate.toDateString() === today.toDateString()) {
+            statusDiv.innerHTML = `<span style="color: var(--accent-orange);">📌 TODAY: ${followUpDate.toLocaleDateString()}</span>`;
+        } else {
+            statusDiv.innerHTML = `<span style="color: var(--accent-green);">✓ Scheduled: ${followUpDate.toLocaleDateString()}</span>`;
+        }
+    } else {
+        dateInput.value = '';
+        statusDiv.innerHTML = '<span style="color: var(--text-muted);">No follow-up scheduled</span>';
+    }
+}
+
+function copyWhatsAppTemplate() {
+    const leadId = window.currentLeadId;
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const template = `Hi ${lead.name},
+
+I wanted to follow up on your interest in a vehicle. Based on our conversation, I've selected some perfect options for you.
+
+Your Pre-Qualification Status: ${lead.prequal ? lead.prequal.verdict : 'Pending'}
+Recommended Monthly Payment: ${lead.prequal ? 'R' + lead.prequal.installment.toLocaleString() : 'TBD'}
+
+When would be a good time for us to discuss the next steps?
+
+Looking forward to getting you into the right vehicle!
+
+Best regards,
+${currentAgent} - BB Hatfield
+☎️ Call for immediate assistance`;
+
+    navigator.clipboard.writeText(template).then(() => {
+        showToast('WhatsApp template copied to clipboard');
+    }).catch(() => {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = template;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('Template copied to clipboard');
+    });
+}
+
+function copyProposalTemplate() {
+    const leadId = window.currentLeadId;
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const proposal = `PROPOSAL SUMMARY
+================
+
+Customer: ${lead.name}
+Phone: ${lead.phone}
+Email: ${lead.email || 'N/A'}
+Agent: ${lead.agent}
+Date: ${new Date().toLocaleDateString()}
+
+VEHICLE INTEREST: ${lead.vehicle || 'TBD'}
+LEAD STAGE: ${lead.stage.toUpperCase()}
+TEMPERATURE: ${lead.temperature}
+
+PRE-QUALIFICATION STATUS:
+${lead.prequal ? `
+- Gross Monthly Income: R${lead.prequal.gross?.toLocaleString() || 'N/A'}
+- Approved Monthly Installment: R${lead.prequal.installment?.toLocaleString() || 'N/A'}
+- DTI Ratio: ${lead.prequal.dti?.toFixed(1) || 'N/A'}%
+- Qualification Verdict: ${lead.prequal.verdict || 'N/A'}
+` : '- No pre-qualification data yet\n'}
+
+NEXT STEPS:
+1. Confirm vehicle selection
+2. Schedule test drive
+3. Prepare financing documents
+4. Submit to bank
+5. Finalize delivery
+
+Generated: ${new Date().toLocaleString()}`;
+
+    navigator.clipboard.writeText(proposal).then(() => {
+        showToast('Proposal template copied');
+    }).catch(() => {
+        const textarea = document.createElement('textarea');
+        textarea.value = proposal;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('Proposal template copied');
+    });
+}
+
+function exportSingleLead() {
+    const leadId = window.currentLeadId;
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const data = {
+        lead: lead,
+        exportDate: new Date().toISOString(),
+        exportedBy: currentAgent
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${lead.name.replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Lead exported as JSON');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
