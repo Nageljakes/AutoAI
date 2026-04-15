@@ -774,6 +774,9 @@
                 </button>
             </div>
 
+            <!-- FOLLOW-UP ALERTS -->
+            <div id="followUpAlertsContainer" style="margin-bottom: 16px;"></div>
+
             <div class="card">
                 <table>
                     <thead>
@@ -917,48 +920,77 @@
         <div id="vehiclesView" class="view">
             <div class="page-header">
                 <div class="page-title">Vehicle Finder</div>
-                <div class="page-subtitle">Browse inventory & compare specs</div>
+                <div class="page-subtitle">Browse & compare 4 vehicles side-by-side</div>
             </div>
 
-            <div class="card" style="margin-bottom: 20px;">
-                <div class="card-header">
-                    <div class="card-title">Quick Search</div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Brand</label>
-                        <select id="vehicleBrandFilter" onchange="filterVehicles()">
-                            <option value="">All Brands</option>
-                            <option>Suzuki</option>
-                            <option>Renault</option>
-                            <option>Mahindra</option>
-                            <option>GAC MOTOR</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Price Range</label>
-                        <select id="vehiclePriceFilter" onchange="filterVehicles()">
-                            <option value="">All Prices</option>
-                            <option value="200000">Under R200k</option>
-                            <option value="300000">R200k - R300k</option>
-                            <option value="400000">R300k - R400k</option>
-                            <option value="999999">Over R400k</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Category</label>
-                        <select id="vehicleCategoryFilter" onchange="filterVehicles()">
-                            <option value="">All Categories</option>
-                            <option>Sedan</option>
-                            <option>SUV</option>
-                            <option>Hatchback</option>
-                            <option>Van</option>
-                        </select>
-                    </div>
-                </div>
+            <div style="margin-bottom: 16px;">
+                <button class="btn btn-secondary" onclick="switchComparisonTab('browse')">
+                    <i class="fas fa-th"></i> Browse Catalog
+                </button>
+                <button class="btn btn-secondary" onclick="switchComparisonTab('compare')">
+                    <i class="fas fa-columns"></i> 4-Vehicle Compare
+                </button>
             </div>
 
-            <div class="grid grid-3" id="vehicleGrid"></div>
+            <!-- BROWSE TAB -->
+            <div id="browseTab">
+                <div class="card" style="margin-bottom: 20px;">
+                    <div class="card-header">
+                        <div class="card-title">Filter Vehicles</div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Brand</label>
+                            <select id="vehicleBrandFilter" onchange="filterVehicles()">
+                                <option value="">All Brands</option>
+                                <option>Suzuki</option>
+                                <option>Renault</option>
+                                <option>Mahindra</option>
+                                <option>GAC MOTOR</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Price Range</label>
+                            <select id="vehiclePriceFilter" onchange="filterVehicles()">
+                                <option value="">All Prices</option>
+                                <option value="200000">Under R200k</option>
+                                <option value="300000">R200k - R300k</option>
+                                <option value="400000">R300k - R400k</option>
+                                <option value="999999">Over R400k</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <select id="vehicleCategoryFilter" onchange="filterVehicles()">
+                                <option value="">All Categories</option>
+                                <option>sedan</option>
+                                <option>suv</option>
+                                <option>hatchback</option>
+                                <option>van</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-3" id="vehicleGrid"></div>
+            </div>
+
+            <!-- COMPARE TAB -->
+            <div id="compareTab" style="display: none;">
+                <div class="card" style="margin-bottom: 20px;">
+                    <div class="card-header">
+                        <div class="card-title">Select Vehicles to Compare</div>
+                    </div>
+                    <div class="grid grid-4" id="comparisonSlots"></div>
+                </div>
+
+                <div class="card" style="margin-bottom: 20px;">
+                    <div class="tabs" id="comparisonTabs"></div>
+                    <div id="comparisonTable"></div>
+                    <button class="btn btn-primary" style="margin-top: 16px;" onclick="copyComparisonToClipboard()">
+                        <i class="fas fa-copy"></i> Copy Comparison
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- CONVERSATION GUIDE VIEW -->
@@ -1025,6 +1057,7 @@
 </div>
 
 <!-- MODALS -->
+<!-- CREATE LEAD MODAL -->
 <div class="modal-overlay" id="leadModal">
     <div class="modal">
         <div class="modal-header">
@@ -1034,15 +1067,19 @@
         <div class="modal-body">
             <div class="form-group">
                 <label class="form-label">Customer Name</label>
-                <input type="text" id="newLeadName">
+                <input type="text" id="newLeadName" class="input">
             </div>
             <div class="form-group">
                 <label class="form-label">Phone</label>
-                <input type="tel" id="newLeadPhone">
+                <input type="tel" id="newLeadPhone" class="input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" id="newLeadEmail" class="input" placeholder="(optional)">
             </div>
             <div class="form-group">
                 <label class="form-label">Agent</label>
-                <select id="newLeadAgent">
+                <select id="newLeadAgent" class="input">
                     <option>Rudi</option>
                     <option>Lesedi</option>
                     <option>Tiisetso</option>
@@ -1050,11 +1087,11 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Vehicle Interest</label>
-                <input type="text" id="newLeadVehicle" placeholder="e.g., Suzuki Swift">
+                <input type="text" id="newLeadVehicle" class="input" placeholder="e.g., Suzuki Swift">
             </div>
             <div class="form-group">
                 <label class="form-label">Temperature</label>
-                <select id="newLeadTemp">
+                <select id="newLeadTemp" class="input">
                     <option>Hot</option>
                     <option>Warm</option>
                     <option>Cold</option>
@@ -1063,6 +1100,127 @@
             <button class="btn btn-primary" style="width: 100%; margin-top: 16px;" onclick="createNewLead()">
                 Create Lead
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- LEAD DETAIL MODAL -->
+<div class="modal-overlay" id="leadDetailModal">
+    <div class="modal" style="max-width: 900px;">
+        <div class="modal-header">
+            <div>
+                <div class="modal-title" id="leadDetailName">Lead Name</div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;" id="leadDetailAgent">Agent</div>
+            </div>
+            <button class="modal-close" onclick="closeModal('leadDetailModal')">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="tabs" id="leadDetailTabs" style="border-bottom: 1px solid var(--border-color); margin-bottom: 16px;">
+                <button class="tab active" onclick="switchLeadTab('overview', this)">Overview</button>
+                <button class="tab" onclick="switchLeadTab('notes', this)">Notes & Timeline</button>
+                <button class="tab" onclick="switchLeadTab('prequal', this)">Pre-Qual</button>
+                <button class="tab" onclick="switchLeadTab('recommend', this)">Recommendations</button>
+            </div>
+
+            <!-- OVERVIEW TAB -->
+            <div id="leadOverviewTab" class="lead-tab-content">
+                <div class="grid grid-2" style="margin-bottom: 16px;">
+                    <div class="metric">
+                        <div class="metric-label">Phone</div>
+                        <div class="metric-value" style="font-size: 16px;" id="leadDetailPhone">-</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Email</div>
+                        <div class="metric-value" style="font-size: 16px;" id="leadDetailEmail">-</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Current Stage</div>
+                        <div id="leadDetailStage" style="margin-top: 8px;"></div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Temperature</div>
+                        <div id="leadDetailTemp" style="margin-top: 8px;"></div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                    <select id="stageChangeSelect" class="input" style="flex: 1;">
+                        <option value="">Change Stage...</option>
+                        <option value="enquiry">Enquiry</option>
+                        <option value="application">Application</option>
+                        <option value="banked">Banked</option>
+                        <option value="lost">Lost</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="changeLeadStage()">Update</button>
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label class="form-label">Add GP (if banked)</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="number" id="leadGPInput" class="input" style="flex: 1;" placeholder="Gross Profit amount">
+                        <button class="btn btn-success" onclick="updateLeadGP()">Save GP</button>
+                    </div>
+                </div>
+
+                <div class="metric">
+                    <div class="metric-label">Gross Profit</div>
+                    <div class="metric-value" id="leadDetailGP">R0</div>
+                </div>
+
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                    <label class="form-label">Schedule Follow-Up</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="date" id="followUpDate" class="input" style="flex: 1;">
+                        <button class="btn btn-secondary" onclick="setFollowUp()">Set</button>
+                    </div>
+                    <div id="followUpStatus" style="font-size: 12px; color: var(--text-muted); margin-top: 8px;"></div>
+                </div>
+
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                    <label class="form-label">Quick Actions</label>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <button class="btn btn-secondary" style="width: 100%;" onclick="copyWhatsAppTemplate()">
+                            <i class="fas fa-message"></i> WhatsApp Message
+                        </button>
+                        <button class="btn btn-secondary" style="width: 100%;" onclick="copyProposalTemplate()">
+                            <i class="fas fa-file"></i> Copy Proposal Text
+                        </button>
+                        <button class="btn btn-secondary" style="width: 100%;" onclick="exportSingleLead()">
+                            <i class="fas fa-download"></i> Export Lead Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NOTES & TIMELINE TAB -->
+            <div id="leadNotesTab" class="lead-tab-content" style="display: none;">
+                <div style="margin-bottom: 16px;">
+                    <label class="form-label">Add Note</label>
+                    <div style="display: flex; gap: 8px;">
+                        <textarea id="newNoteInput" class="input" style="flex: 1; min-height: 60px;" placeholder="Add a call note..."></textarea>
+                        <button class="btn btn-primary" style="align-self: flex-start;" onclick="addNoteToLead()">Add</button>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="metric-label" style="margin-bottom: 12px;">Call Log</div>
+                    <div id="leadNotesList" style="max-height: 400px; overflow-y: auto;"></div>
+                </div>
+            </div>
+
+            <!-- PRE-QUAL TAB -->
+            <div id="leadPrequalTab" class="lead-tab-content" style="display: none;">
+                <div id="leadPrequalContent" style="color: var(--text-muted); text-align: center; padding: 20px;">
+                    No pre-qual linked yet. <button class="btn btn-sm btn-primary" onclick="switchView('prequal')">Run Pre-Qual</button>
+                </div>
+            </div>
+
+            <!-- RECOMMENDATIONS TAB -->
+            <div id="leadRecommendTab" class="lead-tab-content" style="display: none;">
+                <div id="leadRecommendContent" style="color: var(--text-muted); text-align: center; padding: 20px;">
+                    Run pre-qual first to see recommended vehicles
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -1087,21 +1245,117 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
-// EMBEDDED DATA: VEHICLES
+// EMBEDDED DATA: VEHICLES (with detailed specs)
 // ═══════════════════════════════════════════════════════════════════════════
 const VEHICLES_DATA = {
-    "Suzuki::SWIFT": { brand: "Suzuki", model: "SWIFT", category: "hatchback", price: 224900, engine: "1.2L Petrol", transmission: "Manual/CVT", seats: 5, fuel_type: "Petrol", image: "🚗" },
-    "Suzuki::BALENO": { brand: "Suzuki", model: "BALENO", category: "hatchback", price: 266900, engine: "1.5L Petrol", transmission: "Manual/AT", seats: 5, fuel_type: "Petrol", image: "🚗" },
-    "Suzuki::CELERIO": { brand: "Suzuki", model: "CELERIO", category: "hatchback", price: 188900, engine: "1.0L Petrol", transmission: "Manual", seats: 5, fuel_type: "Petrol", image: "🚗" },
-    "Suzuki::FRONX": { brand: "Suzuki", model: "FRONX", category: "suv", price: 298900, engine: "1.5L Petrol", transmission: "Manual/AT", seats: 5, fuel_type: "Petrol", image: "🚙" },
-    "Suzuki::GRAND VITARA": { brand: "Suzuki", model: "GRAND VITARA", category: "suv", price: 358900, engine: "1.5L Petrol", transmission: "Manual/AT", seats: 5, fuel_type: "Petrol", image: "🚙" },
-    "Renault::KWID": { brand: "Renault", model: "KWID", category: "hatchback", price: 186900, engine: "1.0L Petrol", transmission: "Manual", seats: 5, fuel_type: "Petrol", image: "🚗" },
-    "Renault::KIGER": { brand: "Renault", model: "KIGER", category: "suv", price: 229900, engine: "1.0L Petrol", transmission: "Manual/CVT", seats: 5, fuel_type: "Petrol", image: "🚙" },
-    "Renault::TRIBER": { brand: "Renault", model: "TRIBER", category: "van", price: 216900, engine: "1.0L Petrol", transmission: "Manual", seats: 7, fuel_type: "Petrol", image: "🚐" },
-    "Mahindra::XUV3X0": { brand: "Mahindra", model: "XUV 3XO", category: "suv", price: 259999, engine: "1.2L Petrol", transmission: "Manual/AT", seats: 5, fuel_type: "Petrol", image: "🚙" },
-    "Mahindra::SCORPIO-N": { brand: "Mahindra", model: "SCORPIO-N", category: "suv", price: 489999, engine: "2.2L Diesel", transmission: "Auto", seats: 5, fuel_type: "Diesel", image: "🚙" },
-    "GAC MOTOR::EMKOO": { brand: "GAC MOTOR", model: "EMKOO", category: "suv", price: 399999, engine: "1.5L Petrol", transmission: "DCT", seats: 5, fuel_type: "Petrol", image: "🚙" },
-    "GAC MOTOR::GS3 EMZOOM": { brand: "GAC MOTOR", model: "GS3 EMZOOM", category: "suv", price: 289999, engine: "1.5L Petrol", transmission: "Manual/DCT", seats: 5, fuel_type: "Petrol", image: "🚙" },
+    "Suzuki::SWIFT": {
+        brand: "Suzuki", model: "SWIFT", category: "hatchback", price: 224900, image: "🚗",
+        engine: { cc: 1197, power_kw: 67, torque_nm: 113, fuel: "Petrol", consumption: "5.2 L/100km" },
+        transmission: "Manual/CVT", seats: 5, doors: 5, wheelbase: 2430, length: 3840, width: 1695, height: 1500,
+        safety: ["6 Airbags", "ABS", "Electronic Brake-force Distribution", "Brake Assist"],
+        colors: ["Silver", "White", "Black", "Red", "Blue"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["Best fuel economy", "Affordable", "Easy handling", "Compact size"]
+    },
+    "Suzuki::BALENO": {
+        brand: "Suzuki", model: "BALENO", category: "hatchback", price: 266900, image: "🚗",
+        engine: { cc: 1462, power_kw: 77, torque_nm: 138, fuel: "Petrol", consumption: "5.8 L/100km" },
+        transmission: "Manual/AT", seats: 5, doors: 5, wheelbase: 2520, length: 3990, width: 1735, height: 1510,
+        safety: ["6 Airbags", "ABS", "TPMS", "Hill Start Assist"],
+        colors: ["Silver", "White", "Black", "Red", "Blue", "Magenta"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["Spacious interior", "Premium feel", "Great value", "Good performance"]
+    },
+    "Suzuki::CELERIO": {
+        brand: "Suzuki", model: "CELERIO", category: "hatchback", price: 188900, image: "🚗",
+        engine: { cc: 998, power_kw: 51, torque_nm: 89, fuel: "Petrol", consumption: "4.8 L/100km" },
+        transmission: "Manual/AMT", seats: 5, doors: 5, wheelbase: 2385, length: 3795, width: 1665, height: 1515,
+        safety: ["2 Airbags", "ABS", "Brake Assist"],
+        colors: ["Silver", "White", "Black", "Red"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["Most affordable", "Excellent mileage", "Entry-level segment"]
+    },
+    "Suzuki::FRONX": {
+        brand: "Suzuki", model: "FRONX", category: "suv", price: 298900, image: "🚙",
+        engine: { cc: 1497, power_kw: 77, torque_nm: 140, fuel: "Petrol", consumption: "6.0 L/100km" },
+        transmission: "Manual/AT", seats: 5, doors: 5, wheelbase: 2500, length: 3995, width: 1760, height: 1595,
+        safety: ["6 Airbags", "ABS", "Hill Start Assist", "Stability Control"],
+        colors: ["Silver", "White", "Black", "Red", "Blue", "Bronze"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["Modern design", "Good ground clearance", "Spacious cargo"]
+    },
+    "Suzuki::GRAND VITARA": {
+        brand: "Suzuki", model: "GRAND VITARA", category: "suv", price: 358900, image: "🚙",
+        engine: { cc: 1462, power_kw: 77, torque_nm: 138, fuel: "Petrol", consumption: "6.2 L/100km" },
+        transmission: "Manual/AT", seats: 5, doors: 5, wheelbase: 2600, length: 4175, width: 1800, height: 1685,
+        safety: ["6 Airbags", "ABS", "Traction Control", "Hill Descent Control"],
+        colors: ["Silver", "White", "Black", "Grey", "Beige"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["Premium SUV", "All-terrain capability", "Comfortable for families"]
+    },
+    "Renault::KWID": {
+        brand: "Renault", model: "KWID", category: "hatchback", price: 186900, image: "🚗",
+        engine: { cc: 999, power_kw: 50, torque_nm: 96, fuel: "Petrol", consumption: "5.0 L/100km" },
+        transmission: "Manual", seats: 5, doors: 5, wheelbase: 2422, length: 3846, width: 1655, height: 1560,
+        safety: ["2 Airbags", "ABS", "Brake Assist"],
+        colors: ["White", "Black", "Red", "Beige"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["Budget-friendly", "Spacious cabin", "Good value"]
+    },
+    "Renault::KIGER": {
+        brand: "Renault", model: "KIGER", category: "suv", price: 229900, image: "🚙",
+        engine: { cc: 999, power_kw: 50, torque_nm: 96, fuel: "Petrol", consumption: "5.2 L/100km" },
+        transmission: "Manual/CVT", seats: 5, doors: 5, wheelbase: 2479, length: 3994, width: 1738, height: 1600,
+        safety: ["6 Airbags", "ABS", "Traction Control"],
+        colors: ["White", "Black", "Red", "Blue", "Orange"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["Affordable SUV", "Bold design", "Great for beginners"]
+    },
+    "Renault::TRIBER": {
+        brand: "Renault", model: "TRIBER", category: "van", price: 216900, image: "🚐",
+        engine: { cc: 999, power_kw: 50, torque_nm: 96, fuel: "Petrol", consumption: "5.3 L/100km" },
+        transmission: "Manual", seats: 7, doors: 5, wheelbase: 2643, length: 3998, width: 1687, height: 1630,
+        safety: ["2 Airbags", "ABS", "Brake Assist"],
+        colors: ["White", "Black", "Red", "Beige"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["7-seater MPV", "Spacious interior", "Family vehicle", "Easy parking"]
+    },
+    "Mahindra::XUV3X0": {
+        brand: "Mahindra", model: "XUV 3XO", category: "suv", price: 259999, image: "🚙",
+        engine: { cc: 1197, power_kw: 82, torque_nm: 200, fuel: "Petrol", consumption: "6.0 L/100km" },
+        transmission: "Manual/AT", seats: 5, doors: 5, wheelbase: 2600, length: 4200, width: 1821, height: 1646,
+        safety: ["6 Airbags", "ABS", "Traction Control", "Hill Start Assist", "iSmart technology"],
+        colors: ["White", "Black", "Silver", "Red", "Blue"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["Feature-rich", "Premium cabin", "Good power delivery", "Modern tech"]
+    },
+    "Mahindra::SCORPIO-N": {
+        brand: "Mahindra", model: "SCORPIO-N", category: "suv", price: 489999, image: "🚙",
+        engine: { cc: 2184, power_kw: 110, torque_nm: 320, fuel: "Diesel", consumption: "7.5 L/100km" },
+        transmission: "Auto", seats: 5, doors: 5, wheelbase: 2750, length: 4450, width: 1900, height: 1830,
+        safety: ["7 Airbags", "ABS", "Electronic Stability Program", "Traction Control"],
+        colors: ["Black", "White", "Silver", "Red"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["Premium SUV", "Powerful diesel", "Spacious", "Luxury features"]
+    },
+    "GAC MOTOR::EMKOO": {
+        brand: "GAC MOTOR", model: "EMKOO", category: "suv", price: 399999, image: "🚙",
+        engine: { cc: 1497, power_kw: 130, torque_nm: 270, fuel: "Petrol", consumption: "6.4 L/100km" },
+        transmission: "DCT", seats: 5, doors: 5, wheelbase: 2750, length: 4680, width: 1901, height: 1670,
+        safety: ["6 Airbags", "Blind Spot Detection", "Lane Change Assist", "Rear Cross Traffic Alert"],
+        colors: ["White", "Black", "Silver", "Blue", "Green"],
+        warranty: "5 years / 150,000 km",
+        highlights: ["Chinese premium", "Advanced tech", "Powerful engine", "Extended warranty"]
+    },
+    "GAC MOTOR::GS3 EMZOOM": {
+        brand: "GAC MOTOR", model: "GS3 EMZOOM", category: "suv", price: 289999, image: "🚙",
+        engine: { cc: 1497, power_kw: 115, torque_nm: 220, fuel: "Petrol", consumption: "6.2 L/100km" },
+        transmission: "Manual/DCT", seats: 5, doors: 5, wheelbase: 2600, length: 4405, width: 1835, height: 1625,
+        safety: ["6 Airbags", "ABS", "Electronic Stability Control", "Hill Start Assist"],
+        colors: ["White", "Black", "Silver", "Blue", "Red"],
+        warranty: "5 years / 150,000 km",
+        highlights: ["Affordable premium", "Good mileage", "Modern design", "Warranty coverage"]
+    },
 };
 
 const SCRIPTS_DATA = {
@@ -1183,10 +1437,54 @@ function saveState() {
 }
 
 function seedDemoData() {
+    const now = new Date();
     appState.leads = [
-        { id: 1, name: 'Thabo Mokwena', phone: '0821234567', agent: 'Rudi', vehicle: 'Suzuki Swift', stage: 'enquiry', temperature: 'Hot', gp: 0, created: new Date().toISOString() },
-        { id: 2, name: 'Sarah van der Merwe', phone: '0729876543', agent: 'Lesedi', vehicle: 'Renault Kiger', stage: 'application', temperature: 'Warm', gp: 0, created: new Date(Date.now() - 86400000).toISOString() },
-        { id: 3, name: 'John Ndlovu', phone: '0834567890', agent: 'Tiisetso', vehicle: 'GAC GS3 Emzoom', stage: 'banked', temperature: 'Warm', gp: 18500, created: new Date(Date.now() - 172800000).toISOString() },
+        {
+            id: 1, name: 'Thabo Mokwena', phone: '0821234567', email: 'thabo@email.com', agent: 'Rudi',
+            vehicle: 'Suzuki Swift', stage: 'enquiry', temperature: 'Hot', gp: 0,
+            created: now.toISOString(), stageChangedAt: now.toISOString(),
+            notes: [
+                { time: new Date(now - 3600000).toISOString(), text: 'Customer called inquiring about Swift', agent: 'Rudi' },
+                { time: now.toISOString(), text: 'Interested in 1.2 MT variant, wants to see showroom', agent: 'Rudi' }
+            ],
+            prequal: null,
+            followUp: null,
+            timeline: [
+                { date: now.toISOString(), event: 'Lead created', stage: 'enquiry' }
+            ]
+        },
+        {
+            id: 2, name: 'Sarah van der Merwe', phone: '0729876543', email: 'sarah@email.com', agent: 'Lesedi',
+            vehicle: 'Renault Kiger', stage: 'application', temperature: 'Warm', gp: 0,
+            created: new Date(now - 86400000).toISOString(), stageChangedAt: new Date(now - 3600000).toISOString(),
+            notes: [
+                { time: new Date(now - 86400000).toISOString(), text: 'Walk-in customer', agent: 'Lesedi' },
+                { time: new Date(now - 43200000).toISOString(), text: 'Completed pre-qual, approved for financing', agent: 'Lesedi' }
+            ],
+            prequal: { gross: 18000, net: 14500, vehiclePrice: 229900, installment: 3850, dti: 25.7, verdict: 'QUALIFIED' },
+            followUp: new Date(now + 86400000).toISOString(),
+            timeline: [
+                { date: new Date(now - 86400000).toISOString(), event: 'Lead created', stage: 'enquiry' },
+                { date: new Date(now - 43200000).toISOString(), event: 'Pre-qualified', stage: 'application' }
+            ]
+        },
+        {
+            id: 3, name: 'John Ndlovu', phone: '0834567890', email: 'john@email.com', agent: 'Tiisetso',
+            vehicle: 'GAC GS3 Emzoom', stage: 'banked', temperature: 'Warm', gp: 18500,
+            created: new Date(now - 172800000).toISOString(), stageChangedAt: new Date(now - 86400000).toISOString(),
+            notes: [
+                { time: new Date(now - 172800000).toISOString(), text: 'Website inquiry', agent: 'Tiisetso' },
+                { time: new Date(now - 129600000).toISOString(), text: 'Visited showroom, test drove model', agent: 'Tiisetso' },
+                { time: new Date(now - 86400000).toISOString(), text: 'Deal closed! GP: R18,500', agent: 'Tiisetso' }
+            ],
+            prequal: { gross: 22000, net: 17500, vehiclePrice: 289999, installment: 4200, dti: 22.9, verdict: 'QUALIFIED' },
+            followUp: null,
+            timeline: [
+                { date: new Date(now - 172800000).toISOString(), event: 'Lead created', stage: 'enquiry' },
+                { date: new Date(now - 129600000).toISOString(), event: 'Test drive', stage: 'application' },
+                { date: new Date(now - 86400000).toISOString(), event: 'Deal banked', stage: 'banked' }
+            ]
+        }
     ];
     saveState();
 }
@@ -1229,7 +1527,11 @@ function switchView(viewName, element) {
         case 'dashboard': renderDashboard(); break;
         case 'leads': renderLeadsTable(); break;
         case 'prequal': initPrequalForm(); break;
-        case 'vehicles': renderVehicleCatalog(); break;
+        case 'vehicles':
+            document.getElementById('browseTab').style.display = 'block';
+            document.getElementById('compareTab').style.display = 'none';
+            renderVehicleCatalog();
+            break;
         case 'guide': renderGuideContent('enquiry'); break;
         case 'agents': renderAgentStats(); break;
     }
@@ -1283,7 +1585,7 @@ function updateActivityTable() {
     table.innerHTML = hotLeads.map(lead => {
         const daysActive = Math.floor((Date.now() - new Date(lead.created)) / (1000 * 60 * 60 * 24));
         return `
-            <tr>
+            <tr onclick="openLeadDetail(${lead.id})" style="cursor: pointer;">
                 <td><strong>${lead.name}</strong></td>
                 <td>${lead.vehicle}</td>
                 <td><span class="badge badge-${lead.stage}">${lead.stage}</span></td>
@@ -1344,13 +1646,14 @@ function renderLeadsTable() {
     const myLeads = getMyLeads();
 
     table.innerHTML = myLeads.map(lead => `
-        <tr>
+        <tr onclick="openLeadDetail(${lead.id})" style="cursor: pointer;">
             <td><strong>${lead.name}</strong></td>
+            <td><span style="font-size: 11px; color: var(--text-secondary);">${lead.agent}</span></td>
             <td>${lead.vehicle}</td>
             <td><span class="badge badge-${lead.stage}">${lead.stage.charAt(0).toUpperCase() + lead.stage.slice(1)}</span></td>
             <td><span class="badge badge-${lead.temperature}">${lead.temperature}</span></td>
             <td>R${lead.gp?.toLocaleString() || 0}</td>
-            <td>
+            <td onclick="event.stopPropagation();">
                 <button class="btn-icon" onclick="editLead(${lead.id})" title="Change Stage"><i class="fas fa-edit"></i></button>
                 <button class="btn-icon" onclick="deleteLead(${lead.id})" title="Delete"><i class="fas fa-trash"></i></button>
             </td>
@@ -1358,7 +1661,7 @@ function renderLeadsTable() {
     `).join('');
 
     if (myLeads.length === 0) {
-        table.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">No leads yet. <a href="#" onclick="switchView(\'leads\', event.target.closest(\'.nav-item\'))">Create one</a></td></tr>';
+        table.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 20px;">No leads yet. <a href="#" onclick="switchView(\'leads\', event.target.closest(\'.nav-item\'))">Create one</a></td></tr>';
     }
 
     document.getElementById('leadBadge').textContent = myLeads.length;
@@ -1374,18 +1677,25 @@ function createNewLead() {
     const agent = document.getElementById('newLeadAgent').value;
     const vehicle = document.getElementById('newLeadVehicle').value;
     const temperature = document.getElementById('newLeadTemp').value;
+    const email = document.getElementById('newLeadEmail')?.value || '';
 
     if (!name || !phone) {
         showToast('Please fill in required fields');
         return;
     }
 
+    const now = new Date().toISOString();
     const newLead = {
         id: Date.now(),
-        name, phone, agent, vehicle, temperature,
+        name, phone, email, agent, vehicle, temperature,
         stage: 'enquiry',
         gp: 0,
-        created: new Date().toISOString()
+        created: now,
+        stageChangedAt: now,
+        notes: [],
+        prequal: null,
+        followUp: null,
+        timeline: [{ date: now, event: 'Lead created', stage: 'enquiry' }]
     };
 
     appState.leads.push(newLead);
@@ -1423,6 +1733,473 @@ function deleteLead(id) {
         updateAllMetrics();
         showToast('Lead deleted');
     }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LEAD DETAIL MODAL FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+function openLeadDetail(leadId) {
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    // Set header info
+    document.getElementById('leadDetailName').textContent = lead.name;
+    document.getElementById('leadDetailAgent').textContent = `${lead.agent} • ${lead.phone}`;
+
+    // Store current lead ID for modal operations
+    window.currentLeadId = leadId;
+
+    // Populate Overview tab
+    document.getElementById('leadDetailPhone').textContent = lead.phone || '-';
+    document.getElementById('leadDetailEmail').textContent = lead.email || '-';
+    document.getElementById('leadDetailGP').textContent = 'R' + (lead.gp || 0).toLocaleString();
+
+    // Stage selector
+    const stageSelect = document.getElementById('stageChangeSelect');
+    stageSelect.value = lead.stage;
+
+    // Temperature badge
+    const tempDiv = document.getElementById('leadDetailTemp');
+    tempDiv.innerHTML = `<span class="badge badge-${lead.temperature}">${lead.temperature}</span>`;
+
+    // Stage badge
+    const stageDiv = document.getElementById('leadDetailStage');
+    stageDiv.innerHTML = `<span class="badge badge-${lead.stage}">${lead.stage.charAt(0).toUpperCase() + lead.stage.slice(1)}</span>`;
+
+    // Display notes
+    displayLeadNotes();
+
+    // Display pre-qual info
+    displayLeadPrequal();
+
+    // Display recommendations (if pre-qual exists)
+    displayLeadRecommendations();
+
+    // Display follow-up status
+    updateFollowUpStatus();
+
+    // Reset to Overview tab
+    switchLeadTab('overview');
+
+    // Open modal
+    openModal('leadDetailModal');
+}
+
+function switchLeadTab(tabName, element) {
+    // Hide all tabs
+    document.querySelectorAll('.lead-tab-content').forEach(tab => tab.style.display = 'none');
+
+    // Remove active class from all tab buttons
+    document.querySelectorAll('#leadDetailTabs .tab').forEach(btn => btn.classList.remove('active'));
+
+    // Show selected tab
+    const tabId = 'lead' + tabName.charAt(0).toUpperCase() + tabName.slice(1) + 'Tab';
+    const tabElement = document.getElementById(tabId);
+    if (tabElement) {
+        tabElement.style.display = 'block';
+    }
+
+    // Add active class to clicked button
+    if (element) {
+        element.classList.add('active');
+    }
+}
+
+function changeLeadStage() {
+    const leadId = window.currentLeadId;
+    const newStage = document.getElementById('stageChangeSelect').value;
+
+    if (!newStage) {
+        showToast('Please select a stage');
+        return;
+    }
+
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const now = new Date().toISOString();
+    lead.stage = newStage;
+    lead.stageChangedAt = now;
+
+    // Add to timeline
+    if (!lead.timeline) lead.timeline = [];
+    lead.timeline.push({
+        date: now,
+        event: `Moved to ${newStage}`,
+        stage: newStage
+    });
+
+    // Add note
+    if (!lead.notes) lead.notes = [];
+    lead.notes.push({
+        time: now,
+        text: `Stage changed to ${newStage.charAt(0).toUpperCase() + newStage.slice(1)}`,
+        agent: currentAgent
+    });
+
+    saveState();
+    updateAllMetrics();
+    showToast(`Lead moved to ${newStage}`);
+
+    // Update display
+    openLeadDetail(leadId);
+}
+
+function updateLeadGP() {
+    const leadId = window.currentLeadId;
+    const gpValue = parseFloat(document.getElementById('leadGPInput').value);
+
+    if (!gpValue || gpValue <= 0) {
+        showToast('Please enter a valid GP amount');
+        return;
+    }
+
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    lead.gp = gpValue;
+
+    // Add note about GP
+    const now = new Date().toISOString();
+    if (!lead.notes) lead.notes = [];
+    lead.notes.push({
+        time: now,
+        text: `GP added: R${gpValue.toLocaleString()}`,
+        agent: currentAgent
+    });
+
+    saveState();
+    updateAllMetrics();
+    showToast('GP updated successfully');
+
+    // Update display
+    document.getElementById('leadDetailGP').textContent = 'R' + gpValue.toLocaleString();
+    document.getElementById('leadGPInput').value = '';
+
+    // Refresh notes
+    displayLeadNotes();
+}
+
+function addNoteToLead() {
+    const leadId = window.currentLeadId;
+    const noteText = document.getElementById('newNoteInput').value.trim();
+
+    if (!noteText) {
+        showToast('Please enter a note');
+        return;
+    }
+
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const now = new Date().toISOString();
+    if (!lead.notes) lead.notes = [];
+
+    lead.notes.push({
+        time: now,
+        text: noteText,
+        agent: currentAgent
+    });
+
+    // Add to timeline
+    if (!lead.timeline) lead.timeline = [];
+    lead.timeline.push({
+        date: now,
+        event: `Note: ${noteText.substring(0, 50)}...`,
+        stage: lead.stage
+    });
+
+    saveState();
+    document.getElementById('newNoteInput').value = '';
+    displayLeadNotes();
+    showToast('Note added');
+}
+
+function displayLeadNotes() {
+    const leadId = window.currentLeadId;
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const notesList = document.getElementById('leadNotesList');
+    const notes = lead.notes || [];
+
+    if (notes.length === 0) {
+        notesList.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 20px;">No notes yet</div>';
+        return;
+    }
+
+    notesList.innerHTML = notes.map(note => `
+        <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 4px; margin-bottom: 8px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <strong style="color: var(--accent-cyan);">${note.agent}</strong>
+                <span style="font-size: 10px; color: var(--text-muted);">${new Date(note.time).toLocaleString()}</span>
+            </div>
+            <div style="font-size: 13px; line-height: 1.4;">${note.text}</div>
+        </div>
+    `).join('');
+}
+
+function displayLeadPrequal() {
+    const leadId = window.currentLeadId;
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const prequalContent = document.getElementById('leadPrequalContent');
+
+    if (!lead.prequal) {
+        prequalContent.innerHTML = `
+            <div style="text-align: center; color: var(--text-muted); padding: 20px;">
+                <div style="margin-bottom: 12px;">No pre-qual linked yet</div>
+                <button class="btn btn-primary" onclick="switchView('prequal', null); closeModal('leadDetailModal');">
+                    Run Pre-Qual
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    const pq = lead.prequal;
+    prequalContent.innerHTML = `
+        <div class="grid grid-2" style="gap: 16px; margin-bottom: 16px;">
+            <div class="metric">
+                <div class="metric-label">Gross Monthly Income</div>
+                <div class="metric-value">R${pq.gross?.toLocaleString() || 0}</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">Net Monthly Income</div>
+                <div class="metric-value">R${pq.net?.toLocaleString() || 0}</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">Vehicle Price</div>
+                <div class="metric-value">R${pq.vehiclePrice?.toLocaleString() || 0}</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">Monthly Installment</div>
+                <div class="metric-value">R${pq.installment?.toLocaleString() || 0}</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">Debt-to-Income Ratio</div>
+                <div class="metric-value">${pq.dti?.toFixed(1) || 0}%</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">Qualification Verdict</div>
+                <div class="metric-value" style="color: ${pq.verdict === 'QUALIFIED' ? 'var(--accent-green)' : pq.verdict === 'REFER TO MANAGER' ? 'var(--accent-orange)' : 'var(--accent-red)'};">
+                    ${pq.verdict || 'UNKNOWN'}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function displayLeadRecommendations() {
+    const leadId = window.currentLeadId;
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const recommendContent = document.getElementById('leadRecommendContent');
+
+    if (!lead.prequal) {
+        recommendContent.innerHTML = `
+            <div style="text-align: center; color: var(--text-muted); padding: 20px;">
+                Run pre-qual first to see recommended vehicles
+            </div>
+        `;
+        return;
+    }
+
+    // Simple recommendation logic: suggest vehicles in price range
+    const affordablePrice = lead.prequal.vehiclePrice;
+    const priceMin = affordablePrice * 0.8;
+    const priceMax = affordablePrice * 1.2;
+
+    const recommended = Object.values(VEHICLES_DATA).filter(v =>
+        v.price >= priceMin && v.price <= priceMax
+    ).slice(0, 3);
+
+    if (recommended.length === 0) {
+        recommendContent.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">No vehicles in your price range</div>';
+        return;
+    }
+
+    recommendContent.innerHTML = `
+        <div style="display: grid; gap: 12px;">
+            ${recommended.map(v => `
+                <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 4px; border-left: 3px solid var(--accent-cyan);">
+                    <div style="font-weight: 600; margin-bottom: 4px;">${v.brand} ${v.model}</div>
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">
+                        ${v.engine.power_kw}kW • ${v.engine.consumption} • ${v.transmission}
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <strong style="color: var(--accent-green);">R${v.price.toLocaleString()}</strong>
+                        <button class="btn btn-sm btn-primary" onclick="alert('View ${v.model} details in Vehicle KB')">View</button>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function setFollowUp() {
+    const leadId = window.currentLeadId;
+    const followUpDate = document.getElementById('followUpDate').value;
+
+    if (!followUpDate) {
+        showToast('Please select a date');
+        return;
+    }
+
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const followUpTime = new Date(followUpDate).toISOString();
+    lead.followUp = followUpTime;
+
+    // Add note about follow-up
+    const now = new Date().toISOString();
+    if (!lead.notes) lead.notes = [];
+    lead.notes.push({
+        time: now,
+        text: `Follow-up scheduled for ${new Date(followUpDate).toLocaleDateString()}`,
+        agent: currentAgent
+    });
+
+    saveState();
+    updateAllMetrics();
+    showToast('Follow-up scheduled');
+
+    // Update display
+    updateFollowUpStatus();
+}
+
+function updateFollowUpStatus() {
+    const leadId = window.currentLeadId;
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const statusDiv = document.getElementById('followUpStatus');
+    const dateInput = document.getElementById('followUpDate');
+
+    if (lead.followUp) {
+        const followUpDate = new Date(lead.followUp);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        dateInput.value = lead.followUp.split('T')[0];
+
+        if (followUpDate < today) {
+            statusDiv.innerHTML = `<span style="color: var(--accent-red);">⚠ OVERDUE: ${followUpDate.toLocaleDateString()}</span>`;
+        } else if (followUpDate.toDateString() === today.toDateString()) {
+            statusDiv.innerHTML = `<span style="color: var(--accent-orange);">📌 TODAY: ${followUpDate.toLocaleDateString()}</span>`;
+        } else {
+            statusDiv.innerHTML = `<span style="color: var(--accent-green);">✓ Scheduled: ${followUpDate.toLocaleDateString()}</span>`;
+        }
+    } else {
+        dateInput.value = '';
+        statusDiv.innerHTML = '<span style="color: var(--text-muted);">No follow-up scheduled</span>';
+    }
+}
+
+function copyWhatsAppTemplate() {
+    const leadId = window.currentLeadId;
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const template = `Hi ${lead.name},
+
+I wanted to follow up on your interest in a vehicle. Based on our conversation, I've selected some perfect options for you.
+
+Your Pre-Qualification Status: ${lead.prequal ? lead.prequal.verdict : 'Pending'}
+Recommended Monthly Payment: ${lead.prequal ? 'R' + lead.prequal.installment.toLocaleString() : 'TBD'}
+
+When would be a good time for us to discuss the next steps?
+
+Looking forward to getting you into the right vehicle!
+
+Best regards,
+${currentAgent} - BB Hatfield
+☎️ Call for immediate assistance`;
+
+    navigator.clipboard.writeText(template).then(() => {
+        showToast('WhatsApp template copied to clipboard');
+    }).catch(() => {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = template;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('Template copied to clipboard');
+    });
+}
+
+function copyProposalTemplate() {
+    const leadId = window.currentLeadId;
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const proposal = `PROPOSAL SUMMARY
+================
+
+Customer: ${lead.name}
+Phone: ${lead.phone}
+Email: ${lead.email || 'N/A'}
+Agent: ${lead.agent}
+Date: ${new Date().toLocaleDateString()}
+
+VEHICLE INTEREST: ${lead.vehicle || 'TBD'}
+LEAD STAGE: ${lead.stage.toUpperCase()}
+TEMPERATURE: ${lead.temperature}
+
+PRE-QUALIFICATION STATUS:
+${lead.prequal ? `
+- Gross Monthly Income: R${lead.prequal.gross?.toLocaleString() || 'N/A'}
+- Approved Monthly Installment: R${lead.prequal.installment?.toLocaleString() || 'N/A'}
+- DTI Ratio: ${lead.prequal.dti?.toFixed(1) || 'N/A'}%
+- Qualification Verdict: ${lead.prequal.verdict || 'N/A'}
+` : '- No pre-qualification data yet\n'}
+
+NEXT STEPS:
+1. Confirm vehicle selection
+2. Schedule test drive
+3. Prepare financing documents
+4. Submit to bank
+5. Finalize delivery
+
+Generated: ${new Date().toLocaleString()}`;
+
+    navigator.clipboard.writeText(proposal).then(() => {
+        showToast('Proposal template copied');
+    }).catch(() => {
+        const textarea = document.createElement('textarea');
+        textarea.value = proposal;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('Proposal template copied');
+    });
+}
+
+function exportSingleLead() {
+    const leadId = window.currentLeadId;
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const data = {
+        lead: lead,
+        exportDate: new Date().toISOString(),
+        exportedBy: currentAgent
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${lead.name.replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Lead exported as JSON');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1506,26 +2283,119 @@ function calculatePrequal() {
 
 function savePQResult() {
     const name = document.getElementById('pqName').value;
-    if (!name) {
-        showToast('Enter customer name');
+    const phone = document.getElementById('pqPhone').value;
+    const email = document.getElementById('pqEmail').value;
+    const grossIncome = parseFloat(document.getElementById('pqGrossIncome').value) || 0;
+    const netIncome = parseFloat(document.getElementById('pqNetIncome').value) || 0;
+    const expenses = parseFloat(document.getElementById('pqExpenses').value) || 0;
+    const vehiclePrice = parseFloat(document.getElementById('pqVehiclePrice').value) || 0;
+    const deposit = parseFloat(document.getElementById('pqDeposit').value) || 0;
+    const term = parseFloat(document.getElementById('pqTerm').value) || 0;
+    const balloon = parseFloat(document.getElementById('pqBalloon').value) || 0;
+    const creditScore = document.getElementById('pqCreditScore').value;
+
+    if (!name || !grossIncome || !vehiclePrice || !term) {
+        showToast('Fill in all required fields');
         return;
     }
 
-    const lead = {
+    // Calculate pre-qual data
+    let rate = 11.25;
+    if (creditScore === 'good') rate += 2;
+    if (creditScore === 'fair') rate += 4;
+    if (creditScore === 'poor') rate += 8;
+
+    const principal = Math.max(0, vehiclePrice + 15000 - deposit);
+    const balloonVal = vehiclePrice * (balloon / 100);
+    const amortizable = principal - balloonVal;
+
+    const monthlyRate = rate / 100 / 12;
+    const pf = (monthlyRate * Math.pow(1 + monthlyRate, term)) / (Math.pow(1 + monthlyRate, term) - 1);
+    const installment = amortizable * pf + balloonVal * monthlyRate;
+
+    let deemed = expenses;
+    if (grossIncome <= 800) deemed = grossIncome;
+    else if (grossIncome <= 6250) deemed = 800 + (grossIncome - 800) * 0.0675;
+    else if (grossIncome <= 25000) deemed = 1167.88 + (grossIncome - 6250) * 0.09;
+    else if (grossIncome <= 50000) deemed = 2855.38 + (grossIncome - 25000) * 0.082;
+    else deemed = 4905.38 + (grossIncome - 50000) * 0.0675;
+
+    const livingExp = Math.max(deemed, expenses);
+    const discretionary = Math.max(0, netIncome - expenses - livingExp);
+    const mandExtras = 2500;
+    const netSurplus = discretionary - installment - mandExtras;
+    const dti = (installment * 12) / grossIncome * 100;
+
+    // Determine verdict
+    let verdict = 'NOT QUALIFIED';
+    if (grossIncome >= 5000 && creditScore !== 'poor') {
+        if (dti <= 40 && netSurplus >= 1000) {
+            verdict = 'QUALIFIED';
+        } else if (dti < 50 && netSurplus >= 500 && installment <= (grossIncome * 0.3)) {
+            verdict = 'REFER TO MANAGER';
+        }
+    }
+
+    const prequal = {
+        gross: grossIncome,
+        net: netIncome,
+        vehiclePrice: vehiclePrice,
+        installment: Math.round(installment),
+        dti: Math.round(dti * 10) / 10,
+        verdict: verdict
+    };
+
+    // Create or link to existing lead
+    const myLeads = getMyLeads();
+    if (myLeads.length > 0) {
+        // Show dialog to link to existing lead
+        const leadOptions = myLeads.map(l => `${l.name} (${l.phone})`).join('\n');
+        const linkToExisting = confirm(`Link pre-qual to existing lead?\n\nYour leads:\n${leadOptions}\n\nClick OK to link, or Cancel to create new lead.`);
+
+        if (linkToExisting) {
+            const selectedName = prompt(`Enter customer name to link to:\n${leadOptions}`);
+            if (selectedName) {
+                const existingLead = myLeads.find(l => l.name === selectedName);
+                if (existingLead) {
+                    existingLead.prequal = prequal;
+                    saveState();
+                    showToast('Pre-qual linked to ' + existingLead.name);
+                    // Reset form
+                    document.getElementById('pqName').value = '';
+                    document.getElementById('pqPhone').value = '';
+                    document.getElementById('pqEmail').value = '';
+                    document.getElementById('pqGrossIncome').value = '';
+                    document.getElementById('pqNetIncome').value = '';
+                    return;
+                }
+            }
+        }
+    }
+
+    // Create new lead with pre-qual
+    const now = new Date().toISOString();
+    const newLead = {
         id: Date.now(),
         name: name,
-        phone: document.getElementById('pqPhone').value,
-        agent: AGENTS[0],
-        vehicle: 'Pre-qual Lead',
+        phone: phone,
+        email: email,
+        agent: currentAgent,
+        vehicle: 'TBD',
         stage: 'enquiry',
         temperature: 'Warm',
         gp: 0,
-        created: new Date().toISOString()
+        created: now,
+        stageChangedAt: now,
+        notes: [{ time: now, text: 'Pre-qualified via calculator', agent: currentAgent }],
+        prequal: prequal,
+        followUp: null,
+        timeline: [{ date: now, event: 'Pre-qualified', stage: 'enquiry' }]
     };
 
-    appState.leads.push(lead);
+    appState.leads.push(newLead);
     saveState();
-    showToast('Result saved to leads');
+    updateAllMetrics();
+    showToast('Pre-qual saved! Lead created: ' + name);
 
     // Reset form
     document.getElementById('pqName').value = '';
@@ -1540,29 +2410,288 @@ function savePQResult() {
 // ═══════════════════════════════════════════════════════════════════════════
 function renderVehicleCatalog() {
     const grid = document.getElementById('vehicleGrid');
-    const filtered = filterVehicles();
+    const brandFilter = document.getElementById('vehicleBrandFilter')?.value || '';
+    const priceFilter = document.getElementById('vehiclePriceFilter')?.value || '';
+    const categoryFilter = document.getElementById('vehicleCategoryFilter')?.value || '';
 
-    grid.innerHTML = Object.entries(VEHICLES_DATA).map(([key, v]) => `
-        <div class="card" style="cursor: pointer;" onclick="showVehicleDetail('${key}')">
+    let vehicles = Object.entries(VEHICLES_DATA).filter(([key, v]) => {
+        if (brandFilter && v.brand !== brandFilter) return false;
+        if (priceFilter && v.price > parseFloat(priceFilter)) return false;
+        if (categoryFilter && v.category !== categoryFilter) return false;
+        return true;
+    });
+
+    grid.innerHTML = vehicles.map(([key, v]) => `
+        <div class="card" style="cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'" onclick="showVehicleDetail('${key}')">
             <div style="font-size: 32px; text-align: center; margin-bottom: 12px;">${v.image}</div>
             <div class="card-title">${v.brand} ${v.model}</div>
-            <div class="card-subtitle">${v.engine} • ${v.seats} seats</div>
+            <div class="card-subtitle">${v.engine.cc}cc • ${v.engine.power_kw}kW • ${v.seats} seats</div>
+            <div style="margin-top: 8px; padding: 8px; background: var(--bg-tertiary); border-radius: 4px; font-size: 11px;">
+                <div style="color: var(--text-muted); margin-bottom: 4px;">Consumption</div>
+                <div style="font-weight: 700;">${v.engine.consumption}</div>
+            </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color);">
-                <span style="font-size: 10px; color: var(--text-muted);">${v.category}</span>
+                <span style="font-size: 10px; color: var(--text-muted); text-transform: capitalize;">${v.category}</span>
                 <span style="font-weight: 700; color: var(--accent-cyan);">R${v.price.toLocaleString()}</span>
+            </div>
+            <div style="margin-top: 8px; padding: 8px; background: rgba(0, 212, 255, 0.05); border-radius: 4px; border-left: 2px solid var(--accent-cyan);">
+                <div style="font-size: 10px; color: var(--text-secondary); line-height: 1.4;">
+                    ${v.highlights.slice(0, 2).map(h => `• ${h}`).join('<br>')}
+                </div>
             </div>
         </div>
     `).join('');
+
+    if (vehicles.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">No vehicles match your filters</div>';
+    }
 }
 
 function filterVehicles() {
-    // Filtering logic would go here
-    return VEHICLES_DATA;
+    renderVehicleCatalog();
 }
 
 function showVehicleDetail(key) {
     const v = VEHICLES_DATA[key];
-    alert(`${v.brand} ${v.model}\n\nEngine: ${v.engine}\nTransmission: ${v.transmission}\nPrice: R${v.price.toLocaleString()}\n\nAdding detailed spec view...`);
+    alert(`${v.brand} ${v.model}\n\nEngine: ${v.engine.cc}cc ${v.engine.power_kw}kW\nTransmission: ${v.transmission}\nPrice: R${v.price.toLocaleString()}\n\nAdding detailed spec view...`);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VEHICLE COMPARISON
+// ═══════════════════════════════════════════════════════════════════════════
+let comparisonSlots = [null, null, null, null]; // 4 vehicle slots
+let currentComparisonTab = 'overview';
+
+function switchComparisonTab(tab) {
+    document.getElementById('browseTab').style.display = tab === 'browse' ? 'block' : 'none';
+    document.getElementById('compareTab').style.display = tab === 'compare' ? 'block' : 'none';
+    if (tab === 'compare') {
+        renderComparisonSlots();
+        initializeComparison();
+    } else {
+        renderVehicleCatalog();
+    }
+}
+
+function renderComparisonSlots() {
+    const container = document.getElementById('comparisonSlots');
+    const vehicles = Object.keys(VEHICLES_DATA);
+    const brands = [...new Set(vehicles.map(k => VEHICLES_DATA[k].brand))];
+
+    container.innerHTML = comparisonSlots.map((slot, idx) => {
+        const slotVehicles = vehicles.filter(k => !slot || VEHICLES_DATA[k].brand === (slot ? slot.split('::')[0] : ''));
+        return `
+            <div class="card" style="text-align: center;">
+                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">SLOT ${idx + 1}</div>
+                <div class="form-group">
+                    <label class="form-label">Brand</label>
+                    <select id="slotBrand${idx}" onchange="updateSlotModels(${idx})">
+                        <option value="">Select Brand</option>
+                        ${brands.map(b => `<option>${b}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Model</label>
+                    <select id="slotModel${idx}" onchange="selectVehicle(${idx})">
+                        <option value="">Select Model</option>
+                    </select>
+                </div>
+                ${slot ? `<button class="btn btn-sm btn-danger" style="width: 100%; margin-top: 8px;" onclick="clearSlot(${idx})">Clear</button>` : ''}
+            </div>
+        `;
+    }).join('');
+
+    // Restore previous selections
+    comparisonSlots.forEach((slot, idx) => {
+        if (slot) {
+            const [brand, model] = slot.split('::');
+            document.getElementById(`slotBrand${idx}`).value = brand;
+            updateSlotModels(idx);
+            document.getElementById(`slotModel${idx}`).value = model;
+        }
+    });
+}
+
+function updateSlotModels(slotIdx) {
+    const brand = document.getElementById(`slotBrand${slotIdx}`).value;
+    const select = document.getElementById(`slotModel${slotIdx}`);
+    const models = Object.keys(VEHICLES_DATA).filter(k => VEHICLES_DATA[k].brand === brand);
+
+    select.innerHTML = `<option value="">Select Model</option>
+        ${models.map(m => {
+            const model = VEHICLES_DATA[m].model;
+            return `<option value="${m}">${model}</option>`;
+        }).join('')}
+    `;
+    select.value = '';
+    comparisonSlots[slotIdx] = null;
+}
+
+function selectVehicle(slotIdx) {
+    const key = document.getElementById(`slotModel${slotIdx}`).value;
+    if (key) {
+        comparisonSlots[slotIdx] = key;
+        updateComparison();
+    }
+}
+
+function clearSlot(slotIdx) {
+    comparisonSlots[slotIdx] = null;
+    renderComparisonSlots();
+    updateComparison();
+}
+
+function initializeComparison() {
+    renderComparisonTabs();
+    updateComparison();
+}
+
+function renderComparisonTabs() {
+    const tabsContainer = document.getElementById('comparisonTabs');
+    const tabs = ['overview', 'engine', 'dimensions', 'safety', 'pricing', 'colors'];
+    const labels = ['Overview', 'Engine', 'Dimensions', 'Safety', 'Pricing', 'Colors'];
+
+    tabsContainer.innerHTML = tabs.map((tab, i) => `
+        <button class="tab ${currentComparisonTab === tab ? 'active' : ''}" onclick="showComparisonSection('${tab}', this)">
+            ${labels[i]}
+        </button>
+    `).join('');
+}
+
+function showComparisonSection(section, element) {
+    currentComparisonTab = section;
+    document.querySelectorAll('#comparisonTabs .tab').forEach(t => t.classList.remove('active'));
+    element.classList.add('active');
+    updateComparison();
+}
+
+function updateComparison() {
+    const selectedVehicles = comparisonSlots.filter(v => v).map(k => VEHICLES_DATA[k]);
+
+    if (selectedVehicles.length === 0) {
+        document.getElementById('comparisonTable').innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 40px;">Select vehicles to compare</p>';
+        return;
+    }
+
+    let html = '<div style="overflow-x: auto;"><table style="width: 100%; min-width: 600px;">';
+    html += `<tr style="background: var(--bg-tertiary);">
+        <th style="text-align: left; padding: 12px; border: 1px solid var(--border-color); font-weight: 700;">Specification</th>`;
+
+    selectedVehicles.forEach(v => {
+        html += `<th style="text-align: center; padding: 12px; border: 1px solid var(--border-color);"><strong>${v.brand}</strong><br><strong>${v.model}</strong><br>R${v.price.toLocaleString()}</th>`;
+    });
+    html += '</tr>';
+
+    // Build comparison rows based on current tab
+    const rows = getComparisonRows(selectedVehicles, currentComparisonTab);
+    rows.forEach(row => {
+        html += `<tr>
+            <td style="padding: 12px; border: 1px solid var(--border-color); font-weight: 600; background: var(--bg-tertiary); width: 160px;">${row.label}</td>`;
+        row.values.forEach(val => {
+            const highlight = val.highlight ? ' style="background: rgba(0, 212, 255, 0.1); color: var(--accent-cyan); font-weight: 700;"' : '';
+            html += `<td style="padding: 12px; border: 1px solid var(--border-color); text-align: center;"${highlight}>${val.text}</td>`;
+        });
+        html += '</tr>';
+    });
+
+    html += '</table></div>';
+    document.getElementById('comparisonTable').innerHTML = html;
+}
+
+function getComparisonRows(vehicles, tab) {
+    const rows = [];
+
+    if (tab === 'overview') {
+        rows.push({ label: 'Category', values: vehicles.map(v => ({ text: v.category })) });
+        rows.push({ label: 'Seats', values: vehicles.map(v => ({ text: v.seats })) });
+        rows.push({ label: 'Doors', values: vehicles.map(v => ({ text: v.doors })) });
+        rows.push({ label: 'Warranty', values: vehicles.map(v => ({ text: v.warranty })) });
+    }
+
+    if (tab === 'engine') {
+        rows.push({ label: 'Engine CC', values: vehicles.map(v => {
+            const cc = v.engine.cc;
+            const maxCc = Math.max(...vehicles.map(x => x.engine.cc));
+            return { text: cc + ' cc', highlight: cc === maxCc };
+        }) });
+        rows.push({ label: 'Power (kW)', values: vehicles.map(v => {
+            const power = v.engine.power_kw;
+            const maxPower = Math.max(...vehicles.map(x => x.engine.power_kw));
+            return { text: power + ' kW', highlight: power === maxPower };
+        }) });
+        rows.push({ label: 'Torque (Nm)', values: vehicles.map(v => {
+            const torque = v.engine.torque_nm;
+            const maxTorque = Math.max(...vehicles.map(x => x.engine.torque_nm));
+            return { text: torque + ' Nm', highlight: torque === maxTorque };
+        }) });
+        rows.push({ label: 'Fuel Type', values: vehicles.map(v => ({ text: v.engine.fuel })) });
+        rows.push({ label: 'Transmission', values: vehicles.map(v => ({ text: v.transmission })) });
+        rows.push({ label: 'Consumption', values: vehicles.map(v => {
+            const cons = parseFloat(v.engine.consumption);
+            const minCons = Math.min(...vehicles.map(x => parseFloat(x.engine.consumption)));
+            return { text: v.engine.consumption, highlight: cons === minCons };
+        }) });
+    }
+
+    if (tab === 'dimensions') {
+        rows.push({ label: 'Length (mm)', values: vehicles.map(v => ({ text: v.length })) });
+        rows.push({ label: 'Width (mm)', values: vehicles.map(v => ({ text: v.width })) });
+        rows.push({ label: 'Height (mm)', values: vehicles.map(v => ({ text: v.height })) });
+        rows.push({ label: 'Wheelbase (mm)', values: vehicles.map(v => ({
+            text: v.wheelbase,
+            highlight: v.wheelbase === Math.max(...vehicles.map(x => x.wheelbase))
+        })) });
+    }
+
+    if (tab === 'safety') {
+        const allSafety = [...new Set(vehicles.flatMap(v => v.safety))];
+        allSafety.forEach(feature => {
+            rows.push({
+                label: feature,
+                values: vehicles.map(v => ({ text: v.safety.includes(feature) ? '✓' : '✗' }))
+            });
+        });
+    }
+
+    if (tab === 'pricing') {
+        rows.push({ label: 'Price', values: vehicles.map(v => {
+            const minPrice = Math.min(...vehicles.map(x => x.price));
+            return { text: 'R' + v.price.toLocaleString(), highlight: v.price === minPrice };
+        }) });
+        rows.push({ label: 'Price per CC', values: vehicles.map(v => ({
+            text: 'R' + (v.price / v.engine.cc).toFixed(0),
+            highlight: v.price / v.engine.cc === Math.min(...vehicles.map(x => x.price / x.engine.cc))
+        })) });
+    }
+
+    if (tab === 'colors') {
+        rows.push({ label: 'Available Colors', values: vehicles.map(v => ({
+            text: v.colors.join(', ')
+        })) });
+    }
+
+    return rows;
+}
+
+function copyComparisonToClipboard() {
+    const selectedVehicles = comparisonSlots.filter(v => v).map(k => VEHICLES_DATA[k]);
+    if (selectedVehicles.length === 0) {
+        showToast('Select vehicles first');
+        return;
+    }
+
+    let text = '=== VEHICLE COMPARISON ===\n\n';
+    selectedVehicles.forEach(v => {
+        text += `${v.brand} ${v.model}\n`;
+        text += `Price: R${v.price.toLocaleString()}\n`;
+        text += `Engine: ${v.engine.cc}cc, ${v.engine.power_kw}kW, ${v.engine.torque_nm}Nm\n`;
+        text += `Transmission: ${v.transmission}\n`;
+        text += `Consumption: ${v.engine.consumption}\n`;
+        text += `Seats: ${v.seats} | Warranty: ${v.warranty}\n\n`;
+    });
+
+    navigator.clipboard.writeText(text);
+    showToast('Comparison copied to clipboard');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1722,24 +2851,141 @@ function deleteSnapshot(index) {
 }
 
 function exportData() {
+    const format = confirm('Choose export format:\n\nOK = CSV (spreadsheet)\nCancel = JSON (backup)');
+
+    if (format) {
+        exportToCSV();
+    } else {
+        exportToJSON();
+    }
+}
+
+function exportToJSON() {
     const data = {
         leads: appState.leads,
-        exported: new Date().toISOString()
+        exported: new Date().toISOString(),
+        exportedBy: currentAgent
     };
 
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'bbh-data-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.download = 'bbh-leads-' + new Date().toISOString().slice(0, 10) + '.json';
     a.click();
     URL.revokeObjectURL(url);
-    showToast('Data exported');
+    showToast('Leads exported as JSON');
+}
+
+function exportToCSV() {
+    const myLeads = getMyLeads();
+    if (myLeads.length === 0) {
+        showToast('No leads to export');
+        return;
+    }
+
+    const headers = ['Name', 'Phone', 'Email', 'Vehicle', 'Stage', 'Temperature', 'GP', 'Created', 'Pre-qual Verdict', 'DTI %'];
+    const rows = myLeads.map(lead => [
+        lead.name,
+        lead.phone,
+        lead.email || '',
+        lead.vehicle || '',
+        lead.stage,
+        lead.temperature,
+        lead.gp || 0,
+        new Date(lead.created).toLocaleDateString(),
+        lead.prequal?.verdict || 'N/A',
+        lead.prequal?.dti?.toFixed(1) || 'N/A'
+    ]);
+
+    let csv = headers.join(',') + '\n';
+    csv += rows.map(row => row.map(cell => {
+        // Escape quotes in cell content
+        const escaped = (cell || '').toString().replace(/"/g, '""');
+        // Wrap in quotes if contains comma
+        return escaped.includes(',') ? `"${escaped}"` : escaped;
+    }).join(',')).join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'bbh-leads-' + new Date().toISOString().slice(0, 10) + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Leads exported as CSV (' + myLeads.length + ' rows)');
+}
+
+function renderFollowUpAlerts() {
+    const container = document.getElementById('followUpAlertsContainer');
+    if (!container) return;
+
+    const myLeads = getMyLeads();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const overdue = myLeads.filter(l => {
+        if (!l.followUp) return false;
+        const followUpDate = new Date(l.followUp);
+        return followUpDate < today;
+    });
+
+    const todayFollowUps = myLeads.filter(l => {
+        if (!l.followUp) return false;
+        const followUpDate = new Date(l.followUp);
+        return followUpDate.toDateString() === today.toDateString();
+    });
+
+    if (overdue.length === 0 && todayFollowUps.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+
+    let html = '';
+
+    if (overdue.length > 0) {
+        html += `
+            <div class="card" style="border-left: 4px solid var(--accent-red); background: rgba(239, 68, 68, 0.05);">
+                <div style="color: var(--accent-red); font-weight: 600; margin-bottom: 8px;">
+                    ⚠ ${overdue.length} Overdue Follow-ups
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    ${overdue.map(l => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+                            <span>${l.name} (${l.phone})</span>
+                            <button class="btn btn-sm btn-primary" onclick="openLeadDetail(${l.id})">Action</button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    if (todayFollowUps.length > 0) {
+        html += `
+            <div class="card" style="border-left: 4px solid var(--accent-orange); background: rgba(245, 158, 11, 0.05);">
+                <div style="color: var(--accent-orange); font-weight: 600; margin-bottom: 8px;">
+                    📌 ${todayFollowUps.length} Follow-ups Today
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    ${todayFollowUps.map(l => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+                            <span>${l.name} (${l.phone})</span>
+                            <button class="btn btn-sm btn-primary" onclick="openLeadDetail(${l.id})">Follow-up</button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    container.innerHTML = html;
 }
 
 function updateAllMetrics() {
     updateMetrics();
     renderCharts();
+    renderFollowUpAlerts();
     renderLeadsTable();
     renderAgentStats();
 }
