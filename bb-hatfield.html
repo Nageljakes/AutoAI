@@ -1054,6 +1054,7 @@
 </div>
 
 <!-- MODALS -->
+<!-- CREATE LEAD MODAL -->
 <div class="modal-overlay" id="leadModal">
     <div class="modal">
         <div class="modal-header">
@@ -1063,15 +1064,19 @@
         <div class="modal-body">
             <div class="form-group">
                 <label class="form-label">Customer Name</label>
-                <input type="text" id="newLeadName">
+                <input type="text" id="newLeadName" class="input">
             </div>
             <div class="form-group">
                 <label class="form-label">Phone</label>
-                <input type="tel" id="newLeadPhone">
+                <input type="tel" id="newLeadPhone" class="input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" id="newLeadEmail" class="input" placeholder="(optional)">
             </div>
             <div class="form-group">
                 <label class="form-label">Agent</label>
-                <select id="newLeadAgent">
+                <select id="newLeadAgent" class="input">
                     <option>Rudi</option>
                     <option>Lesedi</option>
                     <option>Tiisetso</option>
@@ -1079,11 +1084,11 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Vehicle Interest</label>
-                <input type="text" id="newLeadVehicle" placeholder="e.g., Suzuki Swift">
+                <input type="text" id="newLeadVehicle" class="input" placeholder="e.g., Suzuki Swift">
             </div>
             <div class="form-group">
                 <label class="form-label">Temperature</label>
-                <select id="newLeadTemp">
+                <select id="newLeadTemp" class="input">
                     <option>Hot</option>
                     <option>Warm</option>
                     <option>Cold</option>
@@ -1092,6 +1097,103 @@
             <button class="btn btn-primary" style="width: 100%; margin-top: 16px;" onclick="createNewLead()">
                 Create Lead
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- LEAD DETAIL MODAL -->
+<div class="modal-overlay" id="leadDetailModal">
+    <div class="modal" style="max-width: 900px;">
+        <div class="modal-header">
+            <div>
+                <div class="modal-title" id="leadDetailName">Lead Name</div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;" id="leadDetailAgent">Agent</div>
+            </div>
+            <button class="modal-close" onclick="closeModal('leadDetailModal')">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="tabs" id="leadDetailTabs" style="border-bottom: 1px solid var(--border-color); margin-bottom: 16px;">
+                <button class="tab active" onclick="switchLeadTab('overview', this)">Overview</button>
+                <button class="tab" onclick="switchLeadTab('notes', this)">Notes & Timeline</button>
+                <button class="tab" onclick="switchLeadTab('prequal', this)">Pre-Qual</button>
+                <button class="tab" onclick="switchLeadTab('recommend', this)">Recommendations</button>
+            </div>
+
+            <!-- OVERVIEW TAB -->
+            <div id="leadOverviewTab" class="lead-tab-content">
+                <div class="grid grid-2" style="margin-bottom: 16px;">
+                    <div class="metric">
+                        <div class="metric-label">Phone</div>
+                        <div class="metric-value" style="font-size: 16px;" id="leadDetailPhone">-</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Email</div>
+                        <div class="metric-value" style="font-size: 16px;" id="leadDetailEmail">-</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Current Stage</div>
+                        <div id="leadDetailStage" style="margin-top: 8px;"></div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Temperature</div>
+                        <div id="leadDetailTemp" style="margin-top: 8px;"></div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                    <select id="stageChangeSelect" class="input" style="flex: 1;">
+                        <option value="">Change Stage...</option>
+                        <option value="enquiry">Enquiry</option>
+                        <option value="application">Application</option>
+                        <option value="banked">Banked</option>
+                        <option value="lost">Lost</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="changeLeadStage()">Update</button>
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label class="form-label">Add GP (if banked)</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="number" id="leadGPInput" class="input" style="flex: 1;" placeholder="Gross Profit amount">
+                        <button class="btn btn-success" onclick="updateLeadGP()">Save GP</button>
+                    </div>
+                </div>
+
+                <div class="metric">
+                    <div class="metric-label">Gross Profit</div>
+                    <div class="metric-value" id="leadDetailGP">R0</div>
+                </div>
+            </div>
+
+            <!-- NOTES & TIMELINE TAB -->
+            <div id="leadNotesTab" class="lead-tab-content" style="display: none;">
+                <div style="margin-bottom: 16px;">
+                    <label class="form-label">Add Note</label>
+                    <div style="display: flex; gap: 8px;">
+                        <textarea id="newNoteInput" class="input" style="flex: 1; min-height: 60px;" placeholder="Add a call note..."></textarea>
+                        <button class="btn btn-primary" style="align-self: flex-start;" onclick="addNoteToLead()">Add</button>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="metric-label" style="margin-bottom: 12px;">Call Log</div>
+                    <div id="leadNotesList" style="max-height: 400px; overflow-y: auto;"></div>
+                </div>
+            </div>
+
+            <!-- PRE-QUAL TAB -->
+            <div id="leadPrequalTab" class="lead-tab-content" style="display: none;">
+                <div id="leadPrequalContent" style="color: var(--text-muted); text-align: center; padding: 20px;">
+                    No pre-qual linked yet. <button class="btn btn-sm btn-primary" onclick="switchView('prequal')">Run Pre-Qual</button>
+                </div>
+            </div>
+
+            <!-- RECOMMENDATIONS TAB -->
+            <div id="leadRecommendTab" class="lead-tab-content" style="display: none;">
+                <div id="leadRecommendContent" style="color: var(--text-muted); text-align: center; padding: 20px;">
+                    Run pre-qual first to see recommended vehicles
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -1308,10 +1410,54 @@ function saveState() {
 }
 
 function seedDemoData() {
+    const now = new Date();
     appState.leads = [
-        { id: 1, name: 'Thabo Mokwena', phone: '0821234567', agent: 'Rudi', vehicle: 'Suzuki Swift', stage: 'enquiry', temperature: 'Hot', gp: 0, created: new Date().toISOString() },
-        { id: 2, name: 'Sarah van der Merwe', phone: '0729876543', agent: 'Lesedi', vehicle: 'Renault Kiger', stage: 'application', temperature: 'Warm', gp: 0, created: new Date(Date.now() - 86400000).toISOString() },
-        { id: 3, name: 'John Ndlovu', phone: '0834567890', agent: 'Tiisetso', vehicle: 'GAC GS3 Emzoom', stage: 'banked', temperature: 'Warm', gp: 18500, created: new Date(Date.now() - 172800000).toISOString() },
+        {
+            id: 1, name: 'Thabo Mokwena', phone: '0821234567', email: 'thabo@email.com', agent: 'Rudi',
+            vehicle: 'Suzuki Swift', stage: 'enquiry', temperature: 'Hot', gp: 0,
+            created: now.toISOString(), stageChangedAt: now.toISOString(),
+            notes: [
+                { time: new Date(now - 3600000).toISOString(), text: 'Customer called inquiring about Swift', agent: 'Rudi' },
+                { time: now.toISOString(), text: 'Interested in 1.2 MT variant, wants to see showroom', agent: 'Rudi' }
+            ],
+            prequal: null,
+            followUp: null,
+            timeline: [
+                { date: now.toISOString(), event: 'Lead created', stage: 'enquiry' }
+            ]
+        },
+        {
+            id: 2, name: 'Sarah van der Merwe', phone: '0729876543', email: 'sarah@email.com', agent: 'Lesedi',
+            vehicle: 'Renault Kiger', stage: 'application', temperature: 'Warm', gp: 0,
+            created: new Date(now - 86400000).toISOString(), stageChangedAt: new Date(now - 3600000).toISOString(),
+            notes: [
+                { time: new Date(now - 86400000).toISOString(), text: 'Walk-in customer', agent: 'Lesedi' },
+                { time: new Date(now - 43200000).toISOString(), text: 'Completed pre-qual, approved for financing', agent: 'Lesedi' }
+            ],
+            prequal: { gross: 18000, net: 14500, vehiclePrice: 229900, installment: 3850, dti: 25.7, verdict: 'QUALIFIED' },
+            followUp: new Date(now + 86400000).toISOString(),
+            timeline: [
+                { date: new Date(now - 86400000).toISOString(), event: 'Lead created', stage: 'enquiry' },
+                { date: new Date(now - 43200000).toISOString(), event: 'Pre-qualified', stage: 'application' }
+            ]
+        },
+        {
+            id: 3, name: 'John Ndlovu', phone: '0834567890', email: 'john@email.com', agent: 'Tiisetso',
+            vehicle: 'GAC GS3 Emzoom', stage: 'banked', temperature: 'Warm', gp: 18500,
+            created: new Date(now - 172800000).toISOString(), stageChangedAt: new Date(now - 86400000).toISOString(),
+            notes: [
+                { time: new Date(now - 172800000).toISOString(), text: 'Website inquiry', agent: 'Tiisetso' },
+                { time: new Date(now - 129600000).toISOString(), text: 'Visited showroom, test drove model', agent: 'Tiisetso' },
+                { time: new Date(now - 86400000).toISOString(), text: 'Deal closed! GP: R18,500', agent: 'Tiisetso' }
+            ],
+            prequal: { gross: 22000, net: 17500, vehiclePrice: 289999, installment: 4200, dti: 22.9, verdict: 'QUALIFIED' },
+            followUp: null,
+            timeline: [
+                { date: new Date(now - 172800000).toISOString(), event: 'Lead created', stage: 'enquiry' },
+                { date: new Date(now - 129600000).toISOString(), event: 'Test drive', stage: 'application' },
+                { date: new Date(now - 86400000).toISOString(), event: 'Deal banked', stage: 'banked' }
+            ]
+        }
     ];
     saveState();
 }
@@ -1473,13 +1619,13 @@ function renderLeadsTable() {
     const myLeads = getMyLeads();
 
     table.innerHTML = myLeads.map(lead => `
-        <tr>
+        <tr onclick="openLeadDetail(${lead.id})" style="cursor: pointer;">
             <td><strong>${lead.name}</strong></td>
             <td>${lead.vehicle}</td>
             <td><span class="badge badge-${lead.stage}">${lead.stage.charAt(0).toUpperCase() + lead.stage.slice(1)}</span></td>
             <td><span class="badge badge-${lead.temperature}">${lead.temperature}</span></td>
             <td>R${lead.gp?.toLocaleString() || 0}</td>
-            <td>
+            <td onclick="event.stopPropagation();">
                 <button class="btn-icon" onclick="editLead(${lead.id})" title="Change Stage"><i class="fas fa-edit"></i></button>
                 <button class="btn-icon" onclick="deleteLead(${lead.id})" title="Delete"><i class="fas fa-trash"></i></button>
             </td>
@@ -1503,18 +1649,25 @@ function createNewLead() {
     const agent = document.getElementById('newLeadAgent').value;
     const vehicle = document.getElementById('newLeadVehicle').value;
     const temperature = document.getElementById('newLeadTemp').value;
+    const email = document.getElementById('newLeadEmail')?.value || '';
 
     if (!name || !phone) {
         showToast('Please fill in required fields');
         return;
     }
 
+    const now = new Date().toISOString();
     const newLead = {
         id: Date.now(),
-        name, phone, agent, vehicle, temperature,
+        name, phone, email, agent, vehicle, temperature,
         stage: 'enquiry',
         gp: 0,
-        created: new Date().toISOString()
+        created: now,
+        stageChangedAt: now,
+        notes: [],
+        prequal: null,
+        followUp: null,
+        timeline: [{ date: now, event: 'Lead created', stage: 'enquiry' }]
     };
 
     appState.leads.push(newLead);
@@ -1552,6 +1705,307 @@ function deleteLead(id) {
         updateAllMetrics();
         showToast('Lead deleted');
     }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LEAD DETAIL MODAL FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+function openLeadDetail(leadId) {
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    // Set header info
+    document.getElementById('leadDetailName').textContent = lead.name;
+    document.getElementById('leadDetailAgent').textContent = `${lead.agent} • ${lead.phone}`;
+
+    // Store current lead ID for modal operations
+    window.currentLeadId = leadId;
+
+    // Populate Overview tab
+    document.getElementById('leadDetailPhone').textContent = lead.phone || '-';
+    document.getElementById('leadDetailEmail').textContent = lead.email || '-';
+    document.getElementById('leadDetailGP').textContent = 'R' + (lead.gp || 0).toLocaleString();
+
+    // Stage selector
+    const stageSelect = document.getElementById('stageChangeSelect');
+    stageSelect.value = lead.stage;
+
+    // Temperature badge
+    const tempDiv = document.getElementById('leadDetailTemp');
+    tempDiv.innerHTML = `<span class="badge badge-${lead.temperature}">${lead.temperature}</span>`;
+
+    // Stage badge
+    const stageDiv = document.getElementById('leadDetailStage');
+    stageDiv.innerHTML = `<span class="badge badge-${lead.stage}">${lead.stage.charAt(0).toUpperCase() + lead.stage.slice(1)}</span>`;
+
+    // Display notes
+    displayLeadNotes();
+
+    // Display pre-qual info
+    displayLeadPrequal();
+
+    // Display recommendations (if pre-qual exists)
+    displayLeadRecommendations();
+
+    // Reset to Overview tab
+    switchLeadTab('overview');
+
+    // Open modal
+    openModal('leadDetailModal');
+}
+
+function switchLeadTab(tabName, element) {
+    // Hide all tabs
+    document.querySelectorAll('.lead-tab-content').forEach(tab => tab.style.display = 'none');
+
+    // Remove active class from all tab buttons
+    document.querySelectorAll('#leadDetailTabs .tab').forEach(btn => btn.classList.remove('active'));
+
+    // Show selected tab
+    const tabId = 'lead' + tabName.charAt(0).toUpperCase() + tabName.slice(1) + 'Tab';
+    const tabElement = document.getElementById(tabId);
+    if (tabElement) {
+        tabElement.style.display = 'block';
+    }
+
+    // Add active class to clicked button
+    if (element) {
+        element.classList.add('active');
+    }
+}
+
+function changeLeadStage() {
+    const leadId = window.currentLeadId;
+    const newStage = document.getElementById('stageChangeSelect').value;
+
+    if (!newStage) {
+        showToast('Please select a stage');
+        return;
+    }
+
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const now = new Date().toISOString();
+    lead.stage = newStage;
+    lead.stageChangedAt = now;
+
+    // Add to timeline
+    if (!lead.timeline) lead.timeline = [];
+    lead.timeline.push({
+        date: now,
+        event: `Moved to ${newStage}`,
+        stage: newStage
+    });
+
+    // Add note
+    if (!lead.notes) lead.notes = [];
+    lead.notes.push({
+        time: now,
+        text: `Stage changed to ${newStage.charAt(0).toUpperCase() + newStage.slice(1)}`,
+        agent: currentAgent
+    });
+
+    saveState();
+    updateAllMetrics();
+    showToast(`Lead moved to ${newStage}`);
+
+    // Update display
+    openLeadDetail(leadId);
+}
+
+function updateLeadGP() {
+    const leadId = window.currentLeadId;
+    const gpValue = parseFloat(document.getElementById('leadGPInput').value);
+
+    if (!gpValue || gpValue <= 0) {
+        showToast('Please enter a valid GP amount');
+        return;
+    }
+
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    lead.gp = gpValue;
+
+    // Add note about GP
+    const now = new Date().toISOString();
+    if (!lead.notes) lead.notes = [];
+    lead.notes.push({
+        time: now,
+        text: `GP added: R${gpValue.toLocaleString()}`,
+        agent: currentAgent
+    });
+
+    saveState();
+    updateAllMetrics();
+    showToast('GP updated successfully');
+
+    // Update display
+    document.getElementById('leadDetailGP').textContent = 'R' + gpValue.toLocaleString();
+    document.getElementById('leadGPInput').value = '';
+
+    // Refresh notes
+    displayLeadNotes();
+}
+
+function addNoteToLead() {
+    const leadId = window.currentLeadId;
+    const noteText = document.getElementById('newNoteInput').value.trim();
+
+    if (!noteText) {
+        showToast('Please enter a note');
+        return;
+    }
+
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const now = new Date().toISOString();
+    if (!lead.notes) lead.notes = [];
+
+    lead.notes.push({
+        time: now,
+        text: noteText,
+        agent: currentAgent
+    });
+
+    // Add to timeline
+    if (!lead.timeline) lead.timeline = [];
+    lead.timeline.push({
+        date: now,
+        event: `Note: ${noteText.substring(0, 50)}...`,
+        stage: lead.stage
+    });
+
+    saveState();
+    document.getElementById('newNoteInput').value = '';
+    displayLeadNotes();
+    showToast('Note added');
+}
+
+function displayLeadNotes() {
+    const leadId = window.currentLeadId;
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const notesList = document.getElementById('leadNotesList');
+    const notes = lead.notes || [];
+
+    if (notes.length === 0) {
+        notesList.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 20px;">No notes yet</div>';
+        return;
+    }
+
+    notesList.innerHTML = notes.map(note => `
+        <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 4px; margin-bottom: 8px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <strong style="color: var(--accent-cyan);">${note.agent}</strong>
+                <span style="font-size: 10px; color: var(--text-muted);">${new Date(note.time).toLocaleString()}</span>
+            </div>
+            <div style="font-size: 13px; line-height: 1.4;">${note.text}</div>
+        </div>
+    `).join('');
+}
+
+function displayLeadPrequal() {
+    const leadId = window.currentLeadId;
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const prequalContent = document.getElementById('leadPrequalContent');
+
+    if (!lead.prequal) {
+        prequalContent.innerHTML = `
+            <div style="text-align: center; color: var(--text-muted); padding: 20px;">
+                <div style="margin-bottom: 12px;">No pre-qual linked yet</div>
+                <button class="btn btn-primary" onclick="switchView('prequal', null); closeModal('leadDetailModal');">
+                    Run Pre-Qual
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    const pq = lead.prequal;
+    prequalContent.innerHTML = `
+        <div class="grid grid-2" style="gap: 16px; margin-bottom: 16px;">
+            <div class="metric">
+                <div class="metric-label">Gross Monthly Income</div>
+                <div class="metric-value">R${pq.gross?.toLocaleString() || 0}</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">Net Monthly Income</div>
+                <div class="metric-value">R${pq.net?.toLocaleString() || 0}</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">Vehicle Price</div>
+                <div class="metric-value">R${pq.vehiclePrice?.toLocaleString() || 0}</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">Monthly Installment</div>
+                <div class="metric-value">R${pq.installment?.toLocaleString() || 0}</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">Debt-to-Income Ratio</div>
+                <div class="metric-value">${pq.dti?.toFixed(1) || 0}%</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">Qualification Verdict</div>
+                <div class="metric-value" style="color: ${pq.verdict === 'QUALIFIED' ? 'var(--accent-green)' : pq.verdict === 'REFER TO MANAGER' ? 'var(--accent-orange)' : 'var(--accent-red)'};">
+                    ${pq.verdict || 'UNKNOWN'}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function displayLeadRecommendations() {
+    const leadId = window.currentLeadId;
+    const lead = appState.leads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const recommendContent = document.getElementById('leadRecommendContent');
+
+    if (!lead.prequal) {
+        recommendContent.innerHTML = `
+            <div style="text-align: center; color: var(--text-muted); padding: 20px;">
+                Run pre-qual first to see recommended vehicles
+            </div>
+        `;
+        return;
+    }
+
+    // Simple recommendation logic: suggest vehicles in price range
+    const affordablePrice = lead.prequal.vehiclePrice;
+    const priceMin = affordablePrice * 0.8;
+    const priceMax = affordablePrice * 1.2;
+
+    const recommended = Object.values(VEHICLES_DATA).filter(v =>
+        v.price >= priceMin && v.price <= priceMax
+    ).slice(0, 3);
+
+    if (recommended.length === 0) {
+        recommendContent.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">No vehicles in your price range</div>';
+        return;
+    }
+
+    recommendContent.innerHTML = `
+        <div style="display: grid; gap: 12px;">
+            ${recommended.map(v => `
+                <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 4px; border-left: 3px solid var(--accent-cyan);">
+                    <div style="font-weight: 600; margin-bottom: 4px;">${v.brand} ${v.model}</div>
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">
+                        ${v.engine.power_kw}kW • ${v.engine.consumption} • ${v.transmission}
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <strong style="color: var(--accent-green);">R${v.price.toLocaleString()}</strong>
+                        <button class="btn btn-sm btn-primary" onclick="alert('View ${v.model} details in Vehicle KB')">View</button>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
