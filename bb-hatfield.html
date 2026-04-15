@@ -774,6 +774,9 @@
                 </button>
             </div>
 
+            <!-- FOLLOW-UP ALERTS -->
+            <div id="followUpAlertsContainer" style="margin-bottom: 16px;"></div>
+
             <div class="card">
                 <table>
                     <thead>
@@ -1582,7 +1585,7 @@ function updateActivityTable() {
     table.innerHTML = hotLeads.map(lead => {
         const daysActive = Math.floor((Date.now() - new Date(lead.created)) / (1000 * 60 * 60 * 24));
         return `
-            <tr>
+            <tr onclick="openLeadDetail(${lead.id})" style="cursor: pointer;">
                 <td><strong>${lead.name}</strong></td>
                 <td>${lead.vehicle}</td>
                 <td><span class="badge badge-${lead.stage}">${lead.stage}</span></td>
@@ -1645,6 +1648,7 @@ function renderLeadsTable() {
     table.innerHTML = myLeads.map(lead => `
         <tr onclick="openLeadDetail(${lead.id})" style="cursor: pointer;">
             <td><strong>${lead.name}</strong></td>
+            <td><span style="font-size: 11px; color: var(--text-secondary);">${lead.agent}</span></td>
             <td>${lead.vehicle}</td>
             <td><span class="badge badge-${lead.stage}">${lead.stage.charAt(0).toUpperCase() + lead.stage.slice(1)}</span></td>
             <td><span class="badge badge-${lead.temperature}">${lead.temperature}</span></td>
@@ -1657,7 +1661,7 @@ function renderLeadsTable() {
     `).join('');
 
     if (myLeads.length === 0) {
-        table.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">No leads yet. <a href="#" onclick="switchView(\'leads\', event.target.closest(\'.nav-item\'))">Create one</a></td></tr>';
+        table.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 20px;">No leads yet. <a href="#" onclick="switchView(\'leads\', event.target.closest(\'.nav-item\'))">Create one</a></td></tr>';
     }
 
     document.getElementById('leadBadge').textContent = myLeads.length;
@@ -2847,24 +2851,141 @@ function deleteSnapshot(index) {
 }
 
 function exportData() {
+    const format = confirm('Choose export format:\n\nOK = CSV (spreadsheet)\nCancel = JSON (backup)');
+
+    if (format) {
+        exportToCSV();
+    } else {
+        exportToJSON();
+    }
+}
+
+function exportToJSON() {
     const data = {
         leads: appState.leads,
-        exported: new Date().toISOString()
+        exported: new Date().toISOString(),
+        exportedBy: currentAgent
     };
 
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'bbh-data-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.download = 'bbh-leads-' + new Date().toISOString().slice(0, 10) + '.json';
     a.click();
     URL.revokeObjectURL(url);
-    showToast('Data exported');
+    showToast('Leads exported as JSON');
+}
+
+function exportToCSV() {
+    const myLeads = getMyLeads();
+    if (myLeads.length === 0) {
+        showToast('No leads to export');
+        return;
+    }
+
+    const headers = ['Name', 'Phone', 'Email', 'Vehicle', 'Stage', 'Temperature', 'GP', 'Created', 'Pre-qual Verdict', 'DTI %'];
+    const rows = myLeads.map(lead => [
+        lead.name,
+        lead.phone,
+        lead.email || '',
+        lead.vehicle || '',
+        lead.stage,
+        lead.temperature,
+        lead.gp || 0,
+        new Date(lead.created).toLocaleDateString(),
+        lead.prequal?.verdict || 'N/A',
+        lead.prequal?.dti?.toFixed(1) || 'N/A'
+    ]);
+
+    let csv = headers.join(',') + '\n';
+    csv += rows.map(row => row.map(cell => {
+        // Escape quotes in cell content
+        const escaped = (cell || '').toString().replace(/"/g, '""');
+        // Wrap in quotes if contains comma
+        return escaped.includes(',') ? `"${escaped}"` : escaped;
+    }).join(',')).join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'bbh-leads-' + new Date().toISOString().slice(0, 10) + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Leads exported as CSV (' + myLeads.length + ' rows)');
+}
+
+function renderFollowUpAlerts() {
+    const container = document.getElementById('followUpAlertsContainer');
+    if (!container) return;
+
+    const myLeads = getMyLeads();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const overdue = myLeads.filter(l => {
+        if (!l.followUp) return false;
+        const followUpDate = new Date(l.followUp);
+        return followUpDate < today;
+    });
+
+    const todayFollowUps = myLeads.filter(l => {
+        if (!l.followUp) return false;
+        const followUpDate = new Date(l.followUp);
+        return followUpDate.toDateString() === today.toDateString();
+    });
+
+    if (overdue.length === 0 && todayFollowUps.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+
+    let html = '';
+
+    if (overdue.length > 0) {
+        html += `
+            <div class="card" style="border-left: 4px solid var(--accent-red); background: rgba(239, 68, 68, 0.05);">
+                <div style="color: var(--accent-red); font-weight: 600; margin-bottom: 8px;">
+                    ⚠ ${overdue.length} Overdue Follow-ups
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    ${overdue.map(l => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+                            <span>${l.name} (${l.phone})</span>
+                            <button class="btn btn-sm btn-primary" onclick="openLeadDetail(${l.id})">Action</button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    if (todayFollowUps.length > 0) {
+        html += `
+            <div class="card" style="border-left: 4px solid var(--accent-orange); background: rgba(245, 158, 11, 0.05);">
+                <div style="color: var(--accent-orange); font-weight: 600; margin-bottom: 8px;">
+                    📌 ${todayFollowUps.length} Follow-ups Today
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    ${todayFollowUps.map(l => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+                            <span>${l.name} (${l.phone})</span>
+                            <button class="btn btn-sm btn-primary" onclick="openLeadDetail(${l.id})">Follow-up</button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    container.innerHTML = html;
 }
 
 function updateAllMetrics() {
     updateMetrics();
     renderCharts();
+    renderFollowUpAlerts();
     renderLeadsTable();
     renderAgentStats();
 }
