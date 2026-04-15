@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BB Hatfield Pre-Qualification Form</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .form-content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1e3c72;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title::before {
+            content: '▶';
+            margin-right: 10px;
+            color: #667eea;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        input, select, textarea {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .checkbox-item input[type="checkbox"],
+        .checkbox-item input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .result-box {
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+        
+        .qualified {
+            background: #d4edda;
+            border: 3px solid #28a745;
+            color: #155724;
+        }
+        
+        .refer {
+            background: #fff3cd;
+            border: 3px solid #ffc107;
+            color: #856404;
+        }
+        
+        .not-qualified {
+            background: #f8d7da;
+            border: 3px solid #dc3545;
+            color: #721c24;
+        }
+        
+        .calc-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .calc-result {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1565c0;
+            margin-top: 10px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .mandatory {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .button-group {
+                display: none;
+            }
+            .container {
+                box-shadow: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 BB HATFIELD PRE-QUALIFICATION FORM</h1>
+            <p>Internet Lead Screening Tool | Renault • Suzuki • Mahindra • GAC Motor</p>
+        </div>
+        
+        <div class="form-content">
+            <!-- Form Metadata -->
+            <div class="section">
+                <div class="section-title">Form Information</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="formDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Agent Name</label>
+                        <input type="text" id="agentName" placeholder="Enter your name" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Lead Source</label>
+                        <select id="leadSource">
+                            <option value="">Select source...</option>
+                            <option value="OEM Portal">OEM Portal</option>
+                            <option value="BB Hatfield Website">BB Hatfield Website</option>
+                            <option value="AutoTrader">AutoTrader</option>
+                            <option value="Cars.co.za">Cars.co.za</option>
+                            <option value="Facebook">Facebook Campaign</option>
+                            <option value="Walk-in">Walk-in</option>
+                            <option value="Referral">Referral</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customer Details -->
+            <div class="section">
+                <div class="section-title">Customer Details</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Full Name <span class="mandatory">*</span></label>
+                        <input type="text" id="customerName" placeholder="Customer full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Contact Number <span class="mandatory">*</span></label>
+                        <input type="tel" id="contactNumber" placeholder="0XX XXX XXXX" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="email" placeholder="customer@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Preferred Contact Time</label>
+                        <input type="text" id="contactTime" placeholder="e.g., Mornings, After 2pm">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Vehicle Interest -->
+            <div class="section">
+                <div class="section-title">Vehicle Interest</div>
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label>Brand Interested In <span class="mandatory">*</span></label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="radio" name="brand" value="Renault">
+                                Renault
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="radio" name="brand" value="Suzuki">
+                                Suzuki
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="radio" name="brand" value="Mahindra">
+                                Mahindra
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="radio" name="brand" value="GAC Motor">
+                                GAC Motor
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Model</label>
+                        <input type="text" id="model" placeholder="e.g., Kwid, Swift, Pik Up">
+                    </div>
+                    <div class="form-group">
+                        <label>Condition</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="radio" name="condition" value="New">
+                                New
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="radio" name="condition" value="Used">
+                                Used
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Estimated Vehicle Price <span class="mandatory">*</span></label>
+                        <input type="number" id="vehiclePrice" placeholder="e.g., 250000" min="0" step="1000">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Affordability Screening -->
+            <div class="section">
+                <div class="section-title">Affordability Screening (Critical)</div>
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label>Monthly GROSS Income (before tax) <span class="mandatory">*</span></label>
+                        <select id="incomeRange">
+                            <option value="">Select income range...</option>
+                            <option value="under5000">Under R5,000 (Not likely to qualify)</option>
+                            <option value="5000-7499">R5,000 – R7,499</option>
+                            <option value="7500-10000">R7,500 – R10,000</option>
+                            <option value="10001-15000">R10,001 – R15,000</option>
+                            <option value="15001-20000">R15,001 – R20,000</option>
+                            <option value="20001-30000">R20,001 – R30,000</option>
+                            <option value="30001plus">R30,001+</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Exact Monthly Gross Income <span class="mandatory">*</span></label>
+                        <input type="number" id="grossIncome" placeholder="e.g., 15000" min="0" step="100">
+                    </div>
+                </div>
+                
+                <!-- Auto-calculation box -->
+                <div class="calc-box" id="calcBox" style="display:none;">
+                    <strong>Affordability Calculation:</strong>
+                    <div id="calcDetails"></div>
+                    <div class="calc-result" id="calcResult"></div>
+                </div>
+                
+                <div class="form-row full" style="margin-top: 20px;">
+                    <div class="form-group">
+                        <label>Valid South African Driver's License? <span class="mandatory">* MANDATORY</span></label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="radio" name="license" value="Yes" id="licenseYes">
+                                ✅ Yes
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="radio" name="license" value="No" id="licenseNo">
+                                ❌ No (Cannot proceed with finance)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Employment Status</label>
+                        <select id="employment">
+                            <option value="">Select...</option>
+                            <option value="Permanent">Permanently Employed</option>
+                            <option value="SelfEmployed">Self-Employed</option>
+                            <option value="Contract">Contract/Temporary</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Employment Duration (months)</label>
+                        <input type="number" id="employmentDuration" placeholder="e.g., 12" min="0">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Other Monthly Debt Repayments?</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="radio" name="debt" value="Yes" id="debtYes">
+                                Yes
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="radio" name="debt" value="No" id="debtNo">
+                                No
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Total Monthly Debt (if Yes)</label>
+                        <input type="number" id="monthlyDebt" placeholder="e.g., 5000" min="0" step="100">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Additional Pre-Qualification -->
+            <div class="section">
+                <div class="section-title">Additional Information</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Age Range</label>
+                        <select id="ageRange">
+                            <option value="">Select...</option>
+                            <option value="18-21">18-21 years</option>
+                            <option value="22-30">22-30 years</option>
+                            <option value="31-40">31-40 years</option>
+                            <option value="41plus">41+ years</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Credit History (Agent's Impression)</label>
+                        <select id="creditHistory">
+                            <option value="">Select...</option>
+                            <option value="Good">Good (confident, no issues mentioned)</option>
+                            <option value="Unsure">Unsure (hesitant)</option>
+                            <option value="Poor">Possibly Poor (mentioned issues)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Deposit Available?</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="radio" name="deposit" value="Yes" id="depositYes">
+                                Yes
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="radio" name="deposit" value="No" id="depositNo">
+                                No
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Deposit Amount (if Yes)</label>
+                        <input type="number" id="depositAmount" placeholder="e.g., 20000" min="0" step="1000">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Trade-In Vehicle?</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="radio" name="tradeIn" value="Yes" id="tradeInYes">
+                                Yes
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="radio" name="tradeIn" value="No" id="tradeInNo">
+                                No
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Trade-In Make/Model</label>
+                        <input type="text" id="tradeInDetails" placeholder="e.g., 2015 Toyota Corolla">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Purchase Readiness -->
+            <div class="section">
+                <div class="section-title">Purchase Readiness</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>When Looking to Purchase?</label>
+                        <select id="purchaseTimeline">
+                            <option value="">Select...</option>
+                            <option value="Immediately">Immediately (this week)</option>
+                            <option value="2weeks">Within 2 weeks</option>
+                            <option value="1month">Within 1 month</option>
+                            <option value="browsing">Just browsing / no timeframe</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Visited Showroom Before?</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="radio" name="visited" value="Yes">
+                                Yes
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="radio" name="visited" value="No">
+                                No
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label>Schedule Showroom Visit / Test Drive?</label>
+                        <textarea id="appointmentNotes" rows="2" placeholder="Yes - Preferred date/time OR No - Reason"></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label>Agent Notes</label>
+                        <textarea id="agentNotes" rows="3" placeholder="Additional observations, objections, concerns, or key conversation points..."></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Qualification Result -->
+            <div class="result-box" id="resultBox" style="display:none;">
+                <div id="resultText"></div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="button-group">
+                <button class="btn-primary" onclick="calculateQualification()">🔍 Calculate Qualification</button>
+                <button class="btn-success" onclick="saveForm()">💾 Save to Records</button>
+                <button class="btn-success" onclick="exportToExcel()">📊 Export to Excel</button>
+                <button class="btn-secondary" onclick="viewAllRecords()">📋 View All Records</button>
+                <button class="btn-secondary" onclick="printForm()">🖨️ Print Form</button>
+                <button class="btn-secondary" onclick="resetForm()">🔄 Clear Form</button>
+            </div>
+            
+            <!-- Manager Follow-up Section -->
+            <div class="section" style="margin-top: 30px; background: #fff9e6; border-left-color: #ffc107;">
+                <div class="section-title" style="color: #856404;">Manager Follow-Up (After Hand-Over)</div>
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label>Manager Notes & Closing Actions</label>
+                        <textarea id="managerNotes" rows="4" placeholder="Finance discussion, objection handling, application status, next steps..."></textarea>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Final Outcome</label>
+                        <select id="finalOutcome">
+                            <option value="">Pending...</option>
+                            <option value="Application Submitted">✅ Application Submitted</option>
+                            <option value="Follow-Up Required">📞 Follow-Up Required</option>
+                            <option value="Lost Sale">❌ Lost Sale</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set today's date
+        document.getElementById('formDate').valueAsDate = new Date();
+        
+        // Auto-calculate affordability when values change
+        document.getElementById('vehiclePrice').addEventListener('input', calculateAffordability);
+        document.getElementById('grossIncome').addEventListener('input', calculateAffordability);
+        
+        function calculateAffordability() {
+            const vehiclePrice = parseFloat(document.getElementById('vehiclePrice').value) || 0;
+            const grossIncome = parseFloat(document.getElementById('grossIncome').value) || 0;
+            const calcBox = document.getElementById('calcBox');
+            const calcDetails = document.getElementById('calcDetails');
+            const calcResult = document.getElementById('calcResult');
+            
+            if (vehiclePrice > 0 && grossIncome > 0) {
+                const ratio = (vehiclePrice / grossIncome).toFixed(2);
+                calcBox.style.display = 'block';
+                calcDetails.innerHTML = `
+                    <p style="margin: 10px 0;">Vehicle Price: R${vehiclePrice.toLocaleString()}</p>
+                    <p style="margin: 10px 0;">Monthly Gross Income: R${grossIncome.toLocaleString()}</p>
+                    <p style="margin: 10px 0;">Affordability Ratio: ${ratio}</p>
+                `;
+                
+                if (ratio <= 5) {
+                    calcResult.innerHTML = `✅ PASS - Ratio: ${ratio} (Good affordability)`;
+                    calcResult.style.color = '#28a745';
+                } else if (ratio <= 7) {
+                    calcResult.innerHTML = `⚠️ BORDERLINE - Ratio: ${ratio} (May qualify with deposit/trade-in)`;
+                    calcResult.style.color = '#ffc107';
+                } else {
+                    calcResult.innerHTML = `❌ HIGH RISK - Ratio: ${ratio} (Unlikely to qualify)`;
+                    calcResult.style.color = '#dc3545';
+                }
+            } else {
+                calcBox.style.display = 'none';
+            }
+        }
+        
+        function calculateQualification() {
+            const resultBox = document.getElementById('resultBox');
+            const resultText = document.getElementById('resultText');
+            
+            // Get critical values
+            const hasLicense = document.querySelector('input[name="license"]:checked')?.value;
+            const grossIncome = parseFloat(document.getElementById('grossIncome').value) || 0;
+            const vehiclePrice = parseFloat(document.getElementById('vehiclePrice').value) || 0;
+            const employmentDuration = parseInt(document.getElementById('employmentDuration').value) || 0;
+            const purchaseTimeline = document.getElementById('purchaseTimeline').value;
+            
+            let qualified = true;
+            let issues = [];
+            
+            // Check mandatory criteria
+            if (hasLicense !== 'Yes') {
+                qualified = false;
+                issues.push('No valid SA driver\'s license');
+            }
+            
+            if (grossIncome < 5000) {
+                qualified = false;
+                issues.push('Income below minimum (R5,000)');
+            }
+            
+            const ratio = vehiclePrice / grossIncome;
+            if (ratio > 7) {
+                qualified = false;
+                issues.push(`Affordability ratio too high (${ratio.toFixed(1)})`);
+            }
+            
+            if (purchaseTimeline === 'browsing') {
+                qualified = false;
+                issues.push('Customer not ready to buy');
+            }
+            
+            // Display result
+            resultBox.style.display = 'block';
+            
+            if (!qualified) {
+                resultBox.className = 'result-box not-qualified';
+                resultText.innerHTML = `
+                    <div style="font-size: 24px; margin-bottom: 10px;">❌ NOT QUALIFIED</div>
+                    <div style="font-size: 14px; font-weight: normal;">
+                        <strong>Issues:</strong><br>
+                        ${issues.map(i => `• ${i}`).join('<br>')}
+                    </div>
+                    <div style="margin-top: 15px; font-size: 14px; font-weight: normal;">
+                        ⚠️ Do not proceed to manager. Follow up when situation improves.
+                    </div>
+                `;
+            } else if (ratio > 5 || grossIncome < 7500 || employmentDuration < 6) {
+                resultBox.className = 'result-box refer';
+                resultText.innerHTML = `
+                    <div style="font-size: 24px; margin-bottom: 10px;">⚠️ BORDERLINE - REFER TO MANAGER</div>
+                    <div style="font-size: 14px; font-weight: normal;">
+                        Customer meets basic criteria but has borderline factors.<br>
+                        Manager should assess: ${ratio > 5 ? 'affordability, ' : ''}${grossIncome < 7500 ? 'income level, ' : ''}${employmentDuration < 6 ? 'employment stability' : ''}
+                    </div>
+                    <div style="margin-top: 15px; font-size: 14px; font-weight: normal;">
+                        📋 Hand qualification sheet to manager for expert assessment.
+                    </div>
+                `;
+            } else {
+                resultBox.className = 'result-box qualified';
+                resultText.innerHTML = `
+                    <div style="font-size: 24px; margin-bottom: 10px;">✅ QUALIFIED - HAND TO MANAGER</div>
+                    <div style="font-size: 14px; font-weight: normal;">
+                        ✓ Valid SA driver's license<br>
+                        ✓ Sufficient income (R${grossIncome.toLocaleString()})<br>
+                        ✓ Good affordability ratio (${ratio.toFixed(1)})<br>
+                        ✓ Customer shows purchase intent
+                    </div>
+                    <div style="margin-top: 15px; font-size: 14px; font-weight: normal;">
+                        🎯 Ready for manager to close the deal!
+                    </div>
+                `;
+            }
+            
+            // Scroll to result
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        function saveForm() {
+            const formData = {
+                date: document.getElementById('formDate').value,
+                agentName: document.getElementById('agentName').value,
+                leadSource: document.getElementById('leadSource').value,
+                customerName: document.getElementById('customerName').value,
+                contactNumber: document.getElementById('contactNumber').value,
+                email: document.getElementById('email').value,
+                contactTime: document.getElementById('contactTime').value,
+                brand: document.querySelector('input[name="brand"]:checked')?.value,
+                model: document.getElementById('model').value,
+                condition: document.querySelector('input[name="condition"]:checked')?.value,
+                vehiclePrice: document.getElementById('vehiclePrice').value,
+                incomeRange: document.getElementById('incomeRange').value,
+                grossIncome: document.getElementById('grossIncome').value,
+                hasLicense: document.querySelector('input[name="license"]:checked')?.value,
+                employment: document.getElementById('employment').value,
+                employmentDuration: document.getElementById('employmentDuration').value,
+                hasDebt: document.querySelector('input[name="debt"]:checked')?.value,
+                monthlyDebt: document.getElementById('monthlyDebt').value,
+                ageRange: document.getElementById('ageRange').value,
+                creditHistory: document.getElementById('creditHistory').value,
+                hasDeposit: document.querySelector('input[name="deposit"]:checked')?.value,
+                depositAmount: document.getElementById('depositAmount').value,
+                hasTradeIn: document.querySelector('input[name="tradeIn"]:checked')?.value,
+                tradeInDetails: document.getElementById('tradeInDetails').value,
+                purchaseTimeline: document.getElementById('purchaseTimeline').value,
+                visited: document.querySelector('input[name="visited"]:checked')?.value,
+                appointmentNotes: document.getElementById('appointmentNotes').value,
+                agentNotes: document.getElementById('agentNotes').value,
+                managerNotes: document.getElementById('managerNotes').value,
+                finalOutcome: document.getElementById('finalOutcome').value,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Get existing records
+            let records = JSON.parse(localStorage.getItem('prequalRecords') || '[]');
+            records.push(formData);
+            localStorage.setItem('prequalRecords', JSON.stringify(records));
+            
+            alert(`✅ Form saved successfully!\n\nTotal records: ${records.length}\n\nCustomer: ${formData.customerName}\nAgent: ${formData.agentName}`);
+        }
+        
+        function printForm() {
+            window.print();
+        }
+        
+        function resetForm() {
+            if (confirm('Are you sure you want to clear this form? Unsaved data will be lost.')) {
+                document.querySelectorAll('input:not([type="date"]), select, textarea').forEach(el => {
+                    if (el.type === 'checkbox' || el.type === 'radio') {
+                        el.checked = false;
+                    } else if (el.id !== 'formDate') {
+                        el.value = '';
+                    }
+                });
+                document.getElementById('calcBox').style.display = 'none';
+                document.getElementById('resultBox').style.display = 'none';
+            }
+        }
+        
+        function exportToExcel() {
+            const records = JSON.parse(localStorage.getItem('prequalRecords') || '[]');
+            
+            if (records.length === 0) {
+                alert('No records to export. Save some forms first!');
+                return;
+            }
+            
+            // CSV headers
+            const headers = [
+                'Date', 'Agent Name', 'Lead Source', 'Customer Name', 'Contact Number', 'Email', 
+                'Preferred Contact Time', 'Brand', 'Model', 'Condition', 'Vehicle Price',
+                'Income Range', 'Gross Income', 'Has License', 'Affordability Ratio', 'Qualification Status',
+                'Employment', 'Employment Duration', 'Has Debt', 'Monthly Debt', 'Age Range',
+                'Credit History', 'Has Deposit', 'Deposit Amount', 'Has Trade-In', 'Trade-In Details',
+                'Purchase Timeline', 'Visited Before', 'Appointment Notes', 'Agent Notes',
+                'Manager Notes', 'Final Outcome', 'Timestamp'
+            ];
+            
+            // Build CSV content
+            let csvContent = headers.join(',') + '\n';
+            
+            records.forEach(record => {
+                const ratio = record.vehiclePrice && record.grossIncome ? 
+                    (parseFloat(record.vehiclePrice) / parseFloat(record.grossIncome)).toFixed(2) : 'N/A';
+                
+                let qualStatus = 'Not Assessed';
+                if (record.hasLicense === 'Yes' && parseFloat(record.grossIncome) >= 7500 && parseFloat(ratio) <= 5) {
+                    qualStatus = 'QUALIFIED';
+                } else if (record.hasLicense === 'Yes' && parseFloat(record.grossIncome) >= 5000 && parseFloat(ratio) <= 7) {
+                    qualStatus = 'BORDERLINE';
+                } else if (record.hasLicense === 'No' || parseFloat(record.grossIncome) < 5000) {
+                    qualStatus = 'NOT QUALIFIED';
+                }
+                
+                const row = [
+                    record.date, record.agentName, record.leadSource, record.customerName,
+                    record.contactNumber, record.email, record.contactTime, record.brand,
+                    record.model, record.condition, record.vehiclePrice, record.incomeRange,
+                    record.grossIncome, record.hasLicense, ratio, qualStatus,
+                    record.employment, record.employmentDuration, record.hasDebt, record.monthlyDebt,
+                    record.ageRange, record.creditHistory, record.hasDeposit, record.depositAmount,
+                    record.hasTradeIn, record.tradeInDetails, record.purchaseTimeline, record.visited,
+                    record.appointmentNotes, record.agentNotes, record.managerNotes,
+                    record.finalOutcome, record.timestamp
+                ].map(field => {
+                    // Escape commas and quotes in fields
+                    const str = String(field || '');
+                    return str.includes(',') || str.includes('"') || str.includes('\n') ? 
+                        `"${str.replace(/"/g, '""')}"` : str;
+                });
+                
+                csvContent += row.join(',') + '\n';
+            });
+            
+            // Create download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const date = new Date().toISOString().split('T')[0];
+            link.setAttribute('href', url);
+            link.setAttribute('download', `BB_Hatfield_PreQual_Records_${date}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(`✅ Exported ${records.length} records to Excel!\n\nFile: BB_Hatfield_PreQual_Records_${date}.csv\n\nOpen with Excel or Google Sheets.`);
+        }
+        
+        function viewAllRecords() {
+            const records = JSON.parse(localStorage.getItem('prequalRecords') || '[]');
+            
+            if (records.length === 0) {
+                alert('No records saved yet. Complete and save some forms first!');
+                return;
+            }
+            
+            // Create summary
+            const qualified = records.filter(r => r.hasLicense === 'Yes' && parseFloat(r.grossIncome) >= 7500);
+            const summary = `
+📊 BB HATFIELD PRE-QUALIFICATION RECORDS
+
+Total Records: ${records.length}
+Qualified Leads: ${qualified.length}
+Last Updated: ${new Date().toLocaleString()}
+
+Recent Records:
+${records.slice(-5).reverse().map((r, i) => `
+${i + 1}. ${r.customerName} (${r.date})
+   Agent: ${r.agentName}
+   Brand: ${r.brand} ${r.model}
+   Income: R${r.grossIncome}
+   License: ${r.hasLicense}
+   Status: ${r.finalOutcome || 'Pending'}
+`).join('\n')}
+
+💡 Use "Export to Excel" button to download all records.
+            `.trim();
+            
+            alert(summary);
+        }
+    </script>
+</body>
+</html>
