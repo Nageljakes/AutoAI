@@ -2089,26 +2089,119 @@ function calculatePrequal() {
 
 function savePQResult() {
     const name = document.getElementById('pqName').value;
-    if (!name) {
-        showToast('Enter customer name');
+    const phone = document.getElementById('pqPhone').value;
+    const email = document.getElementById('pqEmail').value;
+    const grossIncome = parseFloat(document.getElementById('pqGrossIncome').value) || 0;
+    const netIncome = parseFloat(document.getElementById('pqNetIncome').value) || 0;
+    const expenses = parseFloat(document.getElementById('pqExpenses').value) || 0;
+    const vehiclePrice = parseFloat(document.getElementById('pqVehiclePrice').value) || 0;
+    const deposit = parseFloat(document.getElementById('pqDeposit').value) || 0;
+    const term = parseFloat(document.getElementById('pqTerm').value) || 0;
+    const balloon = parseFloat(document.getElementById('pqBalloon').value) || 0;
+    const creditScore = document.getElementById('pqCreditScore').value;
+
+    if (!name || !grossIncome || !vehiclePrice || !term) {
+        showToast('Fill in all required fields');
         return;
     }
 
-    const lead = {
+    // Calculate pre-qual data
+    let rate = 11.25;
+    if (creditScore === 'good') rate += 2;
+    if (creditScore === 'fair') rate += 4;
+    if (creditScore === 'poor') rate += 8;
+
+    const principal = Math.max(0, vehiclePrice + 15000 - deposit);
+    const balloonVal = vehiclePrice * (balloon / 100);
+    const amortizable = principal - balloonVal;
+
+    const monthlyRate = rate / 100 / 12;
+    const pf = (monthlyRate * Math.pow(1 + monthlyRate, term)) / (Math.pow(1 + monthlyRate, term) - 1);
+    const installment = amortizable * pf + balloonVal * monthlyRate;
+
+    let deemed = expenses;
+    if (grossIncome <= 800) deemed = grossIncome;
+    else if (grossIncome <= 6250) deemed = 800 + (grossIncome - 800) * 0.0675;
+    else if (grossIncome <= 25000) deemed = 1167.88 + (grossIncome - 6250) * 0.09;
+    else if (grossIncome <= 50000) deemed = 2855.38 + (grossIncome - 25000) * 0.082;
+    else deemed = 4905.38 + (grossIncome - 50000) * 0.0675;
+
+    const livingExp = Math.max(deemed, expenses);
+    const discretionary = Math.max(0, netIncome - expenses - livingExp);
+    const mandExtras = 2500;
+    const netSurplus = discretionary - installment - mandExtras;
+    const dti = (installment * 12) / grossIncome * 100;
+
+    // Determine verdict
+    let verdict = 'NOT QUALIFIED';
+    if (grossIncome >= 5000 && creditScore !== 'poor') {
+        if (dti <= 40 && netSurplus >= 1000) {
+            verdict = 'QUALIFIED';
+        } else if (dti < 50 && netSurplus >= 500 && installment <= (grossIncome * 0.3)) {
+            verdict = 'REFER TO MANAGER';
+        }
+    }
+
+    const prequal = {
+        gross: grossIncome,
+        net: netIncome,
+        vehiclePrice: vehiclePrice,
+        installment: Math.round(installment),
+        dti: Math.round(dti * 10) / 10,
+        verdict: verdict
+    };
+
+    // Create or link to existing lead
+    const myLeads = getMyLeads();
+    if (myLeads.length > 0) {
+        // Show dialog to link to existing lead
+        const leadOptions = myLeads.map(l => `${l.name} (${l.phone})`).join('\n');
+        const linkToExisting = confirm(`Link pre-qual to existing lead?\n\nYour leads:\n${leadOptions}\n\nClick OK to link, or Cancel to create new lead.`);
+
+        if (linkToExisting) {
+            const selectedName = prompt(`Enter customer name to link to:\n${leadOptions}`);
+            if (selectedName) {
+                const existingLead = myLeads.find(l => l.name === selectedName);
+                if (existingLead) {
+                    existingLead.prequal = prequal;
+                    saveState();
+                    showToast('Pre-qual linked to ' + existingLead.name);
+                    // Reset form
+                    document.getElementById('pqName').value = '';
+                    document.getElementById('pqPhone').value = '';
+                    document.getElementById('pqEmail').value = '';
+                    document.getElementById('pqGrossIncome').value = '';
+                    document.getElementById('pqNetIncome').value = '';
+                    return;
+                }
+            }
+        }
+    }
+
+    // Create new lead with pre-qual
+    const now = new Date().toISOString();
+    const newLead = {
         id: Date.now(),
         name: name,
-        phone: document.getElementById('pqPhone').value,
-        agent: AGENTS[0],
-        vehicle: 'Pre-qual Lead',
+        phone: phone,
+        email: email,
+        agent: currentAgent,
+        vehicle: 'TBD',
         stage: 'enquiry',
         temperature: 'Warm',
         gp: 0,
-        created: new Date().toISOString()
+        created: now,
+        stageChangedAt: now,
+        notes: [{ time: now, text: 'Pre-qualified via calculator', agent: currentAgent }],
+        prequal: prequal,
+        followUp: null,
+        timeline: [{ date: now, event: 'Pre-qualified', stage: 'enquiry' }]
     };
 
-    appState.leads.push(lead);
+    appState.leads.push(newLead);
     saveState();
-    showToast('Result saved to leads');
+    updateAllMetrics();
+    showToast('Pre-qual saved! Lead created: ' + name);
 
     // Reset form
     document.getElementById('pqName').value = '';
