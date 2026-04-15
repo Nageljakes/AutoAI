@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BB Hatfield - Call Centre Agent Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #08090f;
+            --bg-secondary: #0f111a;
+            --bg-tertiary: #161925;
+            --bg-hover: #1c1f2a;
+            --accent-cyan: #00d4ff;
+            --accent-teal: #00b8d9;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #8b5cf6;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #1e2535;
+            --input-bg: #161925;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 13px;
+            line-height: 1.5;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            height: 100vh;
+            gap: 0;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           SIDEBAR
+           ═══════════════════════════════════════════════════════════════ */
+        .sidebar {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 20px 12px;
+        }
+
+        .sidebar-header {
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--accent-cyan);
+            margin-bottom: 4px;
+        }
+
+        .logo-sub {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .nav-section {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 12px 8px 6px;
+            margin-top: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            margin-bottom: 3px;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            font-size: 12px;
+            font-weight: 500;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-left-color: var(--accent-cyan);
+        }
+
+        .nav-item.active {
+            background: rgba(0, 212, 255, 0.08);
+            color: var(--accent-cyan);
+            border-left-color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        .nav-item i {
+            width: 16px;
+            text-align: center;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: rgba(0, 212, 255, 0.15);
+            color: var(--accent-cyan);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+            font-size: 10px;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           MAIN CONTENT
+           ═══════════════════════════════════════════════════════════════ */
+        .main {
+            overflow-y: auto;
+            padding: 24px 32px;
+            background: linear-gradient(135deg, #08090f 0%, #0a0d15 100%);
+            position: relative;
+        }
+
+        .main::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle at top right, rgba(0, 212, 255, 0.03), transparent);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .view {
+            display: none;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           CARDS & GRIDS
+           ═══════════════════════════════════════════════════════════════ */
+        .grid {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+        .grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 18px;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .card-subtitle {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .metric {
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            border-left: 3px solid var(--accent-cyan);
+            margin-bottom: 12px;
+        }
+
+        .metric-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           FORMS & INPUTS
+           ═══════════════════════════════════════════════════════════════ */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        input, select, textarea {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 9px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: 'Space Grotesk', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        select option {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           BUTTONS
+           ═══════════════════════════════════════════════════════════════ */
+        .btn {
+            padding: 9px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'Space Grotesk', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: var(--accent-cyan);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-teal);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-cyan);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 11px;
+        }
+
+        .btn-success {
+            background: var(--accent-green);
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: var(--accent-red);
+            color: #fff;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 6px;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .btn-icon:hover {
+            color: var(--accent-cyan);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           TABLES
+           ═══════════════════════════════════════════════════════════════ */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        table th {
+            background: var(--bg-tertiary);
+            padding: 10px 8px;
+            text-align: left;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        table tbody tr:hover {
+            background: rgba(0, 212, 255, 0.02);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           BADGES & TAGS
+           ═══════════════════════════════════════════════════════════════ */
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-hot { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+        .badge-warm { background: rgba(245, 158, 11, 0.15); color: var(--accent-orange); }
+        .badge-cold { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+        .badge-enquiry { background: rgba(0, 212, 255, 0.15); color: var(--accent-cyan); }
+        .badge-application { background: rgba(245, 158, 11, 0.15); color: var(--accent-orange); }
+        .badge-banked { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+        .badge-lost { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+
+        /* ═══════════════════════════════════════════════════════════════
+           MODALS & OVERLAYS
+           ═══════════════════════════════════════════════════════════════ */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(6px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            max-width: 600px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0;
+        }
+
+        .modal-close:hover {
+            color: var(--accent-red);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           TABS
+           ═══════════════════════════════════════════════════════════════ */
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        .tab {
+            padding: 10px 16px;
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .tab.active {
+            color: var(--accent-cyan);
+            border-bottom-color: var(--accent-cyan);
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           TOAST NOTIFICATIONS
+           ═══════════════════════════════════════════════════════════════ */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 12px 16px;
+            border-radius: 6px;
+            border-left: 3px solid var(--accent-cyan);
+            box-shadow: var(--shadow-md);
+            display: none;
+            animation: slideIn 0.3s ease;
+            z-index: 2000;
+            max-width: 300px;
+            font-size: 12px;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           SCROLLBAR
+           ═══════════════════════════════════════════════════════════════ */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-cyan);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           RESPONSIVE
+           ═══════════════════════════════════════════════════════════════ */
+        @media (max-width: 1024px) {
+            .grid-4 { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                top: 0;
+                height: 100vh;
+                z-index: 999;
+                transition: left 0.3s ease;
+            }
+            .sidebar.open {
+                left: 0;
+            }
+            .main {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="app-container">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">BB Hatfield</div>
+            <div class="logo-sub">Agent Console</div>
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+                <label class="form-label" style="margin-bottom: 6px;">Your Name</label>
+                <select id="agentSelector" onchange="setCurrentAgent(this.value)" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-primary);">
+                    <option value="Rudi">Rudi</option>
+                    <option value="Lesedi">Lesedi</option>
+                    <option value="Tiisetso">Tiisetso</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="nav-section">Work Area</div>
+        <div class="nav-item active" onclick="switchView('dashboard', this)">
+            <i class="fas fa-home"></i> My Dashboard
+        </div>
+        <div class="nav-item" onclick="switchView('leads', this)">
+            <i class="fas fa-list"></i> My Leads <span class="nav-badge" id="leadBadge">0</span>
+        </div>
+
+        <div class="nav-section">Tools</div>
+        <div class="nav-item" onclick="switchView('prequal', this)">
+            <i class="fas fa-calculator"></i> Pre-Qualify
+        </div>
+        <div class="nav-item" onclick="switchView('vehicles', this)">
+            <i class="fas fa-car"></i> Vehicles
+        </div>
+        <div class="nav-item" onclick="switchView('guide', this)">
+            <i class="fas fa-book"></i> Scripts
+        </div>
+
+        <div class="nav-section">Personal</div>
+        <div class="nav-item" onclick="switchView('agents', this)">
+            <i class="fas fa-chart-bar"></i> My Stats
+        </div>
+
+        <div class="nav-section">Data</div>
+        <div class="nav-item" onclick="openSnapshotModal()">
+            <i class="fas fa-save"></i> Snapshots
+        </div>
+        <div class="nav-item" onclick="exportData()">
+            <i class="fas fa-download"></i> Export Data
+        </div>
+
+        <div class="sidebar-footer">
+            <p style="margin-bottom: 8px;">Cloudflare Edition</p>
+            <p style="font-size: 9px;">All data stored locally</p>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+        <!-- DASHBOARD VIEW -->
+        <div id="dashboardView" class="view active">
+            <div class="page-header">
+                <div class="page-title" id="agentGreeting">Good Morning, Agent</div>
+                <div class="page-subtitle">Your personal dashboard & today's priorities</div>
+            </div>
+
+            <div class="grid grid-4">
+                <div class="card">
+                    <div class="metric-label">My Active Leads</div>
+                    <div class="metric-value" id="myActiveLeadsMetric">0</div>
+                </div>
+                <div class="card">
+                    <div class="metric-label">My Conversions</div>
+                    <div class="metric-value" id="myConversionMetric">0</div>
+                </div>
+                <div class="card">
+                    <div class="metric-label">Total GP This Month</div>
+                    <div class="metric-value" id="myGPMetric">R0</div>
+                </div>
+                <div class="card">
+                    <div class="metric-label">Avg Deal Value</div>
+                    <div class="metric-value" id="myAvgDealMetric">R0</div>
+                </div>
+            </div>
+
+            <div class="grid grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">My Pipeline Status</div>
+                    </div>
+                    <div id="myPipelineChart" style="height: 250px;"></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Quick Actions</div>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; margin-bottom: 10px;" onclick="switchView('leads', document.querySelectorAll('.nav-item')[2])">
+                        <i class="fas fa-plus"></i> Add New Lead
+                    </button>
+                    <button class="btn btn-secondary" style="width: 100%; margin-bottom: 10px;" onclick="switchView('prequal', document.querySelectorAll('.nav-item')[4])">
+                        <i class="fas fa-calculator"></i> Pre-Qualify Lead
+                    </button>
+                    <button class="btn btn-secondary" style="width: 100%; margin-bottom: 10px;" onclick="switchView('vehicles', document.querySelectorAll('.nav-item')[5])">
+                        <i class="fas fa-car"></i> Vehicle Lookup
+                    </button>
+                    <button class="btn btn-secondary" style="width: 100%;" onclick="switchView('guide', document.querySelectorAll('.nav-item')[6])">
+                        <i class="fas fa-book"></i> Get Sales Script
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">My Hot Leads (Action Items)</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Vehicle</th>
+                            <th>Stage</th>
+                            <th>Temp</th>
+                            <th>Days Active</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hotLeadsTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- LEADS VIEW -->
+        <div id="leadsView" class="view">
+            <div class="page-header">
+                <div class="page-title">Lead Pipeline</div>
+                <div class="page-subtitle">Manage prospects through the sales funnel</div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <button class="btn btn-primary" onclick="openLeadModal()">
+                    <i class="fas fa-plus"></i> New Lead
+                </button>
+            </div>
+
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Agent</th>
+                            <th>Vehicle</th>
+                            <th>Stage</th>
+                            <th>Temp</th>
+                            <th>GP</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leadsTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PRE-QUALIFICATION VIEW -->
+        <div id="prequalView" class="view">
+            <div class="page-header">
+                <div class="page-title">Pre-Qualification</div>
+                <div class="page-subtitle">NCA-grade affordability assessment</div>
+            </div>
+
+            <div class="grid grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Customer Info</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Customer Name</label>
+                        <input type="text" id="pqName" placeholder="Full name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact Number</label>
+                        <input type="tel" id="pqPhone" placeholder="0821234567">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="pqEmail" placeholder="email@example.com">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Financial Profile</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Gross Monthly Income</label>
+                        <input type="number" id="pqGrossIncome" placeholder="15000" onchange="calculatePrequal()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Net Income</label>
+                        <input type="number" id="pqNetIncome" placeholder="12000" onchange="calculatePrequal()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Monthly Expenses</label>
+                        <input type="number" id="pqExpenses" placeholder="3000" onchange="calculatePrequal()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Credit Score</label>
+                        <select id="pqCreditScore" onchange="calculatePrequal()">
+                            <option value="">Select...</option>
+                            <option value="excellent">Excellent</option>
+                            <option value="good">Good</option>
+                            <option value="fair">Fair</option>
+                            <option value="poor">Poor</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Vehicle Selection</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Vehicle Price</label>
+                        <input type="number" id="pqVehiclePrice" placeholder="350000" onchange="calculatePrequal()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Deposit Amount</label>
+                        <input type="number" id="pqDeposit" placeholder="70000" value="0" onchange="calculatePrequal()">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Finance Term (months)</label>
+                        <select id="pqTerm" onchange="calculatePrequal()">
+                            <option value="">Select...</option>
+                            <option value="60">60</option>
+                            <option value="72">72</option>
+                            <option value="84">84</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Balloon %</label>
+                        <select id="pqBalloon" onchange="calculatePrequal()">
+                            <option value="0">0%</option>
+                            <option value="15">15%</option>
+                            <option value="20">20%</option>
+                            <option value="25">25%</option>
+                            <option value="30">30%</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Qualification Result</div>
+                    </div>
+
+                    <div id="pqResult" style="padding: 12px; border-radius: 6px; background: var(--bg-tertiary); margin-bottom: 12px; text-align: center; color: var(--text-muted);">
+                        Fill in details to see result
+                    </div>
+
+                    <div class="metric">
+                        <div class="metric-label">Monthly Installment</div>
+                        <div class="metric-value" id="pqInstallment">R0</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">DTI Ratio</div>
+                        <div class="metric-value" id="pqDTI">0%</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Net Surplus</div>
+                        <div class="metric-value" id="pqSurplus">R0</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-success" onclick="savePQResult()">
+                <i class="fas fa-check"></i> Save Result
+            </button>
+        </div>
+
+        <!-- VEHICLE FINDER VIEW -->
+        <div id="vehiclesView" class="view">
+            <div class="page-header">
+                <div class="page-title">Vehicle Finder</div>
+                <div class="page-subtitle">Browse inventory & compare specs</div>
+            </div>
+
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">
+                    <div class="card-title">Quick Search</div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Brand</label>
+                        <select id="vehicleBrandFilter" onchange="filterVehicles()">
+                            <option value="">All Brands</option>
+                            <option>Suzuki</option>
+                            <option>Renault</option>
+                            <option>Mahindra</option>
+                            <option>GAC MOTOR</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Price Range</label>
+                        <select id="vehiclePriceFilter" onchange="filterVehicles()">
+                            <option value="">All Prices</option>
+                            <option value="200000">Under R200k</option>
+                            <option value="300000">R200k - R300k</option>
+                            <option value="400000">R300k - R400k</option>
+                            <option value="999999">Over R400k</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select id="vehicleCategoryFilter" onchange="filterVehicles()">
+                            <option value="">All Categories</option>
+                            <option>Sedan</option>
+                            <option>SUV</option>
+                            <option>Hatchback</option>
+                            <option>Van</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-3" id="vehicleGrid"></div>
+        </div>
+
+        <!-- CONVERSATION GUIDE VIEW -->
+        <div id="guideView" class="view">
+            <div class="page-header">
+                <div class="page-title">Sales Scripts</div>
+                <div class="page-subtitle">Proven conversation guides by lead stage</div>
+            </div>
+
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchGuideStage('enquiry', this)">Enquiry</button>
+                    <button class="tab" onclick="switchGuideStage('application', this)">Application</button>
+                    <button class="tab" onclick="switchGuideStage('banked', this)">Banked</button>
+                    <button class="tab" onclick="switchGuideStage('lost', this)">Lost</button>
+                </div>
+
+                <div id="guideContent"></div>
+            </div>
+        </div>
+
+        <!-- AGENTS VIEW - NOW ABOUT MY ACTIVITY LOG -->
+        <div id="agentsView" class="view">
+            <div class="page-header">
+                <div class="page-title">My Activity Log</div>
+                <div class="page-subtitle">Personal performance & call history</div>
+            </div>
+
+            <div class="grid grid-3">
+                <div class="card">
+                    <div class="metric-label">Calls Today</div>
+                    <div class="metric-value" id="callsTodayMetric">0</div>
+                </div>
+                <div class="card">
+                    <div class="metric-label">Leads Closed This Month</div>
+                    <div class="metric-value" id="leadsClosedMetric">0</div>
+                </div>
+                <div class="card">
+                    <div class="metric-label">My Conversion %</div>
+                    <div class="metric-value" id="myConversionPctMetric">0%</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">All My Leads (Filter View)</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Vehicle</th>
+                            <th>Stage</th>
+                            <th>Temp</th>
+                            <th>GP</th>
+                            <th>Added</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allMyLeadsTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="leadModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">Create New Lead</div>
+            <button class="modal-close" onclick="closeModal('leadModal')">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Customer Name</label>
+                <input type="text" id="newLeadName">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="tel" id="newLeadPhone">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Agent</label>
+                <select id="newLeadAgent">
+                    <option>Rudi</option>
+                    <option>Lesedi</option>
+                    <option>Tiisetso</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Vehicle Interest</label>
+                <input type="text" id="newLeadVehicle" placeholder="e.g., Suzuki Swift">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Temperature</label>
+                <select id="newLeadTemp">
+                    <option>Hot</option>
+                    <option>Warm</option>
+                    <option>Cold</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" style="width: 100%; margin-top: 16px;" onclick="createNewLead()">
+                Create Lead
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="snapshotModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">Snapshots</div>
+            <button class="modal-close" onclick="closeModal('snapshotModal')">×</button>
+        </div>
+        <div class="modal-body">
+            <button class="btn btn-primary" style="width: 100%; margin-bottom: 16px;" onclick="createSnapshot()">
+                <i class="fas fa-plus"></i> New Snapshot
+            </button>
+            <div id="snapshotList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// EMBEDDED DATA: VEHICLES
+// ═══════════════════════════════════════════════════════════════════════════
+const VEHICLES_DATA = {
+    "Suzuki::SWIFT": { brand: "Suzuki", model: "SWIFT", category: "hatchback", price: 224900, engine: "1.2L Petrol", transmission: "Manual/CVT", seats: 5, fuel_type: "Petrol", image: "🚗" },
+    "Suzuki::BALENO": { brand: "Suzuki", model: "BALENO", category: "hatchback", price: 266900, engine: "1.5L Petrol", transmission: "Manual/AT", seats: 5, fuel_type: "Petrol", image: "🚗" },
+    "Suzuki::CELERIO": { brand: "Suzuki", model: "CELERIO", category: "hatchback", price: 188900, engine: "1.0L Petrol", transmission: "Manual", seats: 5, fuel_type: "Petrol", image: "🚗" },
+    "Suzuki::FRONX": { brand: "Suzuki", model: "FRONX", category: "suv", price: 298900, engine: "1.5L Petrol", transmission: "Manual/AT", seats: 5, fuel_type: "Petrol", image: "🚙" },
+    "Suzuki::GRAND VITARA": { brand: "Suzuki", model: "GRAND VITARA", category: "suv", price: 358900, engine: "1.5L Petrol", transmission: "Manual/AT", seats: 5, fuel_type: "Petrol", image: "🚙" },
+    "Renault::KWID": { brand: "Renault", model: "KWID", category: "hatchback", price: 186900, engine: "1.0L Petrol", transmission: "Manual", seats: 5, fuel_type: "Petrol", image: "🚗" },
+    "Renault::KIGER": { brand: "Renault", model: "KIGER", category: "suv", price: 229900, engine: "1.0L Petrol", transmission: "Manual/CVT", seats: 5, fuel_type: "Petrol", image: "🚙" },
+    "Renault::TRIBER": { brand: "Renault", model: "TRIBER", category: "van", price: 216900, engine: "1.0L Petrol", transmission: "Manual", seats: 7, fuel_type: "Petrol", image: "🚐" },
+    "Mahindra::XUV3X0": { brand: "Mahindra", model: "XUV 3XO", category: "suv", price: 259999, engine: "1.2L Petrol", transmission: "Manual/AT", seats: 5, fuel_type: "Petrol", image: "🚙" },
+    "Mahindra::SCORPIO-N": { brand: "Mahindra", model: "SCORPIO-N", category: "suv", price: 489999, engine: "2.2L Diesel", transmission: "Auto", seats: 5, fuel_type: "Diesel", image: "🚙" },
+    "GAC MOTOR::EMKOO": { brand: "GAC MOTOR", model: "EMKOO", category: "suv", price: 399999, engine: "1.5L Petrol", transmission: "DCT", seats: 5, fuel_type: "Petrol", image: "🚙" },
+    "GAC MOTOR::GS3 EMZOOM": { brand: "GAC MOTOR", model: "GS3 EMZOOM", category: "suv", price: 289999, engine: "1.5L Petrol", transmission: "Manual/DCT", seats: 5, fuel_type: "Petrol", image: "🚙" },
+};
+
+const SCRIPTS_DATA = {
+    enquiry: {
+        opener: "Good [morning/afternoon], [Customer Name]! Thank you for contacting BB Hatfield. How can I assist you with your vehicle purchase today?",
+        qualifying: "1. What brings you in today?\n2. Are you looking to purchase new or used?\n3. What's your timeframe?\n4. Do you currently have a vehicle?\n5. Have you thought about budget?",
+        objections: {
+            "I need to think about it": "Absolutely, take your time. What specific aspect would help you decide? Let's schedule a follow-up call in 2-3 days.",
+            "Your prices seem high": "Our pricing reflects full warranty and service plans. We can explore finance options that fit your budget.",
+            "I'll shop around first": "That's smart! Here's what makes BB Hatfield different: [key differentiators]. When you're ready, give us a call back.",
+        }
+    },
+    application: {
+        opener: "Hi [Customer Name], this is [Agent Name] from BB Hatfield. Great news - your pre-qualification came through!",
+        docs: "REQUIRED DOCS:\n☐ SA Identity (both sides)\n☐ Last 3 months payslips\n☐ Bank statement\n☐ Proof of residence\n☐ Employment letter (if needed)",
+        objections: {
+            "Bank says I need a guarantor": "A guarantor strengthens your application. It's typically a parent or spouse who co-signs.",
+            "Finance rate is higher": "Let me check with the bank if any adjustments are possible given your profile.",
+        }
+    },
+    banked: {
+        opener: "Everything is set for your delivery! You're going to love this vehicle.",
+        checklist: "☐ PDI Complete\n☐ Insurance Activated\n☐ Registration Applied\n☐ Fuel Tank: Full\n☐ Welcome Pack Ready",
+        upsell: "Before you drive off: Extended Warranty, Service Plan, Smash & Grab Cover, Tracker, Interior Protection"
+    },
+    lost: {
+        opener: "Hi [Name], it's [Agent Name] from BB Hatfield. I noticed we haven't connected recently about your vehicle search.",
+        feedback: "1. What was the main deciding factor?\n2. Is there anything we could have done better?\n3. Keep BB Hatfield in mind for future vehicles?",
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// APP STATE MANAGEMENT
+// ═══════════════════════════════════════════════════════════════════════════
+const STORAGE_KEY = 'bbh_app_data_v1';
+const SNAPSHOTS_KEY = 'bbh_snapshots_v1';
+const AGENTS = ['Rudi', 'Lesedi', 'Tiisetso'];
+
+let appState = {
+    leads: [],
+    snapshots: [],
+    lastSync: new Date().toISOString(),
+};
+
+let currentAgent = 'Rudi'; // Agent currently logged in
+
+function initApp() {
+    loadState();
+    const savedAgent = localStorage.getItem('bbh_current_agent') || 'Rudi';
+    currentAgent = savedAgent;
+    document.getElementById('agentSelector').value = currentAgent;
+
+    if (appState.leads.length === 0) {
+        seedDemoData();
+    }
+    renderDashboard();
+    updateAllMetrics();
+}
+
+function loadState() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            appState = JSON.parse(saved);
+        }
+    } catch (e) {
+        console.error('Failed to load state:', e);
+    }
+}
+
+function saveState() {
+    try {
+        appState.lastSync = new Date().toISOString();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    } catch (e) {
+        console.error('Failed to save state:', e);
+        showToast('Storage quota exceeded');
+    }
+}
+
+function seedDemoData() {
+    appState.leads = [
+        { id: 1, name: 'Thabo Mokwena', phone: '0821234567', agent: 'Rudi', vehicle: 'Suzuki Swift', stage: 'enquiry', temperature: 'Hot', gp: 0, created: new Date().toISOString() },
+        { id: 2, name: 'Sarah van der Merwe', phone: '0729876543', agent: 'Lesedi', vehicle: 'Renault Kiger', stage: 'application', temperature: 'Warm', gp: 0, created: new Date(Date.now() - 86400000).toISOString() },
+        { id: 3, name: 'John Ndlovu', phone: '0834567890', agent: 'Tiisetso', vehicle: 'GAC GS3 Emzoom', stage: 'banked', temperature: 'Warm', gp: 18500, created: new Date(Date.now() - 172800000).toISOString() },
+    ];
+    saveState();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AGENT MANAGEMENT
+// ═══════════════════════════════════════════════════════════════════════════
+function setCurrentAgent(agentName) {
+    currentAgent = agentName;
+    localStorage.setItem('bbh_current_agent', agentName);
+    updateAllMetrics();
+}
+
+function getMyLeads() {
+    return appState.leads.filter(l => l.agent === currentAgent);
+}
+
+function getMyStats() {
+    const myLeads = getMyLeads();
+    const banked = myLeads.filter(l => l.stage === 'banked');
+    const active = myLeads.filter(l => ['enquiry', 'application'].includes(l.stage));
+    const totalGP = myLeads.reduce((sum, l) => sum + (l.gp || 0), 0);
+    const conversion = myLeads.length > 0 ? Math.round((banked.length / myLeads.length) * 100) : 0;
+    const avgDeal = banked.length > 0 ? Math.round(totalGP / banked.length) : 0;
+
+    return { myLeads, banked, active, totalGP, conversion, avgDeal };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NAVIGATION & VIEWS
+// ═══════════════════════════════════════════════════════════════════════════
+function switchView(viewName, element) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+    document.getElementById(viewName + 'View').classList.add('active');
+    element.classList.add('active');
+
+    switch(viewName) {
+        case 'dashboard': renderDashboard(); break;
+        case 'leads': renderLeadsTable(); break;
+        case 'prequal': initPrequalForm(); break;
+        case 'vehicles': renderVehicleCatalog(); break;
+        case 'guide': renderGuideContent('enquiry'); break;
+        case 'agents': renderAgentStats(); break;
+    }
+}
+
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════════════════════
+let pipelineChart, teamChart;
+
+function renderDashboard() {
+    updateMetrics();
+    updateActivityTable();
+    renderCharts();
+}
+
+function updateMetrics() {
+    const stats = getMyStats();
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
+
+    document.getElementById('agentGreeting').textContent = greeting + ', ' + currentAgent;
+    document.getElementById('myActiveLeadsMetric').textContent = stats.active.length;
+    document.getElementById('myConversionMetric').textContent = stats.banked.length;
+    document.getElementById('myGPMetric').textContent = 'R' + stats.totalGP.toLocaleString();
+    document.getElementById('myAvgDealMetric').textContent = 'R' + stats.avgDeal.toLocaleString();
+}
+
+function updateActivityTable() {
+    const table = document.getElementById('hotLeadsTable');
+    const hotLeads = getMyLeads()
+        .filter(l => ['enquiry', 'application'].includes(l.stage))
+        .sort((a, b) => new Date(b.created) - new Date(a.created))
+        .slice(0, 5);
+
+    table.innerHTML = hotLeads.map(lead => {
+        const daysActive = Math.floor((Date.now() - new Date(lead.created)) / (1000 * 60 * 60 * 24));
+        return `
+            <tr>
+                <td><strong>${lead.name}</strong></td>
+                <td>${lead.vehicle}</td>
+                <td><span class="badge badge-${lead.stage}">${lead.stage}</span></td>
+                <td><span class="badge badge-${lead.temperature}">${lead.temperature}</span></td>
+                <td>${daysActive} days</td>
+            </tr>
+        `;
+    }).join('');
+
+    if (hotLeads.length === 0) {
+        table.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No active leads right now</td></tr>';
+    }
+}
+
+function renderCharts() {
+    const pipelineCtx = document.getElementById('myPipelineChart');
+
+    if (!pipelineCtx) return;
+
+    // MY Pipeline Chart - only showing MY leads by stage
+    const stages = ['enquiry', 'application', 'banked', 'lost'];
+    const stageCounts = stages.map(s => getMyLeads().filter(l => l.stage === s).length);
+
+    if (pipelineChart) pipelineChart.destroy();
+    pipelineChart = new Chart(pipelineCtx, {
+        type: 'bar',
+        data: {
+            labels: stages.map(s => s.charAt(0).toUpperCase() + s.slice(1)),
+            datasets: [{
+                label: 'My Leads',
+                data: stageCounts,
+                backgroundColor: ['#00d4ff', '#f59e0b', '#10b981', '#ef4444'],
+                borderRadius: 4,
+                borderColor: 'transparent',
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#94a3b8' },
+                    grid: { color: '#1e2535' }
+                },
+                x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
+            }
+        }
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LEADS MANAGEMENT
+// ═══════════════════════════════════════════════════════════════════════════
+function renderLeadsTable() {
+    const table = document.getElementById('leadsTable');
+    const myLeads = getMyLeads();
+
+    table.innerHTML = myLeads.map(lead => `
+        <tr>
+            <td><strong>${lead.name}</strong></td>
+            <td>${lead.vehicle}</td>
+            <td><span class="badge badge-${lead.stage}">${lead.stage.charAt(0).toUpperCase() + lead.stage.slice(1)}</span></td>
+            <td><span class="badge badge-${lead.temperature}">${lead.temperature}</span></td>
+            <td>R${lead.gp?.toLocaleString() || 0}</td>
+            <td>
+                <button class="btn-icon" onclick="editLead(${lead.id})" title="Change Stage"><i class="fas fa-edit"></i></button>
+                <button class="btn-icon" onclick="deleteLead(${lead.id})" title="Delete"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
+
+    if (myLeads.length === 0) {
+        table.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">No leads yet. <a href="#" onclick="switchView(\'leads\', event.target.closest(\'.nav-item\'))">Create one</a></td></tr>';
+    }
+
+    document.getElementById('leadBadge').textContent = myLeads.length;
+}
+
+function openLeadModal() {
+    openModal('leadModal');
+}
+
+function createNewLead() {
+    const name = document.getElementById('newLeadName').value;
+    const phone = document.getElementById('newLeadPhone').value;
+    const agent = document.getElementById('newLeadAgent').value;
+    const vehicle = document.getElementById('newLeadVehicle').value;
+    const temperature = document.getElementById('newLeadTemp').value;
+
+    if (!name || !phone) {
+        showToast('Please fill in required fields');
+        return;
+    }
+
+    const newLead = {
+        id: Date.now(),
+        name, phone, agent, vehicle, temperature,
+        stage: 'enquiry',
+        gp: 0,
+        created: new Date().toISOString()
+    };
+
+    appState.leads.push(newLead);
+    saveState();
+    closeModal('leadModal');
+    renderLeadsTable();
+    updateAllMetrics();
+    showToast('Lead created successfully');
+
+    // Reset form
+    document.getElementById('newLeadName').value = '';
+    document.getElementById('newLeadPhone').value = '';
+    document.getElementById('newLeadVehicle').value = '';
+}
+
+function editLead(id) {
+    const lead = appState.leads.find(l => l.id === id);
+    if (!lead) return;
+
+    const newStage = prompt('New stage (enquiry/application/banked/lost):', lead.stage);
+    if (newStage && ['enquiry', 'application', 'banked', 'lost'].includes(newStage)) {
+        lead.stage = newStage;
+        saveState();
+        renderLeadsTable();
+        updateAllMetrics();
+        showToast('Lead updated');
+    }
+}
+
+function deleteLead(id) {
+    if (confirm('Delete this lead?')) {
+        appState.leads = appState.leads.filter(l => l.id !== id);
+        saveState();
+        renderLeadsTable();
+        updateAllMetrics();
+        showToast('Lead deleted');
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PRE-QUALIFICATION CALCULATOR
+// ═══════════════════════════════════════════════════════════════════════════
+function initPrequalForm() {
+    // Form is already in HTML, just ensure inputs are ready
+}
+
+function calculatePrequal() {
+    const grossIncome = parseFloat(document.getElementById('pqGrossIncome').value) || 0;
+    const netIncome = parseFloat(document.getElementById('pqNetIncome').value) || 0;
+    const expenses = parseFloat(document.getElementById('pqExpenses').value) || 0;
+    const vehiclePrice = parseFloat(document.getElementById('pqVehiclePrice').value) || 0;
+    const deposit = parseFloat(document.getElementById('pqDeposit').value) || 0;
+    const term = parseFloat(document.getElementById('pqTerm').value) || 0;
+    const balloon = parseFloat(document.getElementById('pqBalloon').value) || 0;
+    const creditScore = document.getElementById('pqCreditScore').value;
+
+    if (!grossIncome || !vehiclePrice || !term) {
+        document.getElementById('pqResult').innerHTML = '<p style="color: var(--text-muted);">Fill in all required fields</p>';
+        return;
+    }
+
+    // Interest rate calculation
+    let rate = 11.25;
+    if (creditScore === 'good') rate += 2;
+    if (creditScore === 'fair') rate += 4;
+    if (creditScore === 'poor') rate += 8;
+
+    // Loan calculation
+    const principal = Math.max(0, vehiclePrice + 15000 - deposit);
+    const balloonVal = vehiclePrice * (balloon / 100);
+    const amortizable = principal - balloonVal;
+
+    const monthlyRate = rate / 100 / 12;
+    const pf = (monthlyRate * Math.pow(1 + monthlyRate, term)) / (Math.pow(1 + monthlyRate, term) - 1);
+    const installment = amortizable * pf + balloonVal * monthlyRate;
+
+    // NCA deemed expenses
+    let deemed = expenses;
+    if (grossIncome <= 800) deemed = grossIncome;
+    else if (grossIncome <= 6250) deemed = 800 + (grossIncome - 800) * 0.0675;
+    else if (grossIncome <= 25000) deemed = 1167.88 + (grossIncome - 6250) * 0.09;
+    else if (grossIncome <= 50000) deemed = 2855.38 + (grossIncome - 25000) * 0.082;
+    else deemed = 4905.38 + (grossIncome - 50000) * 0.0675;
+
+    const livingExp = Math.max(deemed, expenses);
+    const discretionary = Math.max(0, netIncome - expenses - livingExp);
+    const mandExtras = 2500;
+    const netSurplus = discretionary - installment - mandExtras;
+
+    const dti = (installment * 12) / grossIncome * 100;
+
+    // Determine qualification
+    let resultHTML = '';
+    let resultClass = '';
+
+    if (grossIncome < 5000) {
+        resultHTML = '<span style="color: var(--accent-red);">⚠ NOT QUALIFIED</span><br><small>Income below minimum threshold (R5,000)</small>';
+        resultClass = 'accent-red';
+    } else if (creditScore === 'poor') {
+        resultHTML = '<span style="color: var(--accent-red);">⚠ NOT QUALIFIED</span><br><small>Poor credit score</small>';
+        resultClass = 'accent-red';
+    } else if (dti > 50 || netSurplus < 500 || installment > (grossIncome * 0.3)) {
+        resultHTML = '<span style="color: var(--accent-red);">✗ NOT QUALIFIED</span><br><small>DTI or surplus constraints</small>';
+        resultClass = 'accent-red';
+    } else if (dti >= 40 || netSurplus < 1000) {
+        resultHTML = '<span style="color: var(--accent-orange);">⚡ REFER TO MANAGER</span><br><small>Borderline application</small>';
+        resultClass = 'accent-orange';
+    } else {
+        resultHTML = '<span style="color: var(--accent-green);">✓ QUALIFIED</span><br><small>Proceed to application</small>';
+        resultClass = 'accent-green';
+    }
+
+    document.getElementById('pqResult').innerHTML = resultHTML;
+    document.getElementById('pqInstallment').textContent = 'R' + Math.round(installment).toLocaleString();
+    document.getElementById('pqDTI').textContent = Math.round(dti) + '%';
+    document.getElementById('pqSurplus').textContent = 'R' + Math.round(netSurplus).toLocaleString();
+}
+
+function savePQResult() {
+    const name = document.getElementById('pqName').value;
+    if (!name) {
+        showToast('Enter customer name');
+        return;
+    }
+
+    const lead = {
+        id: Date.now(),
+        name: name,
+        phone: document.getElementById('pqPhone').value,
+        agent: AGENTS[0],
+        vehicle: 'Pre-qual Lead',
+        stage: 'enquiry',
+        temperature: 'Warm',
+        gp: 0,
+        created: new Date().toISOString()
+    };
+
+    appState.leads.push(lead);
+    saveState();
+    showToast('Result saved to leads');
+
+    // Reset form
+    document.getElementById('pqName').value = '';
+    document.getElementById('pqPhone').value = '';
+    document.getElementById('pqEmail').value = '';
+    document.getElementById('pqGrossIncome').value = '';
+    document.getElementById('pqNetIncome').value = '';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VEHICLE CATALOG
+// ═══════════════════════════════════════════════════════════════════════════
+function renderVehicleCatalog() {
+    const grid = document.getElementById('vehicleGrid');
+    const filtered = filterVehicles();
+
+    grid.innerHTML = Object.entries(VEHICLES_DATA).map(([key, v]) => `
+        <div class="card" style="cursor: pointer;" onclick="showVehicleDetail('${key}')">
+            <div style="font-size: 32px; text-align: center; margin-bottom: 12px;">${v.image}</div>
+            <div class="card-title">${v.brand} ${v.model}</div>
+            <div class="card-subtitle">${v.engine} • ${v.seats} seats</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+                <span style="font-size: 10px; color: var(--text-muted);">${v.category}</span>
+                <span style="font-weight: 700; color: var(--accent-cyan);">R${v.price.toLocaleString()}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function filterVehicles() {
+    // Filtering logic would go here
+    return VEHICLES_DATA;
+}
+
+function showVehicleDetail(key) {
+    const v = VEHICLES_DATA[key];
+    alert(`${v.brand} ${v.model}\n\nEngine: ${v.engine}\nTransmission: ${v.transmission}\nPrice: R${v.price.toLocaleString()}\n\nAdding detailed spec view...`);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONVERSATION GUIDE
+// ═══════════════════════════════════════════════════════════════════════════
+function renderGuideContent(stage) {
+    const content = document.getElementById('guideContent');
+    const script = SCRIPTS_DATA[stage] || SCRIPTS_DATA.enquiry;
+
+    let html = `
+        <div style="background: var(--bg-tertiary); padding: 16px; border-radius: 6px; margin-bottom: 16px; white-space: pre-wrap; line-height: 1.6; font-family: 'JetBrains Mono', monospace; font-size: 12px;">
+    `;
+
+    Object.entries(script).forEach(([key, value]) => {
+        if (typeof value === 'string') {
+            html += `<div style="margin-bottom: 16px;"><strong style="color: var(--accent-cyan);">${key.toUpperCase().replace(/_/g, ' ')}:</strong>\n${value}</div>`;
+        }
+    });
+
+    if (script.objections) {
+        html += `<div style="margin-top: 16px;"><strong style="color: var(--accent-orange);">OBJECTIONS:</strong>`;
+        Object.entries(script.objections).forEach(([objection, response]) => {
+            html += `\n\n<strong>Q: "${objection}"</strong>\nA: ${response}`;
+        });
+        html += `</div>`;
+    }
+
+    html += `</div>
+        <button class="btn btn-primary" onclick="copyToClipboard('${stage}')">
+            <i class="fas fa-copy"></i> Copy to Clipboard
+        </button>
+    `;
+
+    content.innerHTML = html;
+}
+
+function switchGuideStage(stage, element) {
+    document.querySelectorAll('#guideView .tab').forEach(t => t.classList.remove('active'));
+    element.classList.add('active');
+    renderGuideContent(stage);
+}
+
+function copyToClipboard(stage) {
+    const script = SCRIPTS_DATA[stage];
+    let text = `${stage.toUpperCase()} SCRIPT\n\n`;
+    Object.entries(script).forEach(([key, value]) => {
+        text += `${key.toUpperCase()}:\n${value}\n\n`;
+    });
+    navigator.clipboard.writeText(text);
+    showToast('Copied to clipboard');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MY ACTIVITY LOG & PERSONAL STATS
+// ═══════════════════════════════════════════════════════════════════════════
+function renderAgentStats() {
+    const stats = getMyStats();
+    const myLeads = getMyLeads();
+    const thisMonth = myLeads.filter(l => {
+        const created = new Date(l.created);
+        const now = new Date();
+        return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
+    });
+
+    document.getElementById('callsTodayMetric').textContent = '0'; // Placeholder for actual call log
+    document.getElementById('leadsClosedMetric').textContent = thisMonth.filter(l => l.stage === 'banked').length;
+    document.getElementById('myConversionPctMetric').textContent = stats.conversion + '%';
+
+    const tableContainer = document.getElementById('allMyLeadsTable');
+    tableContainer.innerHTML = myLeads.sort((a, b) => new Date(b.created) - new Date(a.created)).map(lead => `
+        <tr>
+            <td><strong>${lead.name}</strong></td>
+            <td>${lead.vehicle}</td>
+            <td><span class="badge badge-${lead.stage}">${lead.stage}</span></td>
+            <td><span class="badge badge-${lead.temperature}">${lead.temperature}</span></td>
+            <td style="font-weight: 700;">R${lead.gp?.toLocaleString() || 0}</td>
+            <td>${new Date(lead.created).toLocaleDateString()}</td>
+        </tr>
+    `).join('');
+
+    if (myLeads.length === 0) {
+        tableContainer.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 20px;">No leads yet</td></tr>';
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SNAPSHOTS
+// ═══════════════════════════════════════════════════════════════════════════
+function openSnapshotModal() {
+    renderSnapshotList();
+    openModal('snapshotModal');
+}
+
+function renderSnapshotList() {
+    const list = document.getElementById('snapshotList');
+    const snapshots = JSON.parse(localStorage.getItem(SNAPSHOTS_KEY) || '[]');
+
+    if (snapshots.length === 0) {
+        list.innerHTML = '<p style="color: var(--text-muted); padding: 12px;">No snapshots yet</p>';
+        return;
+    }
+
+    list.innerHTML = snapshots.map((snap, i) => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: var(--bg-tertiary); border-radius: 6px; border-left: 3px solid var(--accent-cyan);">
+            <div>
+                <div style="font-weight: 600;">${snap.label || 'Snapshot ' + (i + 1)}</div>
+                <div style="font-size: 10px; color: var(--text-muted);">${new Date(snap.created).toLocaleString()}</div>
+            </div>
+            <div style="display: flex; gap: 6px;">
+                <button class="btn btn-sm btn-secondary" onclick="restoreSnapshot(${i})">Restore</button>
+                <button class="btn-icon" onclick="deleteSnapshot(${i})"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function createSnapshot() {
+    const label = prompt('Snapshot name:', 'Snapshot ' + new Date().toLocaleString());
+    if (!label) return;
+
+    const snapshot = {
+        created: new Date().toISOString(),
+        label: label,
+        data: JSON.parse(JSON.stringify(appState.leads))
+    };
+
+    let snapshots = JSON.parse(localStorage.getItem(SNAPSHOTS_KEY) || '[]');
+    snapshots.unshift(snapshot);
+    if (snapshots.length > 10) snapshots.pop();
+
+    localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(snapshots));
+    renderSnapshotList();
+    showToast('Snapshot created: ' + label);
+}
+
+function restoreSnapshot(index) {
+    if (!confirm('Restore this snapshot? Current data will be overwritten.')) return;
+
+    const snapshots = JSON.parse(localStorage.getItem(SNAPSHOTS_KEY) || '[]');
+    const snapshot = snapshots[index];
+
+    appState.leads = JSON.parse(JSON.stringify(snapshot.data));
+    saveState();
+    closeModal('snapshotModal');
+    switchView('leads', document.querySelectorAll('.nav-item')[2]);
+    showToast('Snapshot restored');
+}
+
+function deleteSnapshot(index) {
+    if (!confirm('Delete this snapshot?')) return;
+
+    let snapshots = JSON.parse(localStorage.getItem(SNAPSHOTS_KEY) || '[]');
+    snapshots.splice(index, 1);
+    localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(snapshots));
+    renderSnapshotList();
+    showToast('Snapshot deleted');
+}
+
+function exportData() {
+    const data = {
+        leads: appState.leads,
+        exported: new Date().toISOString()
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'bbh-data-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Data exported');
+}
+
+function updateAllMetrics() {
+    updateMetrics();
+    renderCharts();
+    renderLeadsTable();
+    renderAgentStats();
+}
+
+// Initialize app on load
+window.addEventListener('load', initApp);
+</script>
+</body>
+</html>
