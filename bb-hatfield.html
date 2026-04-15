@@ -917,48 +917,77 @@
         <div id="vehiclesView" class="view">
             <div class="page-header">
                 <div class="page-title">Vehicle Finder</div>
-                <div class="page-subtitle">Browse inventory & compare specs</div>
+                <div class="page-subtitle">Browse & compare 4 vehicles side-by-side</div>
             </div>
 
-            <div class="card" style="margin-bottom: 20px;">
-                <div class="card-header">
-                    <div class="card-title">Quick Search</div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Brand</label>
-                        <select id="vehicleBrandFilter" onchange="filterVehicles()">
-                            <option value="">All Brands</option>
-                            <option>Suzuki</option>
-                            <option>Renault</option>
-                            <option>Mahindra</option>
-                            <option>GAC MOTOR</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Price Range</label>
-                        <select id="vehiclePriceFilter" onchange="filterVehicles()">
-                            <option value="">All Prices</option>
-                            <option value="200000">Under R200k</option>
-                            <option value="300000">R200k - R300k</option>
-                            <option value="400000">R300k - R400k</option>
-                            <option value="999999">Over R400k</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Category</label>
-                        <select id="vehicleCategoryFilter" onchange="filterVehicles()">
-                            <option value="">All Categories</option>
-                            <option>Sedan</option>
-                            <option>SUV</option>
-                            <option>Hatchback</option>
-                            <option>Van</option>
-                        </select>
-                    </div>
-                </div>
+            <div style="margin-bottom: 16px;">
+                <button class="btn btn-secondary" onclick="switchComparisonTab('browse')">
+                    <i class="fas fa-th"></i> Browse Catalog
+                </button>
+                <button class="btn btn-secondary" onclick="switchComparisonTab('compare')">
+                    <i class="fas fa-columns"></i> 4-Vehicle Compare
+                </button>
             </div>
 
-            <div class="grid grid-3" id="vehicleGrid"></div>
+            <!-- BROWSE TAB -->
+            <div id="browseTab">
+                <div class="card" style="margin-bottom: 20px;">
+                    <div class="card-header">
+                        <div class="card-title">Filter Vehicles</div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Brand</label>
+                            <select id="vehicleBrandFilter" onchange="filterVehicles()">
+                                <option value="">All Brands</option>
+                                <option>Suzuki</option>
+                                <option>Renault</option>
+                                <option>Mahindra</option>
+                                <option>GAC MOTOR</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Price Range</label>
+                            <select id="vehiclePriceFilter" onchange="filterVehicles()">
+                                <option value="">All Prices</option>
+                                <option value="200000">Under R200k</option>
+                                <option value="300000">R200k - R300k</option>
+                                <option value="400000">R300k - R400k</option>
+                                <option value="999999">Over R400k</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <select id="vehicleCategoryFilter" onchange="filterVehicles()">
+                                <option value="">All Categories</option>
+                                <option>sedan</option>
+                                <option>suv</option>
+                                <option>hatchback</option>
+                                <option>van</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-3" id="vehicleGrid"></div>
+            </div>
+
+            <!-- COMPARE TAB -->
+            <div id="compareTab" style="display: none;">
+                <div class="card" style="margin-bottom: 20px;">
+                    <div class="card-header">
+                        <div class="card-title">Select Vehicles to Compare</div>
+                    </div>
+                    <div class="grid grid-4" id="comparisonSlots"></div>
+                </div>
+
+                <div class="card" style="margin-bottom: 20px;">
+                    <div class="tabs" id="comparisonTabs"></div>
+                    <div id="comparisonTable"></div>
+                    <button class="btn btn-primary" style="margin-top: 16px;" onclick="copyComparisonToClipboard()">
+                        <i class="fas fa-copy"></i> Copy Comparison
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- CONVERSATION GUIDE VIEW -->
@@ -1087,21 +1116,117 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
-// EMBEDDED DATA: VEHICLES
+// EMBEDDED DATA: VEHICLES (with detailed specs)
 // ═══════════════════════════════════════════════════════════════════════════
 const VEHICLES_DATA = {
-    "Suzuki::SWIFT": { brand: "Suzuki", model: "SWIFT", category: "hatchback", price: 224900, engine: "1.2L Petrol", transmission: "Manual/CVT", seats: 5, fuel_type: "Petrol", image: "🚗" },
-    "Suzuki::BALENO": { brand: "Suzuki", model: "BALENO", category: "hatchback", price: 266900, engine: "1.5L Petrol", transmission: "Manual/AT", seats: 5, fuel_type: "Petrol", image: "🚗" },
-    "Suzuki::CELERIO": { brand: "Suzuki", model: "CELERIO", category: "hatchback", price: 188900, engine: "1.0L Petrol", transmission: "Manual", seats: 5, fuel_type: "Petrol", image: "🚗" },
-    "Suzuki::FRONX": { brand: "Suzuki", model: "FRONX", category: "suv", price: 298900, engine: "1.5L Petrol", transmission: "Manual/AT", seats: 5, fuel_type: "Petrol", image: "🚙" },
-    "Suzuki::GRAND VITARA": { brand: "Suzuki", model: "GRAND VITARA", category: "suv", price: 358900, engine: "1.5L Petrol", transmission: "Manual/AT", seats: 5, fuel_type: "Petrol", image: "🚙" },
-    "Renault::KWID": { brand: "Renault", model: "KWID", category: "hatchback", price: 186900, engine: "1.0L Petrol", transmission: "Manual", seats: 5, fuel_type: "Petrol", image: "🚗" },
-    "Renault::KIGER": { brand: "Renault", model: "KIGER", category: "suv", price: 229900, engine: "1.0L Petrol", transmission: "Manual/CVT", seats: 5, fuel_type: "Petrol", image: "🚙" },
-    "Renault::TRIBER": { brand: "Renault", model: "TRIBER", category: "van", price: 216900, engine: "1.0L Petrol", transmission: "Manual", seats: 7, fuel_type: "Petrol", image: "🚐" },
-    "Mahindra::XUV3X0": { brand: "Mahindra", model: "XUV 3XO", category: "suv", price: 259999, engine: "1.2L Petrol", transmission: "Manual/AT", seats: 5, fuel_type: "Petrol", image: "🚙" },
-    "Mahindra::SCORPIO-N": { brand: "Mahindra", model: "SCORPIO-N", category: "suv", price: 489999, engine: "2.2L Diesel", transmission: "Auto", seats: 5, fuel_type: "Diesel", image: "🚙" },
-    "GAC MOTOR::EMKOO": { brand: "GAC MOTOR", model: "EMKOO", category: "suv", price: 399999, engine: "1.5L Petrol", transmission: "DCT", seats: 5, fuel_type: "Petrol", image: "🚙" },
-    "GAC MOTOR::GS3 EMZOOM": { brand: "GAC MOTOR", model: "GS3 EMZOOM", category: "suv", price: 289999, engine: "1.5L Petrol", transmission: "Manual/DCT", seats: 5, fuel_type: "Petrol", image: "🚙" },
+    "Suzuki::SWIFT": {
+        brand: "Suzuki", model: "SWIFT", category: "hatchback", price: 224900, image: "🚗",
+        engine: { cc: 1197, power_kw: 67, torque_nm: 113, fuel: "Petrol", consumption: "5.2 L/100km" },
+        transmission: "Manual/CVT", seats: 5, doors: 5, wheelbase: 2430, length: 3840, width: 1695, height: 1500,
+        safety: ["6 Airbags", "ABS", "Electronic Brake-force Distribution", "Brake Assist"],
+        colors: ["Silver", "White", "Black", "Red", "Blue"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["Best fuel economy", "Affordable", "Easy handling", "Compact size"]
+    },
+    "Suzuki::BALENO": {
+        brand: "Suzuki", model: "BALENO", category: "hatchback", price: 266900, image: "🚗",
+        engine: { cc: 1462, power_kw: 77, torque_nm: 138, fuel: "Petrol", consumption: "5.8 L/100km" },
+        transmission: "Manual/AT", seats: 5, doors: 5, wheelbase: 2520, length: 3990, width: 1735, height: 1510,
+        safety: ["6 Airbags", "ABS", "TPMS", "Hill Start Assist"],
+        colors: ["Silver", "White", "Black", "Red", "Blue", "Magenta"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["Spacious interior", "Premium feel", "Great value", "Good performance"]
+    },
+    "Suzuki::CELERIO": {
+        brand: "Suzuki", model: "CELERIO", category: "hatchback", price: 188900, image: "🚗",
+        engine: { cc: 998, power_kw: 51, torque_nm: 89, fuel: "Petrol", consumption: "4.8 L/100km" },
+        transmission: "Manual/AMT", seats: 5, doors: 5, wheelbase: 2385, length: 3795, width: 1665, height: 1515,
+        safety: ["2 Airbags", "ABS", "Brake Assist"],
+        colors: ["Silver", "White", "Black", "Red"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["Most affordable", "Excellent mileage", "Entry-level segment"]
+    },
+    "Suzuki::FRONX": {
+        brand: "Suzuki", model: "FRONX", category: "suv", price: 298900, image: "🚙",
+        engine: { cc: 1497, power_kw: 77, torque_nm: 140, fuel: "Petrol", consumption: "6.0 L/100km" },
+        transmission: "Manual/AT", seats: 5, doors: 5, wheelbase: 2500, length: 3995, width: 1760, height: 1595,
+        safety: ["6 Airbags", "ABS", "Hill Start Assist", "Stability Control"],
+        colors: ["Silver", "White", "Black", "Red", "Blue", "Bronze"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["Modern design", "Good ground clearance", "Spacious cargo"]
+    },
+    "Suzuki::GRAND VITARA": {
+        brand: "Suzuki", model: "GRAND VITARA", category: "suv", price: 358900, image: "🚙",
+        engine: { cc: 1462, power_kw: 77, torque_nm: 138, fuel: "Petrol", consumption: "6.2 L/100km" },
+        transmission: "Manual/AT", seats: 5, doors: 5, wheelbase: 2600, length: 4175, width: 1800, height: 1685,
+        safety: ["6 Airbags", "ABS", "Traction Control", "Hill Descent Control"],
+        colors: ["Silver", "White", "Black", "Grey", "Beige"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["Premium SUV", "All-terrain capability", "Comfortable for families"]
+    },
+    "Renault::KWID": {
+        brand: "Renault", model: "KWID", category: "hatchback", price: 186900, image: "🚗",
+        engine: { cc: 999, power_kw: 50, torque_nm: 96, fuel: "Petrol", consumption: "5.0 L/100km" },
+        transmission: "Manual", seats: 5, doors: 5, wheelbase: 2422, length: 3846, width: 1655, height: 1560,
+        safety: ["2 Airbags", "ABS", "Brake Assist"],
+        colors: ["White", "Black", "Red", "Beige"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["Budget-friendly", "Spacious cabin", "Good value"]
+    },
+    "Renault::KIGER": {
+        brand: "Renault", model: "KIGER", category: "suv", price: 229900, image: "🚙",
+        engine: { cc: 999, power_kw: 50, torque_nm: 96, fuel: "Petrol", consumption: "5.2 L/100km" },
+        transmission: "Manual/CVT", seats: 5, doors: 5, wheelbase: 2479, length: 3994, width: 1738, height: 1600,
+        safety: ["6 Airbags", "ABS", "Traction Control"],
+        colors: ["White", "Black", "Red", "Blue", "Orange"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["Affordable SUV", "Bold design", "Great for beginners"]
+    },
+    "Renault::TRIBER": {
+        brand: "Renault", model: "TRIBER", category: "van", price: 216900, image: "🚐",
+        engine: { cc: 999, power_kw: 50, torque_nm: 96, fuel: "Petrol", consumption: "5.3 L/100km" },
+        transmission: "Manual", seats: 7, doors: 5, wheelbase: 2643, length: 3998, width: 1687, height: 1630,
+        safety: ["2 Airbags", "ABS", "Brake Assist"],
+        colors: ["White", "Black", "Red", "Beige"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["7-seater MPV", "Spacious interior", "Family vehicle", "Easy parking"]
+    },
+    "Mahindra::XUV3X0": {
+        brand: "Mahindra", model: "XUV 3XO", category: "suv", price: 259999, image: "🚙",
+        engine: { cc: 1197, power_kw: 82, torque_nm: 200, fuel: "Petrol", consumption: "6.0 L/100km" },
+        transmission: "Manual/AT", seats: 5, doors: 5, wheelbase: 2600, length: 4200, width: 1821, height: 1646,
+        safety: ["6 Airbags", "ABS", "Traction Control", "Hill Start Assist", "iSmart technology"],
+        colors: ["White", "Black", "Silver", "Red", "Blue"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["Feature-rich", "Premium cabin", "Good power delivery", "Modern tech"]
+    },
+    "Mahindra::SCORPIO-N": {
+        brand: "Mahindra", model: "SCORPIO-N", category: "suv", price: 489999, image: "🚙",
+        engine: { cc: 2184, power_kw: 110, torque_nm: 320, fuel: "Diesel", consumption: "7.5 L/100km" },
+        transmission: "Auto", seats: 5, doors: 5, wheelbase: 2750, length: 4450, width: 1900, height: 1830,
+        safety: ["7 Airbags", "ABS", "Electronic Stability Program", "Traction Control"],
+        colors: ["Black", "White", "Silver", "Red"],
+        warranty: "3 years / 100,000 km",
+        highlights: ["Premium SUV", "Powerful diesel", "Spacious", "Luxury features"]
+    },
+    "GAC MOTOR::EMKOO": {
+        brand: "GAC MOTOR", model: "EMKOO", category: "suv", price: 399999, image: "🚙",
+        engine: { cc: 1497, power_kw: 130, torque_nm: 270, fuel: "Petrol", consumption: "6.4 L/100km" },
+        transmission: "DCT", seats: 5, doors: 5, wheelbase: 2750, length: 4680, width: 1901, height: 1670,
+        safety: ["6 Airbags", "Blind Spot Detection", "Lane Change Assist", "Rear Cross Traffic Alert"],
+        colors: ["White", "Black", "Silver", "Blue", "Green"],
+        warranty: "5 years / 150,000 km",
+        highlights: ["Chinese premium", "Advanced tech", "Powerful engine", "Extended warranty"]
+    },
+    "GAC MOTOR::GS3 EMZOOM": {
+        brand: "GAC MOTOR", model: "GS3 EMZOOM", category: "suv", price: 289999, image: "🚙",
+        engine: { cc: 1497, power_kw: 115, torque_nm: 220, fuel: "Petrol", consumption: "6.2 L/100km" },
+        transmission: "Manual/DCT", seats: 5, doors: 5, wheelbase: 2600, length: 4405, width: 1835, height: 1625,
+        safety: ["6 Airbags", "ABS", "Electronic Stability Control", "Hill Start Assist"],
+        colors: ["White", "Black", "Silver", "Blue", "Red"],
+        warranty: "5 years / 150,000 km",
+        highlights: ["Affordable premium", "Good mileage", "Modern design", "Warranty coverage"]
+    },
 };
 
 const SCRIPTS_DATA = {
@@ -1229,7 +1354,11 @@ function switchView(viewName, element) {
         case 'dashboard': renderDashboard(); break;
         case 'leads': renderLeadsTable(); break;
         case 'prequal': initPrequalForm(); break;
-        case 'vehicles': renderVehicleCatalog(); break;
+        case 'vehicles':
+            document.getElementById('browseTab').style.display = 'block';
+            document.getElementById('compareTab').style.display = 'none';
+            renderVehicleCatalog();
+            break;
         case 'guide': renderGuideContent('enquiry'); break;
         case 'agents': renderAgentStats(); break;
     }
@@ -1540,29 +1669,288 @@ function savePQResult() {
 // ═══════════════════════════════════════════════════════════════════════════
 function renderVehicleCatalog() {
     const grid = document.getElementById('vehicleGrid');
-    const filtered = filterVehicles();
+    const brandFilter = document.getElementById('vehicleBrandFilter')?.value || '';
+    const priceFilter = document.getElementById('vehiclePriceFilter')?.value || '';
+    const categoryFilter = document.getElementById('vehicleCategoryFilter')?.value || '';
 
-    grid.innerHTML = Object.entries(VEHICLES_DATA).map(([key, v]) => `
-        <div class="card" style="cursor: pointer;" onclick="showVehicleDetail('${key}')">
+    let vehicles = Object.entries(VEHICLES_DATA).filter(([key, v]) => {
+        if (brandFilter && v.brand !== brandFilter) return false;
+        if (priceFilter && v.price > parseFloat(priceFilter)) return false;
+        if (categoryFilter && v.category !== categoryFilter) return false;
+        return true;
+    });
+
+    grid.innerHTML = vehicles.map(([key, v]) => `
+        <div class="card" style="cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'" onclick="showVehicleDetail('${key}')">
             <div style="font-size: 32px; text-align: center; margin-bottom: 12px;">${v.image}</div>
             <div class="card-title">${v.brand} ${v.model}</div>
-            <div class="card-subtitle">${v.engine} • ${v.seats} seats</div>
+            <div class="card-subtitle">${v.engine.cc}cc • ${v.engine.power_kw}kW • ${v.seats} seats</div>
+            <div style="margin-top: 8px; padding: 8px; background: var(--bg-tertiary); border-radius: 4px; font-size: 11px;">
+                <div style="color: var(--text-muted); margin-bottom: 4px;">Consumption</div>
+                <div style="font-weight: 700;">${v.engine.consumption}</div>
+            </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color);">
-                <span style="font-size: 10px; color: var(--text-muted);">${v.category}</span>
+                <span style="font-size: 10px; color: var(--text-muted); text-transform: capitalize;">${v.category}</span>
                 <span style="font-weight: 700; color: var(--accent-cyan);">R${v.price.toLocaleString()}</span>
+            </div>
+            <div style="margin-top: 8px; padding: 8px; background: rgba(0, 212, 255, 0.05); border-radius: 4px; border-left: 2px solid var(--accent-cyan);">
+                <div style="font-size: 10px; color: var(--text-secondary); line-height: 1.4;">
+                    ${v.highlights.slice(0, 2).map(h => `• ${h}`).join('<br>')}
+                </div>
             </div>
         </div>
     `).join('');
+
+    if (vehicles.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">No vehicles match your filters</div>';
+    }
 }
 
 function filterVehicles() {
-    // Filtering logic would go here
-    return VEHICLES_DATA;
+    renderVehicleCatalog();
 }
 
 function showVehicleDetail(key) {
     const v = VEHICLES_DATA[key];
-    alert(`${v.brand} ${v.model}\n\nEngine: ${v.engine}\nTransmission: ${v.transmission}\nPrice: R${v.price.toLocaleString()}\n\nAdding detailed spec view...`);
+    alert(`${v.brand} ${v.model}\n\nEngine: ${v.engine.cc}cc ${v.engine.power_kw}kW\nTransmission: ${v.transmission}\nPrice: R${v.price.toLocaleString()}\n\nAdding detailed spec view...`);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VEHICLE COMPARISON
+// ═══════════════════════════════════════════════════════════════════════════
+let comparisonSlots = [null, null, null, null]; // 4 vehicle slots
+let currentComparisonTab = 'overview';
+
+function switchComparisonTab(tab) {
+    document.getElementById('browseTab').style.display = tab === 'browse' ? 'block' : 'none';
+    document.getElementById('compareTab').style.display = tab === 'compare' ? 'block' : 'none';
+    if (tab === 'compare') {
+        renderComparisonSlots();
+        initializeComparison();
+    } else {
+        renderVehicleCatalog();
+    }
+}
+
+function renderComparisonSlots() {
+    const container = document.getElementById('comparisonSlots');
+    const vehicles = Object.keys(VEHICLES_DATA);
+    const brands = [...new Set(vehicles.map(k => VEHICLES_DATA[k].brand))];
+
+    container.innerHTML = comparisonSlots.map((slot, idx) => {
+        const slotVehicles = vehicles.filter(k => !slot || VEHICLES_DATA[k].brand === (slot ? slot.split('::')[0] : ''));
+        return `
+            <div class="card" style="text-align: center;">
+                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">SLOT ${idx + 1}</div>
+                <div class="form-group">
+                    <label class="form-label">Brand</label>
+                    <select id="slotBrand${idx}" onchange="updateSlotModels(${idx})">
+                        <option value="">Select Brand</option>
+                        ${brands.map(b => `<option>${b}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Model</label>
+                    <select id="slotModel${idx}" onchange="selectVehicle(${idx})">
+                        <option value="">Select Model</option>
+                    </select>
+                </div>
+                ${slot ? `<button class="btn btn-sm btn-danger" style="width: 100%; margin-top: 8px;" onclick="clearSlot(${idx})">Clear</button>` : ''}
+            </div>
+        `;
+    }).join('');
+
+    // Restore previous selections
+    comparisonSlots.forEach((slot, idx) => {
+        if (slot) {
+            const [brand, model] = slot.split('::');
+            document.getElementById(`slotBrand${idx}`).value = brand;
+            updateSlotModels(idx);
+            document.getElementById(`slotModel${idx}`).value = model;
+        }
+    });
+}
+
+function updateSlotModels(slotIdx) {
+    const brand = document.getElementById(`slotBrand${slotIdx}`).value;
+    const select = document.getElementById(`slotModel${slotIdx}`);
+    const models = Object.keys(VEHICLES_DATA).filter(k => VEHICLES_DATA[k].brand === brand);
+
+    select.innerHTML = `<option value="">Select Model</option>
+        ${models.map(m => {
+            const model = VEHICLES_DATA[m].model;
+            return `<option value="${m}">${model}</option>`;
+        }).join('')}
+    `;
+    select.value = '';
+    comparisonSlots[slotIdx] = null;
+}
+
+function selectVehicle(slotIdx) {
+    const key = document.getElementById(`slotModel${slotIdx}`).value;
+    if (key) {
+        comparisonSlots[slotIdx] = key;
+        updateComparison();
+    }
+}
+
+function clearSlot(slotIdx) {
+    comparisonSlots[slotIdx] = null;
+    renderComparisonSlots();
+    updateComparison();
+}
+
+function initializeComparison() {
+    renderComparisonTabs();
+    updateComparison();
+}
+
+function renderComparisonTabs() {
+    const tabsContainer = document.getElementById('comparisonTabs');
+    const tabs = ['overview', 'engine', 'dimensions', 'safety', 'pricing', 'colors'];
+    const labels = ['Overview', 'Engine', 'Dimensions', 'Safety', 'Pricing', 'Colors'];
+
+    tabsContainer.innerHTML = tabs.map((tab, i) => `
+        <button class="tab ${currentComparisonTab === tab ? 'active' : ''}" onclick="showComparisonSection('${tab}', this)">
+            ${labels[i]}
+        </button>
+    `).join('');
+}
+
+function showComparisonSection(section, element) {
+    currentComparisonTab = section;
+    document.querySelectorAll('#comparisonTabs .tab').forEach(t => t.classList.remove('active'));
+    element.classList.add('active');
+    updateComparison();
+}
+
+function updateComparison() {
+    const selectedVehicles = comparisonSlots.filter(v => v).map(k => VEHICLES_DATA[k]);
+
+    if (selectedVehicles.length === 0) {
+        document.getElementById('comparisonTable').innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 40px;">Select vehicles to compare</p>';
+        return;
+    }
+
+    let html = '<div style="overflow-x: auto;"><table style="width: 100%; min-width: 600px;">';
+    html += `<tr style="background: var(--bg-tertiary);">
+        <th style="text-align: left; padding: 12px; border: 1px solid var(--border-color); font-weight: 700;">Specification</th>`;
+
+    selectedVehicles.forEach(v => {
+        html += `<th style="text-align: center; padding: 12px; border: 1px solid var(--border-color);"><strong>${v.brand}</strong><br><strong>${v.model}</strong><br>R${v.price.toLocaleString()}</th>`;
+    });
+    html += '</tr>';
+
+    // Build comparison rows based on current tab
+    const rows = getComparisonRows(selectedVehicles, currentComparisonTab);
+    rows.forEach(row => {
+        html += `<tr>
+            <td style="padding: 12px; border: 1px solid var(--border-color); font-weight: 600; background: var(--bg-tertiary); width: 160px;">${row.label}</td>`;
+        row.values.forEach(val => {
+            const highlight = val.highlight ? ' style="background: rgba(0, 212, 255, 0.1); color: var(--accent-cyan); font-weight: 700;"' : '';
+            html += `<td style="padding: 12px; border: 1px solid var(--border-color); text-align: center;"${highlight}>${val.text}</td>`;
+        });
+        html += '</tr>';
+    });
+
+    html += '</table></div>';
+    document.getElementById('comparisonTable').innerHTML = html;
+}
+
+function getComparisonRows(vehicles, tab) {
+    const rows = [];
+
+    if (tab === 'overview') {
+        rows.push({ label: 'Category', values: vehicles.map(v => ({ text: v.category })) });
+        rows.push({ label: 'Seats', values: vehicles.map(v => ({ text: v.seats })) });
+        rows.push({ label: 'Doors', values: vehicles.map(v => ({ text: v.doors })) });
+        rows.push({ label: 'Warranty', values: vehicles.map(v => ({ text: v.warranty })) });
+    }
+
+    if (tab === 'engine') {
+        rows.push({ label: 'Engine CC', values: vehicles.map(v => {
+            const cc = v.engine.cc;
+            const maxCc = Math.max(...vehicles.map(x => x.engine.cc));
+            return { text: cc + ' cc', highlight: cc === maxCc };
+        }) });
+        rows.push({ label: 'Power (kW)', values: vehicles.map(v => {
+            const power = v.engine.power_kw;
+            const maxPower = Math.max(...vehicles.map(x => x.engine.power_kw));
+            return { text: power + ' kW', highlight: power === maxPower };
+        }) });
+        rows.push({ label: 'Torque (Nm)', values: vehicles.map(v => {
+            const torque = v.engine.torque_nm;
+            const maxTorque = Math.max(...vehicles.map(x => x.engine.torque_nm));
+            return { text: torque + ' Nm', highlight: torque === maxTorque };
+        }) });
+        rows.push({ label: 'Fuel Type', values: vehicles.map(v => ({ text: v.engine.fuel })) });
+        rows.push({ label: 'Transmission', values: vehicles.map(v => ({ text: v.transmission })) });
+        rows.push({ label: 'Consumption', values: vehicles.map(v => {
+            const cons = parseFloat(v.engine.consumption);
+            const minCons = Math.min(...vehicles.map(x => parseFloat(x.engine.consumption)));
+            return { text: v.engine.consumption, highlight: cons === minCons };
+        }) });
+    }
+
+    if (tab === 'dimensions') {
+        rows.push({ label: 'Length (mm)', values: vehicles.map(v => ({ text: v.length })) });
+        rows.push({ label: 'Width (mm)', values: vehicles.map(v => ({ text: v.width })) });
+        rows.push({ label: 'Height (mm)', values: vehicles.map(v => ({ text: v.height })) });
+        rows.push({ label: 'Wheelbase (mm)', values: vehicles.map(v => ({
+            text: v.wheelbase,
+            highlight: v.wheelbase === Math.max(...vehicles.map(x => x.wheelbase))
+        })) });
+    }
+
+    if (tab === 'safety') {
+        const allSafety = [...new Set(vehicles.flatMap(v => v.safety))];
+        allSafety.forEach(feature => {
+            rows.push({
+                label: feature,
+                values: vehicles.map(v => ({ text: v.safety.includes(feature) ? '✓' : '✗' }))
+            });
+        });
+    }
+
+    if (tab === 'pricing') {
+        rows.push({ label: 'Price', values: vehicles.map(v => {
+            const minPrice = Math.min(...vehicles.map(x => x.price));
+            return { text: 'R' + v.price.toLocaleString(), highlight: v.price === minPrice };
+        }) });
+        rows.push({ label: 'Price per CC', values: vehicles.map(v => ({
+            text: 'R' + (v.price / v.engine.cc).toFixed(0),
+            highlight: v.price / v.engine.cc === Math.min(...vehicles.map(x => x.price / x.engine.cc))
+        })) });
+    }
+
+    if (tab === 'colors') {
+        rows.push({ label: 'Available Colors', values: vehicles.map(v => ({
+            text: v.colors.join(', ')
+        })) });
+    }
+
+    return rows;
+}
+
+function copyComparisonToClipboard() {
+    const selectedVehicles = comparisonSlots.filter(v => v).map(k => VEHICLES_DATA[k]);
+    if (selectedVehicles.length === 0) {
+        showToast('Select vehicles first');
+        return;
+    }
+
+    let text = '=== VEHICLE COMPARISON ===\n\n';
+    selectedVehicles.forEach(v => {
+        text += `${v.brand} ${v.model}\n`;
+        text += `Price: R${v.price.toLocaleString()}\n`;
+        text += `Engine: ${v.engine.cc}cc, ${v.engine.power_kw}kW, ${v.engine.torque_nm}Nm\n`;
+        text += `Transmission: ${v.transmission}\n`;
+        text += `Consumption: ${v.engine.consumption}\n`;
+        text += `Seats: ${v.seats} | Warranty: ${v.warranty}\n\n`;
+    });
+
+    navigator.clipboard.writeText(text);
+    showToast('Comparison copied to clipboard');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
