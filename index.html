@@ -58,6 +58,62 @@
         .clickable { cursor: pointer; color: var(--accent-cyan); font-weight: 600; }
         .clickable:hover { text-decoration: underline; }
 
+        
+        /* --- AUTHENTICATION & LOGIN GATE --- */
+        #loginGate {
+            position: fixed; inset: 0; z-index: 99999;
+            background: radial-gradient(circle at 50% 30%, #1e293b 0%, #0b0f19 100%);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Syne', sans-serif; color: #fff;
+        }
+        .login-card {
+            background: rgba(17, 24, 39, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            border-radius: 16px; width: 420px; padding: 36px 32px;
+            backdrop-filter: blur(12px); text-align: center;
+        }
+        .login-brand { font-size: 24px; font-weight: 800; color: #fff; letter-spacing: -0.5px; margin-bottom: 4px; }
+        .login-brand span { color: var(--accent-cyan); }
+        .login-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+        .login-field { text-align: left; margin-bottom: 20px; }
+        .login-field label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .login-input {
+            width: 100%; box-sizing: border-box; background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border); border-radius: 8px; color: #fff;
+            padding: 12px 14px; font-size: 14px; font-family: inherit; transition: 0.2s;
+        }
+        .login-input:focus { outline: none; border-color: var(--accent-cyan); background: rgba(255, 255, 255, 0.08); }
+        .login-btn {
+            width: 100%; padding: 12px; border: none; border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent-cyan), #0099cc);
+            color: #000; font-weight: 700; font-size: 14px; cursor: pointer;
+            transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px;
+        }
+        .login-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .user-pill {
+            background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border);
+            border-radius: 8px; padding: 12px; margin-top: auto; margin-bottom: 12px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .user-pill-info { text-align: left; }
+        .user-pill-name { font-size: 13px; font-weight: 700; color: #fff; }
+        .user-pill-role { font-size: 11px; color: var(--accent-cyan); }
+
+        /* --- WHITEBOARD STYLING --- */
+        .whiteboard-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .whiteboard-table th { background: rgba(30, 41, 59, 0.8); color: var(--text-muted); font-size: 11px; text-transform: uppercase; padding: 10px 8px; text-align: left; border: 1px solid var(--border); }
+        .whiteboard-table td { padding: 10px 8px; border: 1px solid var(--border); vertical-align: middle; }
+        .wb-flag { display: inline-block; width: 18px; height: 18px; line-height: 18px; text-align: center; border-radius: 4px; font-size: 10px; font-weight: 700; }
+        .wb-flag-active { background: var(--accent-green); color: #000; }
+        .wb-flag-inactive { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+
+        /* --- APPRAISAL CHECKLIST --- */
+        .appraisal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
+        .appraisal-item { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 6px; padding: 10px; }
+        .appraisal-item label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
+        .appraisal-select { width: 100%; background: var(--bg); border: 1px solid var(--border); color: #fff; padding: 6px 8px; border-radius: 4px; font-size: 12px; }
+
         /* BUTTONS */
         .btn { border: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px; font-family: 'Syne', sans-serif; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
         .btn-primary { background: var(--accent-cyan); color: #000; }
@@ -403,6 +459,34 @@
 <script src="data/vehicles.js"></script>
 <script src="data/scripts.js"></script>
 
+
+<!-- AUTHENTICATION GATE (Client-side Security) -->
+<div id="loginGate" style="display:none;">
+    <div class="login-card">
+        <div class="login-brand">BB <span>Automotive OS</span></div>
+        <div class="login-sub">Dealership Management &amp; AI CRM System</div>
+        
+        <div class="login-field">
+            <label>Select User / Role</label>
+            <select id="loginUserSelect" class="login-input">
+                <option value="Jakes" data-role="Senior Sales Executive" data-pin="2470">Jakes (Senior Sales Executive)</option>
+                <option value="Sales Manager" data-role="Sales Manager" data-pin="8899">Sales Manager (Showroom Admin)</option>
+                <option value="F&I Manager" data-role="F&I Business Manager" data-pin="5544">F&amp;I Business Manager</option>
+                <option value="Dealer Principal" data-role="Dealer Principal" data-pin="9900">Dealer Principal (Executive)</option>
+            </select>
+        </div>
+
+        <div class="login-field">
+            <label>Security Passcode / PIN</label>
+            <input type="password" id="loginPinInput" class="login-input" placeholder="Enter PIN (Default: 2470)" maxlength="8">
+        </div>
+
+        <button class="login-btn" onclick="attemptLogin()"><i class="fas fa-lock-open"></i> Authenticate &amp; Launch</button>
+        <div id="loginError" style="color:var(--accent-red);font-size:12px;margin-top:12px;display:none;">Invalid passcode. Please verify your credentials.</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:24px;">Secured Dealership Portal &bull; Enterprise Session Encryption</div>
+    </div>
+</div>
+
 <div class="layout">
     <!-- SIDEBAR -->
     <aside class="sidebar">
@@ -417,6 +501,11 @@
             <div class="nav-item" onclick="switchView('diary',this)"><i class="fas fa-calendar-day"></i> Daily Diary <span class="nav-badge" id="navDiaryCount">0</span></div>
             <div class="nav-section">Lead Management</div>
             <div class="nav-item" onclick="switchView('leads',this)"><i class="fas fa-users"></i> Lead Pipeline <span class="nav-badge" id="navLeadCount">0</span></div>
+                        <div class="nav-section">Showroom Floor</div>
+            <div class="nav-item" onclick="switchView('whiteboard',this)"><i class="fas fa-chalkboard"></i> Activity Whiteboard</div>
+            <div class="nav-item" onclick="switchView('inbox',this)"><i class="fas fa-inbox"></i> Lead Inbox <span class="nav-badge" id="navInboxCount">0</span></div>
+            <div class="nav-section">Dealership Operations</div>
+            <div class="nav-item" onclick="switchView('settings',this)"><i class="fas fa-sliders-h"></i> Dealership Setup</div>
             <div class="nav-section">Tools & Resources</div>
             <div class="nav-item" onclick="switchView('prequal',this)"><i class="fas fa-clipboard-check"></i> Pre-Qualification</div>
             <div class="nav-item" onclick="switchView('vehicleKB',this)"><i class="fas fa-car"></i> Vehicle Knowledge Base</div>
@@ -427,6 +516,14 @@
             <div class="nav-item" onclick="exportJSON()"><i class="fas fa-download"></i> Export Backup</div>
             <div class="nav-item" onclick="document.getElementById('importFile').click()"><i class="fas fa-upload"></i> Import Backup</div>
         </nav>
+
+        <div class="user-pill" id="sidebarUserPill">
+            <div class="user-pill-info">
+                <div class="user-pill-name" id="currentUserName">Jakes</div>
+                <div class="user-pill-role" id="currentUserRole">Sales Executive</div>
+            </div>
+            <button class="btn-icon" onclick="lockCRM()" title="Lock CRM / Sign Out" style="color:var(--accent-red);"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
     </aside>
 
     <!-- MAIN -->
@@ -597,6 +694,123 @@
     </div>
 </div>
 
+        
+        <!-- WHITEBOARD VIEW (autoHUB Showroom Parity) -->
+        <div id="whiteboardView" class="view">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <div>
+                    <div class="page-title">Activity Whiteboard</div>
+                    <div class="page-sub">Live Showroom Floor Traffic &amp; Daily Deal Trajectory</div>
+                </div>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <input type="date" id="wbDatePicker" class="input" style="width:160px;" onchange="renderWhiteboard()">
+                    <button class="btn btn-secondary btn-sm" onclick="renderWhiteboard()"><i class="fas fa-sync"></i> Refresh</button>
+                </div>
+            </div>
+
+            <div class="metrics-grid" style="grid-template-columns: repeat(5, 1fr); margin-bottom:20px;">
+                <div class="card metric-card"><div class="metric-val" id="wbEnqCount">0</div><div class="metric-lbl">Showroom Enquiries</div></div>
+                <div class="card metric-card"><div class="metric-val" id="wbTestDriveCount">0</div><div class="metric-lbl">Test Drives Taken</div></div>
+                <div class="card metric-card"><div class="metric-val" id="wbTradeInCount">0</div><div class="metric-lbl">Trade-Ins Appraised</div></div>
+                <div class="card metric-card"><div class="metric-val" id="wbSaleCount">0</div><div class="metric-lbl">Sales Concluded</div></div>
+                <div class="card metric-card"><div class="metric-val" id="wbDeliveryCount">0</div><div class="metric-lbl">Deliveries Pending</div></div>
+            </div>
+
+            <div class="card" style="padding:0; overflow-x:auto;">
+                <table class="whiteboard-table" id="whiteboardTable">
+                    <thead>
+                        <tr>
+                            <th style="width:30px;">#</th>
+                            <th>Customer Name</th>
+                            <th style="text-align:center;">Enq</th>
+                            <th style="text-align:center;">TD</th>
+                            <th style="text-align:center;">Sale</th>
+                            <th style="text-align:center;">Del</th>
+                            <th>Trade-In Vehicle</th>
+                            <th>Product Enquired</th>
+                            <th>Type</th>
+                            <th>Source</th>
+                            <th>MOC</th>
+                            <th>Next Contact</th>
+                            <th>Purpose &amp; Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="whiteboardBody">
+                        <!-- Dynamic Whiteboard Rows -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- INBOX VIEW (Unactioned Leads Parity) -->
+        <div id="inboxView" class="view">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <div>
+                    <div class="page-title">Lead Inbox</div>
+                    <div class="page-sub">Unactioned &amp; Incoming Dealership Opportunities</div>
+                </div>
+                <button class="btn btn-primary" onclick="openAddLeadModal()"><i class="fas fa-plus"></i> Capture New Lead</button>
+            </div>
+
+            <div id="inboxContainer" style="display:flex; flex-direction:column; gap:12px;">
+                <!-- Inbound Leads rendered via JS -->
+            </div>
+        </div>
+
+        <!-- SETTINGS VIEW (Quote Setup & Dealership Parameters) -->
+        <div id="settingsView" class="view">
+            <div class="page-title">Dealership Setup &amp; Parameters</div>
+            <div class="page-sub">Standard Fee Schedules, Finance Defaults &amp; Security</div>
+
+            <div class="card" style="max-width:800px; margin-bottom:20px;">
+                <div class="app-section-title">Standard Deal Fees &amp; Margins</div>
+                <div class="app-grid cols-2" style="margin-top:12px;">
+                    <div class="app-field">
+                        <label>Dealership Name</label>
+                        <input type="text" id="cfg_dealerName" class="cc-input" value="BB Gezina Nissan">
+                    </div>
+                    <div class="app-field">
+                        <label>VAT Rate (%)</label>
+                        <input type="number" id="cfg_vatRate" class="cc-input" value="15">
+                    </div>
+                </div>
+                <div class="app-grid cols-3" style="margin-top:12px;">
+                    <div class="app-field">
+                        <label>Delivery &amp; Service Fee</label>
+                        <div class="pq-pfx"><span class="pq-pfx-sym">R</span><input type="number" id="cfg_feeService" class="cc-input" value="6500"></div>
+                    </div>
+                    <div class="app-field">
+                        <label>Smash &amp; Grab Fee</label>
+                        <div class="pq-pfx"><span class="pq-pfx-sym">R</span><input type="number" id="cfg_feeSmash" class="cc-input" value="3500"></div>
+                    </div>
+                    <div class="app-field">
+                        <label>License &amp; Reg Fee</label>
+                        <div class="pq-pfx"><span class="pq-pfx-sym">R</span><input type="number" id="cfg_feeLicence" class="cc-input" value="2500"></div>
+                    </div>
+                </div>
+                <div style="margin-top:20px; display:flex; justify-content:flex-end;">
+                    <button class="btn btn-success" onclick="saveDealerSettings()"><i class="fas fa-save"></i> Save Settings</button>
+                </div>
+            </div>
+
+            <div class="card" style="max-width:800px;">
+                <div class="app-section-title">Security &amp; Passcodes</div>
+                <div class="app-grid cols-2" style="margin-top:12px;">
+                    <div class="app-field">
+                        <label>Jakes Sales PIN</label>
+                        <input type="password" id="cfg_pinJakes" class="cc-input" value="2470">
+                    </div>
+                    <div class="app-field">
+                        <label>Manager / Admin PIN</label>
+                        <input type="password" id="cfg_pinManager" class="cc-input" value="8899">
+                    </div>
+                </div>
+                <div style="margin-top:20px; display:flex; justify-content:flex-end;">
+                    <button class="btn btn-primary" onclick="saveSecuritySettings()"><i class="fas fa-key"></i> Update Security PINs</button>
+                </div>
+            </div>
+        </div>
+
         <div id="leadsView" class="view">
             <div class="page-title">Lead Pipeline</div>
             <div class="page-sub">Full prospect management</div>
@@ -725,6 +939,7 @@
                 <button class="cc-tab" onclick="switchCCTab('quote',this)"><i class="fas fa-file-alt"></i> Quote</button>
                 <button class="cc-tab" onclick="switchCCTab('application',this)"><i class="fas fa-file-signature"></i> Application</button>
                 <button class="cc-tab" onclick="switchCCTab('otp',this)"><i class="fas fa-file-contract"></i> OTP</button>
+                <button class="cc-tab" onclick="switchCCTab('tradein',this)"><i class="fas fa-exchange-alt"></i> Trade-In</button>
             </div>
             <div id="ccPanel-details" class="cc-panel active"></div>
             <div id="ccPanel-notes" class="cc-panel">
@@ -751,6 +966,7 @@
             <div id="ccPanel-quote" class="cc-panel"></div>
             <div id="ccPanel-application" class="cc-panel"></div>
             <div id="ccPanel-otp" class="cc-panel"></div>
+            <div id="ccPanel-tradein" class="cc-panel"></div>
         </div>
     </div>
 </div>
@@ -1244,6 +1460,9 @@ function switchView(name, el) {
     if (name === 'dashboard') { if (!ccCharts.calls) initCCCharts(); updateDashboard(); }
     if (name === 'leads') { renderLeads(); }
     if (name === 'diary') { renderDiary(); }
+    if (name === 'whiteboard') { renderWhiteboard(); }
+    if (name === 'inbox') { renderInbox(); }
+    if (name === 'settings') { initSettings(); }
     if (name === 'agents') renderAgents();
     if (name === 'prequal') initPrequal();
     if (name === 'vehicleKB') initVehicleKB();
@@ -1705,6 +1924,7 @@ function switchCCTab(name, btn) {
     if (name === 'quote') populateQuotePanel(lead);
     if (name === 'application') populateApplicationPanel(lead);
     if (name === 'otp') populateOTPPanel(lead);
+    if (name === 'tradein') populateTradeInPanel(lead);
 }
 
 // -- DETAILS PANEL --
@@ -3274,3 +3494,406 @@ renderSnapshots();
 </script>
 </body>
 </html>
+
+// ============================================================
+// ENTERPRISE AUTHENTICATION & LOGIN GATE
+// ============================================================
+const AUTH_KEY = 'bbh_auth_user_session';
+const PINS_KEY = 'bbh_auth_pins';
+
+function getStoredPins() {
+    try {
+        return JSON.parse(localStorage.getItem(PINS_KEY) || '{}');
+    } catch(e) { return {}; }
+}
+
+function initAuth() {
+    const session = sessionStorage.getItem(AUTH_KEY);
+    const gate = document.getElementById('loginGate');
+    if (!gate) return;
+    
+    if (session) {
+        try {
+            const user = JSON.parse(session);
+            document.getElementById('currentUserName').textContent = user.name;
+            document.getElementById('currentUserRole').textContent = user.role;
+            gate.style.display = 'none';
+        } catch(e) {
+            gate.style.display = 'flex';
+        }
+    } else {
+        gate.style.display = 'flex';
+    }
+}
+
+function attemptLogin() {
+    const select = document.getElementById('loginUserSelect');
+    const opt = select.options[select.selectedIndex];
+    const name = opt.value;
+    const role = opt.dataset.role;
+    const defaultPin = opt.dataset.pin;
+    
+    const customPins = getStoredPins();
+    const expectedPin = customPins[name] || defaultPin;
+    
+    const inputPin = document.getElementById('loginPinInput').value.trim();
+    const err = document.getElementById('loginError');
+    
+    if (inputPin === expectedPin) {
+        err.style.display = 'none';
+        const userSession = { name, role, loggedAt: new Date().toISOString() };
+        sessionStorage.setItem(AUTH_KEY, JSON.stringify(userSession));
+        
+        document.getElementById('currentUserName').textContent = name;
+        document.getElementById('currentUserRole').textContent = role;
+        
+        document.getElementById('loginGate').style.display = 'none';
+        document.getElementById('loginPinInput').value = '';
+        
+        // Auto-sync if database is empty or initial seed
+        if (db.leads.length <= 3) {
+            syncFromGist();
+        }
+        showToast("Authenticated as " + name);
+    } else {
+        err.style.display = 'block';
+    }
+}
+
+function lockCRM() {
+    sessionStorage.removeItem(AUTH_KEY);
+    document.getElementById('loginGate').style.display = 'flex';
+    document.getElementById('loginPinInput').value = '';
+    showToast("CRM locked. Sign in to continue.");
+}
+
+// Enter key to login
+document.addEventListener('DOMContentLoaded', () => {
+    initAuth();
+    const pinInp = document.getElementById('loginPinInput');
+    if (pinInp) {
+        pinInp.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') attemptLogin();
+        });
+    }
+});
+
+// ============================================================
+// SHOWROOM ACTIVITY WHITEBOARD (autoHUB Parity)
+// ============================================================
+function renderWhiteboard() {
+    const datePicker = document.getElementById('wbDatePicker');
+    if (datePicker && !datePicker.value) {
+        datePicker.value = new Date().toISOString().slice(0, 10);
+    }
+    const targetDate = datePicker ? datePicker.value : new Date().toISOString().slice(0, 10);
+    const tbody = document.getElementById('whiteboardBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    let enq = 0, td = 0, trade = 0, sale = 0, del = 0;
+    
+    const relevantLeads = db.leads.filter(l => {
+        // Active deals or deals touched on this date
+        return l.stage !== 'lost';
+    });
+    
+    if (relevantLeads.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:24px;color:var(--text-muted);">No showroom activity recorded.</td></tr>';
+        return;
+    }
+    
+    relevantLeads.forEach((l, idx) => {
+        const isEnq = (l.stage === 'enquiry');
+        const isTD = (l.qualData && l.qualData.testDriveTaken) || (l.otpData && l.otpData.testDrive);
+        const hasTrade = (l.tradeInData && l.tradeInData.make) || (l.tradeInVehicle);
+        const isSale = (l.stage === 'banked') || (l.otpData && l.otpData.signed);
+        const isDel = (l.otpData && l.otpData.deliveryDate);
+        
+        if (isEnq) enq++;
+        if (isTD) td++;
+        if (hasTrade) trade++;
+        if (isSale) sale++;
+        if (isDel) del++;
+        
+        const lastNote = (l.noteHistory && l.noteHistory.length > 0) ? l.noteHistory[l.noteHistory.length - 1].text : 'No notes';
+        const tradeDesc = hasTrade ? `${l.tradeInData ? l.tradeInData.year||'' : ''} ${l.tradeInData ? l.tradeInData.make||'' : ''} ${l.tradeInData ? l.tradeInData.model||'' : ''}` : '—';
+        
+        tbody.innerHTML += `
+            <tr style="cursor:pointer;" onclick="openCC(${l.id})">
+                <td style="color:var(--text-muted);font-weight:700;">${idx + 1}</td>
+                <td><strong style="color:var(--text-main);">${l.customer}</strong><br><span style="font-size:10px;color:var(--text-muted);">${l.phone}</span></td>
+                <td style="text-align:center;"><span class="wb-flag ${isEnq?'wb-flag-active':'wb-flag-inactive'}">${isEnq?'Y':''}</span></td>
+                <td style="text-align:center;"><span class="wb-flag ${isTD?'wb-flag-active':'wb-flag-inactive'}">${isTD?'Y':''}</span></td>
+                <td style="text-align:center;"><span class="wb-flag ${isSale?'wb-flag-active':'wb-flag-inactive'}">${isSale?'Y':''}</span></td>
+                <td style="text-align:center;"><span class="wb-flag ${isDel?'wb-flag-active':'wb-flag-inactive'}">${isDel?'Y':''}</span></td>
+                <td style="font-size:11px;color:var(--accent-orange);">${tradeDesc}</td>
+                <td style="color:var(--accent-cyan);font-weight:600;">${l.vehicle || '—'}</td>
+                <td><span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,0.05);">${l.newUsed || 'NEW'}</span></td>
+                <td style="font-size:11px;">${l.source || 'Walk-in'}</td>
+                <td style="font-size:11px;">${l.moc || 'Phone'}</td>
+                <td style="font-size:11px;color:var(--accent-purple);">${l.followUpDate || 'Today'}</td>
+                <td style="font-size:11px;color:var(--text-muted);max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${lastNote}">${lastNote}</td>
+            </tr>
+        `;
+    });
+    
+    document.getElementById('wbEnqCount').textContent = enq;
+    document.getElementById('wbTestDriveCount').textContent = td;
+    document.getElementById('wbTradeInCount').textContent = trade;
+    document.getElementById('wbSaleCount').textContent = sale;
+    document.getElementById('wbDeliveryCount').textContent = del;
+}
+
+// ============================================================
+// LEAD INBOX & UNACTIONED LEADS (autoHUB Parity)
+// ============================================================
+function renderInbox() {
+    const container = document.getElementById('inboxContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    // Inbound or unassigned leads
+    const inboxLeads = db.leads.filter(l => l.stage === 'enquiry' && (!l.noteHistory || l.noteHistory.length <= 1));
+    document.getElementById('navInboxCount').textContent = inboxLeads.length;
+    
+    if (inboxLeads.length === 0) {
+        container.innerHTML = '<div class="empty-state">No unassigned or unactioned leads in inbox. Excellent work!</div>';
+        return;
+    }
+    
+    inboxLeads.forEach(l => {
+        container.innerHTML += `
+            <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div style="font-size:15px; font-weight:700; color:var(--text-main); display:flex; align-items:center; gap:8px;">
+                        <span>👤 ${l.customer}</span>
+                        <span style="font-size:10px; padding:2px 6px; border-radius:4px; background:rgba(0,212,255,0.15); color:var(--accent-cyan); font-weight:700;">NEW LEAD</span>
+                    </div>
+                    <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">
+                        📞 ${l.phone} &bull; 🚗 ${l.vehicle || 'Unspecified Model'} &bull; Source: <strong>${l.source || 'Website'}</strong>
+                    </div>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn btn-secondary btn-sm" onclick="openCC(${l.id})"><i class="fas fa-eye"></i> View</button>
+                    <button class="btn btn-sm" style="background:var(--accent-green); color:#000; font-weight:700;" onclick="claimLead(${l.id})"><i class="fas fa-check"></i> Accept Lead</button>
+                </div>
+            </div>
+        `;
+    });
+}
+
+function claimLead(id) {
+    const lead = db.leads.find(l => l.id === id);
+    if (!lead) return;
+    
+    const user = JSON.parse(sessionStorage.getItem(AUTH_KEY) || '{"name":"Jakes"}');
+    lead.agent = user.name;
+    
+    if (!lead.noteHistory) lead.noteHistory = [];
+    lead.noteHistory.push({
+        date: new Date().toISOString(),
+        text: `Lead accepted and assigned to ${user.name}. Awaiting manual outreach.`
+    });
+    
+    // Set follow-up date to today
+    lead.followUpDate = new Date().toISOString().slice(0,10);
+    
+    saveDB();
+    renderInbox();
+    renderDiary();
+    updateDashboard();
+    showToast(`Lead ${lead.customer} accepted and placed in Today's Diary.`);
+}
+
+// ============================================================
+// TRADE-IN & 11-POINT APPRAISAL (autoHUB Parity)
+// ============================================================
+function populateTradeInPanel(lead) {
+    const p = document.getElementById('ccPanel-tradein');
+    p.dataset.populated = '1';
+    const td = lead.tradeInData || {};
+    const cond = td.condition || {};
+    
+    const checklistItems = [
+        ['exterior', 'Exterior Bodywork & Paint'],
+        ['interior', 'Interior & Upholstery'],
+        ['tyres', 'Tyres & Tread Depth'],
+        ['wheels', 'Wheels & Alloys'],
+        ['engine', 'Engine & Mechanical'],
+        ['brakes', 'Brakes & Pads'],
+        ['exhaust', 'Exhaust System'],
+        ['suspension', 'Suspension & Steering'],
+        ['electrical', 'Electrical & Diagnostics'],
+        ['glass', 'Windscreen & Glass'],
+        ['lights', 'Lights & Lenses']
+    ];
+    
+    p.innerHTML = `
+    <div class="app-toolbar">
+        <div class="app-toolbar-left">
+            <button class="quote-print-btn" style="background:var(--accent-green);" onclick="saveTradeInData()"><i class="fas fa-save"></i> Save Trade-In Appraisal</button>
+        </div>
+        <span class="app-status-badge ${td.make?'saved':'draft'}">${td.make?'Vehicle Captured':'No Trade-In'}</span>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+        <div class="app-section-title">Trade-In Vehicle Particulars</div>
+        <div class="app-grid cols-3">
+            <div class="app-field"><label>Make</label><input type="text" id="ti_make" class="cc-input" value="${td.make||''}"></div>
+            <div class="app-field"><label>Model</label><input type="text" id="ti_model" class="cc-input" value="${td.model||''}"></div>
+            <div class="app-field"><label>Spec / Derivative</label><input type="text" id="ti_spec" class="cc-input" value="${td.spec||''}"></div>
+        </div>
+        <div class="app-grid cols-4" style="margin-top:10px;">
+            <div class="app-field"><label>Year</label><input type="number" id="ti_year" class="cc-input" value="${td.year||''}"></div>
+            <div class="app-field"><label>Mileage (km)</label><input type="number" id="ti_mileage" class="cc-input" value="${td.mileage||''}"></div>
+            <div class="app-field"><label>Registration No</label><input type="text" id="ti_reg" class="cc-input" value="${td.reg||''}"></div>
+            <div class="app-field"><label>Colour</label><input type="text" id="ti_colour" class="cc-input" value="${td.colour||''}"></div>
+        </div>
+        <div class="app-grid cols-2" style="margin-top:10px;">
+            <div class="app-field"><label>VIN / Chassis Number</label><input type="text" id="ti_vin" class="cc-input" value="${td.vin||''}"></div>
+            <div class="app-field"><label>Engine Number</label><input type="text" id="ti_engine" class="cc-input" value="${td.engine||''}"></div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+        <div class="app-section-title">Settlement &amp; Valuation Details</div>
+        <div class="app-grid cols-3">
+            <div class="app-field">
+                <label>Financed Bank / Institution</label>
+                <input type="text" id="ti_bank" class="cc-input" value="${td.bank||''}" placeholder="e.g. WesBank, MFC, ABSA">
+            </div>
+            <div class="app-field">
+                <label>Outstanding Settlement (R)</label>
+                <div class="pq-pfx"><span class="pq-pfx-sym">R</span><input type="number" id="ti_settlement" class="cc-input" value="${td.settlement||''}"></div>
+            </div>
+            <div class="app-field">
+                <label>Settlement Due Date</label>
+                <input type="date" id="ti_settlementDate" class="cc-input" value="${td.settlementDate||''}">
+            </div>
+        </div>
+        <div class="app-grid cols-3" style="margin-top:10px;">
+            <div class="app-field">
+                <label>Settlement Account Ref</label>
+                <input type="text" id="ti_settlementRef" class="cc-input" value="${td.settlementRef||''}">
+            </div>
+            <div class="app-field">
+                <label>Trade-In Value Offered (R)</label>
+                <div class="pq-pfx"><span class="pq-pfx-sym">R</span><input type="number" id="ti_valueOffered" class="cc-input" value="${td.valueOffered||''}"></div>
+            </div>
+            <div class="app-field">
+                <label>Estimated Recon Costs (R)</label>
+                <div class="pq-pfx"><span class="pq-pfx-sym">R</span><input type="number" id="ti_reconCost" class="cc-input" value="${td.reconCost||''}"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="app-section-title">11-Point Vehicle Condition Appraisal Checklist</div>
+        <div class="appraisal-grid">
+            ${checklistItems.map(([k, label]) => `
+                <div class="appraisal-item">
+                    <label>${label}</label>
+                    <select id="ti_cond_${k}" class="appraisal-select">
+                        <option value="Good" ${cond[k]==='Good'?'selected':''}>✓ Good / Clean</option>
+                        <option value="Fair" ${cond[k]==='Fair'?'selected':''}>- Fair (Minor wear)</option>
+                        <option value="Poor" ${cond[k]==='Poor'?'selected':''}>⚠ Poor (Requires attention)</option>
+                        <option value="Damaged" ${cond[k]==='Damaged'?'selected':''}>✕ Damaged (Recon required)</option>
+                    </select>
+                </div>
+            `).join('')}
+        </div>
+        <div class="app-field" style="margin-top:16px;">
+            <label>Appraiser General Assessment &amp; Notes</label>
+            <textarea id="ti_notes" class="cc-input" style="height:70px;">${td.notes||''}</textarea>
+        </div>
+    </div>
+    `;
+}
+
+function saveTradeInData() {
+    const lead = db.leads.find(l => l.id === ccState.id);
+    if (!lead) return;
+    
+    const checklistKeys = ['exterior','interior','tyres','wheels','engine','brakes','exhaust','suspension','electrical','glass','lights'];
+    const condition = {};
+    checklistKeys.forEach(k => {
+        const el = document.getElementById(`ti_cond_${k}`);
+        if (el) condition[k] = el.value;
+    });
+    
+    lead.tradeInData = {
+        make: document.getElementById('ti_make').value,
+        model: document.getElementById('ti_model').value,
+        spec: document.getElementById('ti_spec').value,
+        year: document.getElementById('ti_year').value,
+        mileage: document.getElementById('ti_mileage').value,
+        reg: document.getElementById('ti_reg').value,
+        colour: document.getElementById('ti_colour').value,
+        vin: document.getElementById('ti_vin').value,
+        engine: document.getElementById('ti_engine').value,
+        bank: document.getElementById('ti_bank').value,
+        settlement: document.getElementById('ti_settlement').value,
+        settlementDate: document.getElementById('ti_settlementDate').value,
+        settlementRef: document.getElementById('ti_settlementRef').value,
+        valueOffered: document.getElementById('ti_valueOffered').value,
+        reconCost: document.getElementById('ti_reconCost').value,
+        notes: document.getElementById('ti_notes').value,
+        condition: condition
+    };
+    
+    // Also sync to quote/OTP trade-in fields if present
+    if (lead.otpData && lead.tradeInData.valueOffered) {
+        lead.otpData.tradeInFinal = lead.tradeInData.valueOffered;
+    }
+    
+    saveDB();
+    populateTradeInPanel(lead);
+    updateDashboard();
+    renderWhiteboard();
+    showToast("Trade-in appraisal saved.");
+}
+
+// ============================================================
+// DEALERSHIP SETTINGS & SECURITY
+// ============================================================
+const SETTINGS_KEY = 'bbh_dealer_settings';
+
+function getDealerSettings() {
+    try {
+        return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+    } catch(e) { return {}; }
+}
+
+function initSettings() {
+    const s = getDealerSettings();
+    if (s.dealerName) document.getElementById('cfg_dealerName').value = s.dealerName;
+    if (s.vatRate) document.getElementById('cfg_vatRate').value = s.vatRate;
+    if (s.feeService) document.getElementById('cfg_feeService').value = s.feeService;
+    if (s.feeSmash) document.getElementById('cfg_feeSmash').value = s.feeSmash;
+    if (s.feeLicence) document.getElementById('cfg_feeLicence').value = s.feeLicence;
+    
+    const pins = getStoredPins();
+    if (pins['Jakes']) document.getElementById('cfg_pinJakes').value = pins['Jakes'];
+    if (pins['Sales Manager']) document.getElementById('cfg_pinManager').value = pins['Sales Manager'];
+}
+
+function saveDealerSettings() {
+    const s = {
+        dealerName: document.getElementById('cfg_dealerName').value,
+        vatRate: parseFloat(document.getElementById('cfg_vatRate').value) || 15,
+        feeService: parseFloat(document.getElementById('cfg_feeService').value) || 6500,
+        feeSmash: parseFloat(document.getElementById('cfg_feeSmash').value) || 3500,
+        feeLicence: parseFloat(document.getElementById('cfg_feeLicence').value) || 2500
+    };
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+    showToast("Dealership settings saved.");
+}
+
+function saveSecuritySettings() {
+    const pins = getStoredPins();
+    pins['Jakes'] = document.getElementById('cfg_pinJakes').value;
+    pins['Sales Manager'] = document.getElementById('cfg_pinManager').value;
+    localStorage.setItem(PINS_KEY, JSON.stringify(pins));
+    showToast("Security passcodes updated.");
+}
