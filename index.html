@@ -673,6 +673,32 @@
     </main>
 </div>
 
+
+<!-- ACTION MODAL -->
+<div id="actionModal" class="modal-overlay">
+    <div class="modal modal-sm">
+        <div class="modal-hdr">
+            <h2 style="display:flex; align-items:center; gap:8px; color:var(--text-main);"><i class="fas fa-tasks"></i> Action Diary Entry</h2>
+            <button class="modal-close" onclick="closeActionModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="actionLeadId">
+            <div class="app-field" style="margin-bottom:16px;">
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:6px;">Interaction Note (What happened?)</label>
+                <textarea id="actionNote" class="cc-input" style="height:100px;width:100%;box-sizing:border-box;" placeholder="Customer answered and said..."></textarea>
+            </div>
+            <div class="app-field" style="margin-bottom:16px;">
+                <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:6px;">Next Contact Date (Reschedule)</label>
+                <input type="date" id="actionNextDate" class="cc-input" style="width:100%;box-sizing:border-box;">
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
+                <button class="btn btn-secondary" onclick="closeActionModal()">Cancel</button>
+                <button class="btn" style="background:var(--accent-purple);color:#fff;" onclick="saveAction()"><i class="fas fa-save"></i> Save & Reschedule</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- CONTACT CARD MODAL -->
 <div id="ccModal" class="modal-overlay">
     <div class="modal modal-lg">
@@ -924,6 +950,62 @@ let currentDiaryMonth = new Date();
 currentDiaryMonth.setDate(1);
 let selectedDiaryDate = new Date().toISOString().split('T')[0];
 
+
+// ============================================================
+// DIARY ACTION LOGIC
+// ============================================================
+function openActionModal(id) {
+    const lead = db.leads.find(l => l.id === id);
+    if (!lead) return;
+    document.getElementById('actionLeadId').value = id;
+    document.getElementById('actionNote').value = '';
+    
+    // Default next date to tomorrow
+    const tmr = new Date();
+    tmr.setDate(tmr.getDate() + 1);
+    document.getElementById('actionNextDate').value = tmr.toISOString().split('T')[0];
+    
+    document.getElementById('actionModal').classList.add('open');
+}
+
+function closeActionModal() {
+    document.getElementById('actionModal').classList.remove('open');
+}
+
+function saveAction() {
+    const id = parseInt(document.getElementById('actionLeadId').value);
+    const note = document.getElementById('actionNote').value.trim();
+    const nextDate = document.getElementById('actionNextDate').value;
+    
+    if (!note) {
+        alert("Please enter an interaction note.");
+        return;
+    }
+    if (!nextDate) {
+        alert("Please select a next contact date.");
+        return;
+    }
+    
+    const lead = db.leads.find(l => l.id === id);
+    if (!lead) return;
+    
+    if (!lead.noteHistory) lead.noteHistory = [];
+    lead.noteHistory.push({
+        date: new Date().toISOString(),
+        text: `[Action] ${note}`
+    });
+    
+    lead.followUpDate = nextDate;
+    
+    saveDB();
+    updateDashboard();
+    renderDiary();
+    renderLeads();
+    
+    closeActionModal();
+    showToast("Diary entry actioned and rescheduled.");
+}
+
 function changeDiaryMonth(delta) {
     currentDiaryMonth.setMonth(currentDiaryMonth.getMonth() + delta);
     renderCalendar();
@@ -1047,7 +1129,10 @@ function renderDiary() {
                         <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">📞 ${l.phone}</div>
                         <div style="font-size: 12px; color: var(--accent-cyan); margin-top: 2px;">🚗 ${l.vehicle || 'No vehicle'}</div>
                     </div>
-                    <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); openWhatsApp()"><i class="fab fa-whatsapp"></i> Chat</button>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn btn-secondary btn-sm" style="background:var(--accent-purple); border:none;" onclick="event.stopPropagation(); openActionModal(${l.id})"><i class="fas fa-tasks"></i> Action</button>
+                        <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); openWhatsApp()"><i class="fab fa-whatsapp"></i> Chat</button>
+                    </div>
                 </div>
                 <div style="margin-top: 12px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 6px;">
                     <div style="font-size: 11px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">🎯 RECOMMENDED ACTION:</div>
