@@ -3097,6 +3097,25 @@ async function syncFromGist() {
                     incomingLead.quoteData = existing.quoteData || null;
                     incomingLead.otpData = existing.otpData || null;
                     incomingLead.applicationData = existing.applicationData || null;
+                    
+                    // Merge local notes that don't exist in the incoming data
+                    if (existing.noteHistory && existing.noteHistory.length > 0) {
+                        const incomingNoteDates = new Set((incomingLead.noteHistory || []).map(n => n.date));
+                        existing.noteHistory.forEach(localNote => {
+                            if (!incomingNoteDates.has(localNote.date)) {
+                                incomingLead.noteHistory.push(localNote);
+                            }
+                        });
+                        // Sort by date just in case
+                        incomingLead.noteHistory.sort((a,b) => new Date(a.date) - new Date(b.date));
+                        
+                        // If we have local notes that pushed the follow up date further, keep the latest follow up date
+                        if (existing.followUpDate && incomingLead.followUpDate) {
+                            if (new Date(existing.followUpDate) > new Date(incomingLead.followUpDate)) {
+                                incomingLead.followUpDate = existing.followUpDate;
+                            }
+                        }
+                    }
                 }
             });
             
