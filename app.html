@@ -461,7 +461,7 @@
 
 
 <!-- AUTHENTICATION GATE (Client-side Security) -->
-<div id="loginGate" style="display:none;">
+<div id="loginGate">
     <div class="login-card">
         <div class="login-brand">BB <span>Automotive OS</span></div>
         <div class="login-sub">Dealership Management &amp; AI CRM System</div>
@@ -3383,6 +3383,7 @@ function importJSON(input) {
 // INIT
 // ============================================================
 window.onload = function() {
+    initAuth();
     loadDB();
     initProfilesIfNeeded();
     // Init charts first, then update data
@@ -3515,14 +3516,18 @@ function initAuth() {
     if (session) {
         try {
             const user = JSON.parse(session);
-            document.getElementById('currentUserName').textContent = user.name;
-            document.getElementById('currentUserRole').textContent = user.role;
+            const nameEl = document.getElementById('currentUserName');
+            const roleEl = document.getElementById('currentUserRole');
+            if (nameEl) nameEl.textContent = user.name;
+            if (roleEl) roleEl.textContent = user.role;
             gate.style.display = 'none';
         } catch(e) {
             gate.style.display = 'flex';
+            setTimeout(() => { const inp = document.getElementById('loginPinInput'); if(inp) inp.focus(); }, 50);
         }
     } else {
         gate.style.display = 'flex';
+        setTimeout(() => { const inp = document.getElementById('loginPinInput'); if(inp) inp.focus(); }, 50);
     }
 }
 
