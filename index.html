@@ -511,14 +511,16 @@
             <div class="nav-section">Data</div>
             <div class="nav-item" onclick="exportJSON()"><i class="fas fa-download"></i> Export Backup</div>
             <div class="nav-item" onclick="document.getElementById('importFile').click()"><i class="fas fa-upload"></i> Import Backup</div>
+            <div class="nav-section">Session</div>
+            <div class="nav-item" style="color:var(--accent-red); font-weight:700;" onclick="lockCRM()"><i class="fas fa-sign-out-alt"></i> Log Out</div>
         </nav>
 
-        <div class="user-pill" id="sidebarUserPill">
+        <div class="user-pill" id="sidebarUserPill" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
             <div class="user-pill-info">
                 <div class="user-pill-name" id="currentUserName">Jakes</div>
                 <div class="user-pill-role" id="currentUserRole">Sales Executive</div>
             </div>
-            <button class="btn-icon" onclick="lockCRM()" title="Lock CRM / Sign Out" style="color:var(--accent-red);"><i class="fas fa-sign-out-alt"></i></button>
+            <button class="btn btn-sm btn-danger" onclick="lockCRM()" style="padding:6px 10px; font-size:11px; font-weight:700; white-space:nowrap;"><i class="fas fa-sign-out-alt"></i> Log Out</button>
         </div>
     </aside>
 
@@ -540,6 +542,7 @@
                     <button class="btn-cc btn-cc-secondary" onclick="showToast('Vehicle database: 36 models across Suzuki, Mahindra, Renault & GAC. Select vehicles via lead Details tab.')"><i class="fas fa-car"></i> Manage Vehicles</button>
                     <button class="btn-cc" style="background:var(--accent-purple);" onclick="syncFromGist()"><i class="fas fa-sync-alt"></i> Live Sync</button>
                     <button class="btn-cc btn-cc-green" onclick="exportJSON()"><i class="fas fa-database"></i> Backup</button>
+                    <button class="btn-cc btn-danger" onclick="lockCRM()" style="font-weight:700;"><i class="fas fa-sign-out-alt"></i> Log Out</button>
                 </div>
             </div>
 
