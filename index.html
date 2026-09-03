@@ -511,6 +511,8 @@
             <div class="nav-section">Data</div>
             <div class="nav-item" onclick="exportJSON()"><i class="fas fa-download"></i> Export Backup</div>
             <div class="nav-item" onclick="document.getElementById('importFile').click()"><i class="fas fa-upload"></i> Import Backup</div>
+            <div class="nav-section">Session</div>
+            <div class="nav-item" style="color:var(--accent-red); font-weight:700;" onclick="lockCRM()"><i class="fas fa-sign-out-alt"></i> Log Out</div>
         </nav>
 
         <div class="user-pill" id="sidebarUserPill" style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
@@ -540,6 +542,7 @@
                     <button class="btn-cc btn-cc-secondary" onclick="showToast('Vehicle database: 36 models across Suzuki, Mahindra, Renault & GAC. Select vehicles via lead Details tab.')"><i class="fas fa-car"></i> Manage Vehicles</button>
                     <button class="btn-cc" style="background:var(--accent-purple);" onclick="syncFromGist()"><i class="fas fa-sync-alt"></i> Live Sync</button>
                     <button class="btn-cc btn-cc-green" onclick="exportJSON()"><i class="fas fa-database"></i> Backup</button>
+                    <button class="btn-cc btn-danger" onclick="lockCRM()" style="font-weight:700;"><i class="fas fa-sign-out-alt"></i> Log Out</button>
                 </div>
             </div>
 
@@ -656,11 +659,16 @@
         
         <!-- DIARY VIEW -->
         <div id="diaryView" class="view">
-    <div class="page-title">Daily Diary</div>
-    <div class="page-sub">AutoHUB-style Executive Deal Cards for today's follow-ups</div>
-    <div style="margin-bottom: 16px; display: flex; justify-content: space-between;">
-        <div style="color: var(--text-muted); font-size: 13px;" id="diarySubtitle">Select a date to view scheduled follow-ups.</div>
-    </div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                <div>
+                    <div class="page-title">Daily Diary</div>
+                    <div class="page-sub">AutoHUB-style Executive Deal Cards for today's follow-ups</div>
+                </div>
+                <button class="btn btn-sm btn-danger" onclick="lockCRM()" style="font-weight:700; padding:7px 14px; font-size:12px;"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+            </div>
+            <div style="margin-bottom: 16px; display: flex; justify-content: space-between;">
+                <div style="color: var(--text-muted); font-size: 13px;" id="diarySubtitle">Select a date to view scheduled follow-ups.</div>
+            </div>
     
     <div style="display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start;">
         <!-- Physical Calendar UI -->
@@ -701,6 +709,7 @@
                 <div style="display:flex; gap:10px; align-items:center;">
                     <input type="date" id="wbDatePicker" class="input" style="width:160px;" onchange="renderWhiteboard()">
                     <button class="btn btn-secondary btn-sm" onclick="renderWhiteboard()"><i class="fas fa-sync"></i> Refresh</button>
+                    <button class="btn btn-sm btn-danger" onclick="lockCRM()" style="font-weight:700;"><i class="fas fa-sign-out-alt"></i> Log Out</button>
                 </div>
             </div>
 
@@ -745,7 +754,10 @@
                     <div class="page-title">Lead Inbox</div>
                     <div class="page-sub">Unactioned &amp; Incoming Dealership Opportunities</div>
                 </div>
-                <button class="btn btn-primary" onclick="openAddLeadModal()"><i class="fas fa-plus"></i> Capture New Lead</button>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <button class="btn btn-primary" onclick="openAddLeadModal()"><i class="fas fa-plus"></i> Capture New Lead</button>
+                    <button class="btn btn-sm btn-danger" onclick="lockCRM()" style="font-weight:700;"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+                </div>
             </div>
 
             <div id="inboxContainer" style="display:flex; flex-direction:column; gap:12px;">
@@ -755,8 +767,13 @@
 
         <!-- SETTINGS VIEW (Quote Setup & Dealership Parameters) -->
         <div id="settingsView" class="view">
-            <div class="page-title">Dealership Setup &amp; Parameters</div>
-            <div class="page-sub">Standard Fee Schedules, Finance Defaults &amp; Security</div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+                <div>
+                    <div class="page-title">Dealership Setup &amp; Parameters</div>
+                    <div class="page-sub">Standard Fee Schedules, Finance Defaults &amp; Security</div>
+                </div>
+                <button class="btn btn-sm btn-danger" onclick="lockCRM()" style="font-weight:700;"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+            </div>
 
             <div class="card" style="max-width:800px; margin-bottom:20px;">
                 <div class="app-section-title">Standard Deal Fees &amp; Margins</div>
@@ -846,12 +863,17 @@
         </div>
 
         <div id="leadsView" class="view">
-            <div class="page-title">Lead Pipeline</div>
-            <div class="page-sub">Full prospect management</div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                <div>
+                    <div class="page-title">Lead Pipeline</div>
+                    <div class="page-sub">Full prospect management</div>
+                </div>
+                <button class="btn btn-sm btn-danger" onclick="lockCRM()" style="font-weight:700; padding:7px 14px; font-size:12px;"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+            </div>
             <div class="card">
                 <div class="card-header"><div class="card-title">Add New Lead</div></div>
                 <div class="form-grid">
-                    <div class="form-field"><div class="form-label">Agent *</div><select id="newAgent" class="input"><option value="">Select...</option></select></div>
+                    <div class="form-field"><div class="form-label">Agent *</div><select id="newAgent" class="input"><option value="">Select...</option><option>Rudi</option><option>Lesedi</option><option>Tiisetso</option></select></div>
                     <div class="form-field"><div class="form-label">Customer Name *</div><input type="text" id="newCustomer" class="input" placeholder="Full name"></div>
                     <div class="form-field"><div class="form-label">Phone *</div><input type="text" id="newPhone" class="input" placeholder="0821234567"></div>
                     <div class="form-field"><div class="form-label">Vehicle</div><input type="text" id="newVehicle" class="input" placeholder="e.g. Suzuki Swift"></div>
@@ -873,6 +895,9 @@
                         </select>
                         <select id="filterAgent" class="input" onchange="renderLeads()" style="width:120px;">
                             <option value="">All Agents</option>
+                            <option>Rudi</option>
+                            <option>Lesedi</option>
+                            <option>Tiisetso</option>
                         </select>
                         <input type="text" id="leadSearch" class="input" placeholder="Search..." style="width:200px;" oninput="renderLeads()">
                     </div>
@@ -886,8 +911,13 @@
 
         <!-- AGENTS VIEW -->
         <div id="agentsView" class="view">
-            <div class="page-title">Agent Performance</div>
-            <div class="page-sub">Click an agent to open their profile</div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+                <div>
+                    <div class="page-title">Agent Performance</div>
+                    <div class="page-sub">Click an agent to open their profile</div>
+                </div>
+                <button class="btn btn-sm btn-danger" onclick="lockCRM()" style="font-weight:700;"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+            </div>
             <div class="metrics-grid" id="agentCards"></div>
             <div class="card">
                 <div class="card-header"><div class="card-title">Agent Leads</div></div>
@@ -1177,22 +1207,24 @@
 // ============================================================
 // CONFIG & STATE
 // ============================================================
-// Dynamic AGENTS: derived from managed users (sales roles)
+// Dynamic AGENTS: derived from managed users (sales roles), fallback to defaults
+const DEFAULT_AGENTS = ['Rudi', 'Lesedi', 'Tiisetso'];
 function getAgentNames() {
     try {
         const users = getUsers();
-        return users
+        const names = users
             .filter(u => {
                 const t = u.userType.toLowerCase();
                 return t.includes('sales') || t.includes('executive') || t.includes('call centre');
             })
             .map(u => u.username);
+        return names.length > 0 ? names : DEFAULT_AGENTS;
     } catch(e) {
-        return [];
+        return DEFAULT_AGENTS;
     }
 }
 // Legacy compat: mutable reference that is refreshed on each dashboard update
-let AGENTS = [];
+let AGENTS = ['Rudi', 'Lesedi', 'Tiisetso'];
 function refreshAgents() { AGENTS = getAgentNames(); }
 const PQ_VAT = 0.15;
 const PQ_FEE_SERVICE = 6500;
@@ -1254,8 +1286,11 @@ function initProfilesIfNeeded() {
 }
 
 function seedData() {
-    // Start clean - no demo data. Leads come from Live Sync or manual entry.
-    db.leads = [];
+    db.leads = [
+        {id:1001,agent:'Rudi',customer:'Thabo Mokwena',phone:'0821234567',vehicle:'GAC GS3 Emzoom 1.5T Elite DCT',source:'Walk-in',temperature:'Hot',stage:'enquiry',gp:0,created:new Date().toISOString(),applicationDate:null,bankedDate:null,lostDate:null,noteHistory:[],financeData:{},qualData:null,quoteData:null,applicationData:null},
+        {id:1002,agent:'Lesedi',customer:'Sarah van der Merwe',phone:'0729876543',vehicle:'Suzuki Swift GLX CVT',source:'Phone',temperature:'Warm',stage:'application',gp:0,created:new Date(Date.now()-86400000).toISOString(),applicationDate:new Date(Date.now()-86400000).toISOString(),bankedDate:null,lostDate:null,noteHistory:[],financeData:{},qualData:null,quoteData:null,applicationData:null},
+        {id:1003,agent:'Tiisetso',customer:'John Ndlovu',phone:'0834567890',vehicle:'Renault Kiger Intens',source:'Website',temperature:'Warm',stage:'banked',gp:18500,created:new Date(Date.now()-172800000).toISOString(),applicationDate:new Date(Date.now()-259200000).toISOString(),bankedDate:new Date(Date.now()-172800000).toISOString(),lostDate:null,noteHistory:[],financeData:{},qualData:null,quoteData:null,applicationData:null}
+    ];
     saveDB();
 }
 
@@ -3953,14 +3988,12 @@ function attemptLogin() {
 }
 
 function lockCRM() {
-    showConfirm('Are you sure you want to log out?', () => {
-        sessionStorage.removeItem(AUTH_KEY);
-        if (_inactivityTimer) { clearTimeout(_inactivityTimer); _inactivityTimer = null; }
-        document.getElementById('loginGate').style.display = 'flex';
-        document.getElementById('loginPinInput').value = '';
-        renderLoginUserSelect();
-        showToast("CRM locked. Sign in to continue.");
-    });
+    sessionStorage.removeItem(AUTH_KEY);
+    if (_inactivityTimer) { clearTimeout(_inactivityTimer); _inactivityTimer = null; }
+    document.getElementById('loginGate').style.display = 'flex';
+    document.getElementById('loginPinInput').value = '';
+    renderLoginUserSelect();
+    showToast("CRM locked. Sign in to continue.");
 }
 
 // Manage Users CRUD
