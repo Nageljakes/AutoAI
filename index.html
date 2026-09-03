@@ -555,7 +555,7 @@
             <div class="card">
                 <div class="card-header"><div class="card-title">Add New Lead</div></div>
                 <div class="form-grid">
-                    <div class="form-field"><div class="form-label">Agent *</div><select id="newAgent" class="input"><option value="">Select...</option><option>Rudi</option><option>Lesedi</option><option>Tiisetso</option></select></div>
+                    <div class="form-field"><div class="form-label">Agent *</div><select id="newAgent" class="input"><option value="">Select...</option></select></div>
                     <div class="form-field"><div class="form-label">Customer Name *</div><input type="text" id="newCustomer" class="input" placeholder="Full name"></div>
                     <div class="form-field"><div class="form-label">Phone *</div><input type="text" id="newPhone" class="input" placeholder="0821234567"></div>
                     <div class="form-field"><div class="form-label">Vehicle</div><input type="text" id="newVehicle" class="input" placeholder="e.g. Suzuki Swift"></div>
@@ -577,7 +577,6 @@
                         </select>
                         <select id="filterAgent" class="input" onchange="renderLeads()" style="width:120px;">
                             <option value="">All Agents</option>
-                            <option>Rudi</option><option>Lesedi</option><option>Tiisetso</option>
                         </select>
                         <input type="text" id="leadSearch" class="input" placeholder="Search..." style="width:200px;" oninput="renderLeads()">
                     </div>
@@ -591,15 +590,41 @@
 
         <!-- AGENTS VIEW -->
         <div id="agentsView" class="view">
-            <div class="page-title">Agent Performance</div>
-            <div class="page-sub">Click an agent to open their profile</div>
-            <div class="metrics-grid" id="agentCards"></div>
-            <div class="card">
-                <div class="card-header"><div class="card-title">Agent Leads</div></div>
-                <table>
-                    <thead><tr><th>Agent</th><th>Leads</th><th>Enquiries</th><th>Applications</th><th>Banked</th><th>Lost</th><th>GP</th><th></th></tr></thead>
-                    <tbody id="agentTable"></tbody>
-                </table>
+            <div class="page-title">Agent Management</div>
+            <div class="page-sub">Manage agents and view performance metrics</div>
+            
+            <div style="display: grid; grid-template-columns: 280px 1fr; gap: 20px;">
+                <!-- LEFT PANE: Agent Management -->
+                <div class="card" style="margin:0; height: fit-content;">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fas fa-users-cog"></i> Agent Management</div>
+                    </div>
+                    
+                    <div class="form-field" style="margin-bottom: 16px;">
+                        <div class="form-label">Add New Agent</div>
+                        <div style="display: flex; gap: 8px; margin-top: 8px;">
+                            <input type="text" id="newAgentName" class="input" placeholder="Agent name" style="flex: 1;" onkeypress="if(event.key==='Enter') addNewAgent()">
+                            <button class="btn btn-primary btn-sm" onclick="addNewAgent()"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div style="border-top: 1px solid var(--border); padding-top: 12px;">
+                        <div class="form-label" style="margin-bottom: 10px;">Active Agents <span id="agentCount" style="color: var(--accent-cyan); font-weight: 700;">0</span></div>
+                        <div id="agentListContainer" style="max-height: 400px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+                
+                <!-- RIGHT PANE: Agent Performance -->
+                <div>
+                    <div class="metrics-grid" id="agentCards"></div>
+                    <div class="card">
+                        <div class="card-header"><div class="card-title">Agent Leads & Performance</div></div>
+                        <table>
+                            <thead><tr><th>Agent</th><th>Leads</th><th>Enquiries</th><th>Applications</th><th>Banked</th><th>Lost</th><th>GP</th><th></th></tr></thead>
+                            <tbody id="agentTable"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -749,12 +774,67 @@
 // ============================================================
 // CONFIG & STATE
 // ============================================================
-const AGENTS = ['Rudi', 'Lesedi', 'Tiisetso'];
+let AGENTS = ['Rudi', 'Lesedi', 'Tiisetso'];
 const PQ_VAT = 0.15;
 const PQ_FEE_SERVICE = 6500;
 const PQ_FEE_SMASH = 3500;
 const STORAGE_KEY = 'bbh_crm_v8';
 const PROFILES_KEY = 'bbh_v8_profiles';
+const AGENTS_STORAGE_KEY = 'bbh_v8_agents';
+
+// Load agents from localStorage or use defaults
+function loadAgents() {
+    try {
+        const stored = localStorage.getItem(AGENTS_STORAGE_KEY);
+        if (stored) {
+            AGENTS = JSON.parse(stored);
+        }
+    } catch(e) { console.error('Failed to load agents:', e); }
+}
+loadAgents();
+
+// Save agents to localStorage
+function saveAgents() {
+    try {
+        localStorage.setItem(AGENTS_STORAGE_KEY, JSON.stringify(AGENTS));
+    } catch(e) { console.error('Failed to save agents:', e); }
+}
+
+// Add new agent
+function addNewAgent() {
+    const input = document.getElementById('newAgentName');
+    const name = input.value.trim();
+    if (!name) return;
+    if (AGENTS.includes(name)) {
+        showToast('Agent already exists!');
+        input.value = '';
+        return;
+    }
+    AGENTS.push(name);
+    saveAgents();
+    input.value = '';
+    renderAgentList();
+    renderAgents();
+    renderLeads(); // Update agent dropdowns
+    showToast(`Agent "${name}" added successfully!`);
+}
+
+// Remove agent
+function removeAgent(agentName) {
+    const leadCount = db.leads.filter(l => l.agent === agentName).length;
+    if (leadCount > 0) {
+        showDialog(`Cannot remove "${agentName}" - they have ${leadCount} lead(s) assigned. Reassign or delete leads first.`, false);
+        return;
+    }
+    showDialog(`Are you sure you want to remove "${agentName}"? This cannot be undone.`, true, () => {
+        AGENTS = AGENTS.filter(a => a !== agentName);
+        saveAgents();
+        renderAgentList();
+        renderAgents();
+        renderLeads(); // Update agent dropdowns
+        showToast(`Agent "${agentName}" removed.`);
+    });
+}
 
 let db = { leads: [] };
 let ccState = { id: null, edits: {} };
@@ -1222,6 +1302,9 @@ function addLead() {
 }
 
 function renderLeads() {
+    // Populate agent dropdowns dynamically
+    populateAgentDropdowns();
+    
     const search = (document.getElementById('leadSearch').value || '').toLowerCase();
     const stageFilter = document.getElementById('filterStage').value;
     const agentFilter = document.getElementById('filterAgent').value;
@@ -1249,6 +1332,33 @@ function renderLeads() {
     });
 }
 
+// Populate agent dropdowns dynamically from AGENTS array
+function populateAgentDropdowns() {
+    const newAgentSelect = document.getElementById('newAgent');
+    const filterAgentSelect = document.getElementById('filterAgent');
+    if (!newAgentSelect || !filterAgentSelect) return;
+    
+    // Save current selection
+    const currentNewAgent = newAgentSelect.value;
+    const currentFilterAgent = filterAgentSelect.value;
+    
+    // Clear and rebuild newAgent dropdown
+    newAgentSelect.innerHTML = '<option value="">Select...</option>';
+    AGENTS.forEach(agent => {
+        newAgentSelect.innerHTML += `<option value="${agent}">${agent}</option>`;
+    });
+    
+    // Clear and rebuild filterAgent dropdown
+    filterAgentSelect.innerHTML = '<option value="">All Agents</option>';
+    AGENTS.forEach(agent => {
+        filterAgentSelect.innerHTML += `<option value="${agent}">${agent}</option>`;
+    });
+    
+    // Restore selections if still valid
+    if (AGENTS.includes(currentNewAgent)) newAgentSelect.value = currentNewAgent;
+    if (AGENTS.includes(currentFilterAgent)) filterAgentSelect.value = currentFilterAgent;
+}
+
 // ============================================================
 // AGENTS VIEW
 // ============================================================
@@ -1257,6 +1367,10 @@ function renderAgents() {
     const tbody = document.getElementById('agentTable');
     cards.innerHTML = '';
     tbody.innerHTML = '';
+    
+    // Also render the agent list in the left pane
+    renderAgentList();
+    
     AGENTS.forEach(agent => {
         const aLeads = db.leads.filter(l => l.agent === agent);
         const enq = aLeads.filter(l => l.stage === 'enquiry').length;
@@ -1279,6 +1393,34 @@ function renderAgents() {
             <td class="money">${fmtR(gp)}</td>
             <td><button class="btn btn-purple btn-sm" onclick="openAgentProfile('${agent}')"><i class="fas fa-user"></i></button></td>
         </tr>`;
+    });
+}
+
+// Render agent list in left pane
+function renderAgentList() {
+    const container = document.getElementById('agentListContainer');
+    const countEl = document.getElementById('agentCount');
+    if (!container || !countEl) return;
+    
+    countEl.textContent = AGENTS.length;
+    container.innerHTML = '';
+    
+    AGENTS.forEach(agent => {
+        const leadCount = db.leads.filter(l => l.agent === agent).length;
+        container.innerHTML += `
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 32px; height: 32px; background: rgba(0,212,255,0.1); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--accent-cyan); font-weight: 700; font-size: 12px;">
+                        ${agent.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase()}
+                    </div>
+                    <div>
+                        <div style="font-size: 13px; font-weight: 600;">${agent}</div>
+                        <div style="font-size: 10px; color: var(--text-muted);">${leadCount} lead(s)</div>
+                    </div>
+                </div>
+                <button class="btn-icon" onclick="removeAgent('${agent}')" title="Remove agent"><i class="fas fa-trash"></i></button>
+            </div>
+        `;
     });
 }
 
