@@ -1266,7 +1266,8 @@ function renderCalendar() {
     const today = new Date().toISOString().split('T')[0];
     
     const followUpCounts = {};
-    db.leads.forEach(l => {
+    const accessible = getAccessibleLeads();
+    accessible.forEach(l => {
         if (l.followUpDate && l.stage !== 'banked' && l.stage !== 'lost') {
             followUpCounts[l.followUpDate] = (followUpCounts[l.followUpDate] || 0) + 1;
         }
@@ -1318,9 +1319,11 @@ function renderDiary() {
     container.innerHTML = '';
     const today = new Date().toISOString().split('T')[0];
     
-    // Update nav badge to ALWAYS show today & past-due count
-    const pastDueLeads = db.leads.filter(l => l.followUpDate && l.followUpDate <= today && l.stage !== 'banked' && l.stage !== 'lost');
-    document.getElementById('navDiaryCount').textContent = pastDueLeads.length;
+    const accessible = getAccessibleLeads();
+    // Update nav badge to ALWAYS show today & past-due count for accessible leads
+    const pastDueLeads = accessible.filter(l => l.followUpDate && l.followUpDate <= today && l.stage !== 'banked' && l.stage !== 'lost');
+    const badgeEl = document.getElementById('navDiaryCount');
+    if (badgeEl) badgeEl.textContent = pastDueLeads.length;
     
     const isToday = (selectedDiaryDate === today);
     const subEl = document.getElementById('diarySubtitle');
@@ -1331,7 +1334,7 @@ function renderDiary() {
     }
 
     // Filter leads scheduled for the selected date (if today, include past due)
-    let diaryLeads = db.leads.filter(l => {
+    let diaryLeads = accessible.filter(l => {
         if (!l.followUpDate || l.stage === 'banked' || l.stage === 'lost') return false;
         if (isToday) return l.followUpDate <= today;
         return l.followUpDate === selectedDiaryDate;
@@ -1540,7 +1543,10 @@ function handleCCDateChange() {
 }
 
 function updateDashboard() {
-    const leads = db.leads;
+    const user = getCurrentUser();
+    const isMgr = isManagerRole(user.role);
+    // Managers see entire dealership; Sales Executives see their own pipeline
+    const leads = isMgr ? db.leads : db.leads.filter(l => l.agent && l.agent.toLowerCase() === user.name.toLowerCase());
     // Date-aware filtering using ccViewDate and trading month
     const { mStart, mEnd } = getTradingMonth(ccViewDate);
     const viewDateEnd = new Date(ccViewDate);
@@ -1815,8 +1821,11 @@ function addLead() {
 function renderLeads() {
     const search = (document.getElementById('leadSearch').value || '').toLowerCase();
     const stageFilter = document.getElementById('filterStage').value;
-    const agentFilter = document.getElementById('filterAgent').value;
-    let leads = [...db.leads];
+    const agentFilterEl = document.getElementById('filterAgent');
+    const agentFilter = agentFilterEl ? agentFilterEl.value : '';
+    const user = getCurrentUser();
+    
+    let leads = [...getAccessibleLeads()];
     if (search) leads = leads.filter(l => l.customer.toLowerCase().includes(search) || l.phone.includes(search) || (l.vehicle||'').toLowerCase().includes(search));
     if (stageFilter) leads = leads.filter(l => l.stage === stageFilter);
     if (agentFilter) leads = leads.filter(l => l.agent === agentFilter);
@@ -3516,6 +3525,31 @@ renderSnapshots();
 const AUTH_KEY = 'bbh_auth_user_session';
 const USERS_KEY = 'bbh_users_v2';
 
+function getCurrentUser() {
+    try {
+        const s = sessionStorage.getItem(AUTH_KEY);
+        if (s) return JSON.parse(s);
+    } catch(e) {}
+    return { name: 'Jakes', role: 'Senior Sales Executive' };
+}
+
+function isManagerRole(role) {
+    if (!role) return false;
+    const r = role.toLowerCase();
+    return r.includes('manager') || r.includes('principal') || r.includes('admin') || r.includes('director');
+}
+
+function getAccessibleLeads() {
+    const user = getCurrentUser();
+    if (!user || !user.name) return db.leads;
+    if (isManagerRole(user.role)) {
+        return db.leads;
+    }
+    // Sales consultants ONLY see leads assigned to their exact username
+    return db.leads.filter(l => l.agent && l.agent.toLowerCase() === user.name.toLowerCase());
+}
+
+
 const DEFAULT_USERS = [
     { id: 1, username: 'Jakes', userType: 'Senior Sales Executive', pin: '2470' },
     { id: 2, username: 'Sales Manager', userType: 'Sales Manager', pin: '8899' },
@@ -3608,6 +3642,11 @@ function attemptLogin() {
         if (db.leads && db.leads.length <= 3) {
             syncFromGist();
         }
+        updateDashboard();
+        renderDiary();
+        renderLeads();
+        renderWhiteboard();
+        renderInbox();
         showToast("Authenticated as " + user.username);
     } else {
         if (err) err.style.display = 'block';
@@ -3774,8 +3813,8 @@ function renderWhiteboard() {
     
     let enq = 0, td = 0, trade = 0, sale = 0, del = 0;
     
-    const relevantLeads = db.leads.filter(l => {
-        // Active deals or deals touched on this date
+    const accessible = getAccessibleLeads();
+    const relevantLeads = accessible.filter(l => {
         return l.stage !== 'lost';
     });
     
