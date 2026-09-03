@@ -790,19 +790,57 @@
             </div>
 
             <div class="card" style="max-width:800px;">
-                <div class="app-section-title">Security &amp; Passcodes</div>
-                <div class="app-grid cols-2" style="margin-top:12px;">
-                    <div class="app-field">
-                        <label>Jakes Sales PIN</label>
-                        <input type="password" id="cfg_pinJakes" class="cc-input" value="2470">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <div class="app-section-title" style="margin:0;">Manage Dealership Users &amp; Roles</div>
+                    <button class="btn btn-primary btn-sm" onclick="openAddUserForm()"><i class="fas fa-user-plus"></i> Add User</button>
+                </div>
+
+                <!-- ADD / EDIT USER FORM (Hidden by default) -->
+                <div id="userFormContainer" style="display:none; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; padding:16px; margin-bottom:16px;">
+                    <div style="font-weight:700; font-size:13px; color:var(--accent-cyan); margin-bottom:12px;" id="userFormTitle">Add New User</div>
+                    <input type="hidden" id="editUserId">
+                    <div class="app-grid cols-3">
+                        <div class="app-field">
+                            <label>Username</label>
+                            <input type="text" id="mu_username" class="cc-input" placeholder="e.g. Zelda, Anthony">
+                        </div>
+                        <div class="app-field">
+                            <label>User Type / Role</label>
+                            <select id="mu_userType" class="cc-input">
+                                <option value="Senior Sales Executive">Senior Sales Executive</option>
+                                <option value="Sales Executive">Sales Executive</option>
+                                <option value="Sales Manager">Sales Manager</option>
+                                <option value="F&I Business Manager">F&amp;I Business Manager</option>
+                                <option value="Dealer Principal">Dealer Principal</option>
+                                <option value="Call Centre Agent">Call Centre Agent</option>
+                            </select>
+                        </div>
+                        <div class="app-field">
+                            <label>Password / PIN</label>
+                            <input type="password" id="mu_password" class="cc-input" placeholder="Enter PIN / Passcode">
+                        </div>
                     </div>
-                    <div class="app-field">
-                        <label>Manager / Admin PIN</label>
-                        <input type="password" id="cfg_pinManager" class="cc-input" value="8899">
+                    <div style="margin-top:14px; display:flex; justify-content:flex-end; gap:8px;">
+                        <button class="btn btn-secondary btn-sm" onclick="closeUserForm()">Cancel</button>
+                        <button class="btn btn-success btn-sm" onclick="saveUserFromForm()"><i class="fas fa-save"></i> Save User</button>
                     </div>
                 </div>
-                <div style="margin-top:20px; display:flex; justify-content:flex-end;">
-                    <button class="btn btn-primary" onclick="saveSecuritySettings()"><i class="fas fa-key"></i> Update Security PINs</button>
+
+                <!-- USERS TABLE -->
+                <div style="overflow-x:auto;">
+                    <table class="table" style="width:100%; border-collapse:collapse; font-size:12px;">
+                        <thead>
+                            <tr style="border-bottom:1px solid var(--border); text-align:left; color:var(--text-muted);">
+                                <th style="padding:10px 8px;">Username</th>
+                                <th style="padding:10px 8px;">User Type / Role</th>
+                                <th style="padding:10px 8px;">Password / PIN</th>
+                                <th style="padding:10px 8px; text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manageUsersTableBody">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -3470,18 +3508,52 @@ renderSnapshots();
 
 
 // ============================================================
-// ENTERPRISE AUTHENTICATION & LOGIN GATE
+// ENTERPRISE USER MANAGEMENT & AUTHENTICATION
 // ============================================================
 const AUTH_KEY = 'bbh_auth_user_session';
-const PINS_KEY = 'bbh_auth_pins';
+const USERS_KEY = 'bbh_users_v2';
 
-function getStoredPins() {
+const DEFAULT_USERS = [
+    { id: 1, username: 'Jakes', userType: 'Senior Sales Executive', pin: '2470' },
+    { id: 2, username: 'Sales Manager', userType: 'Sales Manager', pin: '8899' },
+    { id: 3, username: 'F&I Manager', userType: 'F&I Business Manager', pin: '5544' },
+    { id: 4, username: 'Dealer Principal', userType: 'Dealer Principal', pin: '9900' }
+];
+
+function getUsers() {
     try {
-        return JSON.parse(localStorage.getItem(PINS_KEY) || '{}');
-    } catch(e) { return {}; }
+        const u = localStorage.getItem(USERS_KEY);
+        if (u) {
+            const parsed = JSON.parse(u);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+    } catch(e) {}
+    saveUsers(DEFAULT_USERS);
+    return DEFAULT_USERS;
+}
+
+function saveUsers(users) {
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
+function renderLoginUserSelect() {
+    const select = document.getElementById('loginUserSelect');
+    if (!select) return;
+    const users = getUsers();
+    const currentVal = select.value;
+    select.innerHTML = '';
+    users.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.username;
+        opt.dataset.role = u.userType;
+        opt.textContent = `${u.username} (${u.userType})`;
+        if (u.username === currentVal) opt.selected = true;
+        select.appendChild(opt);
+    });
 }
 
 function initAuth() {
+    renderLoginUserSelect();
     const session = sessionStorage.getItem(AUTH_KEY);
     const gate = document.getElementById('loginGate');
     if (!gate) return;
@@ -3506,35 +3578,36 @@ function initAuth() {
 
 function attemptLogin() {
     const select = document.getElementById('loginUserSelect');
-    const opt = select.options[select.selectedIndex];
-    const name = opt.value;
-    const role = opt.dataset.role;
-    const defaultPin = opt.dataset.pin;
+    if (!select) return;
+    const selectedUsername = select.value;
     
-    const customPins = getStoredPins();
-    const expectedPin = customPins[name] || defaultPin;
+    const users = getUsers();
+    const user = users.find(u => u.username === selectedUsername);
+    if (!user) return;
     
     const inputPin = document.getElementById('loginPinInput').value.trim();
     const err = document.getElementById('loginError');
     
-    if (inputPin === expectedPin) {
-        err.style.display = 'none';
-        const userSession = { name, role, loggedAt: new Date().toISOString() };
+    if (inputPin === user.pin) {
+        if (err) err.style.display = 'none';
+        const userSession = { name: user.username, role: user.userType, loggedAt: new Date().toISOString() };
         sessionStorage.setItem(AUTH_KEY, JSON.stringify(userSession));
         
-        document.getElementById('currentUserName').textContent = name;
-        document.getElementById('currentUserRole').textContent = role;
+        const nameEl = document.getElementById('currentUserName');
+        const roleEl = document.getElementById('currentUserRole');
+        if (nameEl) nameEl.textContent = user.username;
+        if (roleEl) roleEl.textContent = user.userType;
         
         document.getElementById('loginGate').style.display = 'none';
         document.getElementById('loginPinInput').value = '';
         
         // Auto-sync if database is empty or initial seed
-        if (db.leads.length <= 3) {
+        if (db.leads && db.leads.length <= 3) {
             syncFromGist();
         }
-        showToast("Authenticated as " + name);
+        showToast("Authenticated as " + user.username);
     } else {
-        err.style.display = 'block';
+        if (err) err.style.display = 'block';
     }
 }
 
@@ -3542,8 +3615,135 @@ function lockCRM() {
     sessionStorage.removeItem(AUTH_KEY);
     document.getElementById('loginGate').style.display = 'flex';
     document.getElementById('loginPinInput').value = '';
+    renderLoginUserSelect();
     showToast("CRM locked. Sign in to continue.");
 }
+
+// Manage Users CRUD
+function renderManageUsers() {
+    const tbody = document.getElementById('manageUsersTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    const users = getUsers();
+    users.forEach(u => {
+        tbody.innerHTML += `
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                <td style="padding:10px 8px; font-weight:700; color:var(--text-main);">${u.username}</td>
+                <td style="padding:10px 8px; color:var(--accent-cyan);">${u.userType}</td>
+                <td style="padding:10px 8px; font-family:monospace; letter-spacing:2px; color:var(--text-muted);" id="user_pin_disp_${u.id}">••••
+                    <button class="btn-icon" style="margin-left:6px; font-size:11px;" onclick="togglePinVisibility(${u.id}, '${u.pin}')" title="Show / Hide PIN"><i class="fas fa-eye"></i></button>
+                </td>
+                <td style="padding:10px 8px; text-align:right;">
+                    <button class="btn btn-secondary btn-sm" onclick="editUser(${u.id})" style="margin-right:4px;"><i class="fas fa-edit"></i> Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function togglePinVisibility(id, realPin) {
+    const el = document.getElementById(`user_pin_disp_${id}`);
+    if (!el) return;
+    if (el.textContent.includes('•')) {
+        el.innerHTML = `${realPin} <button class="btn-icon" style="margin-left:6px; font-size:11px;" onclick="togglePinVisibility(${id}, '${realPin}')" title="Hide PIN"><i class="fas fa-eye-slash"></i></button>`;
+    } else {
+        el.innerHTML = `•••• <button class="btn-icon" style="margin-left:6px; font-size:11px;" onclick="togglePinVisibility(${id}, '${realPin}')" title="Show PIN"><i class="fas fa-eye"></i></button>`;
+    }
+}
+
+function openAddUserForm() {
+    document.getElementById('editUserId').value = '';
+    document.getElementById('mu_username').value = '';
+    document.getElementById('mu_userType').value = 'Sales Executive';
+    document.getElementById('mu_password').value = '';
+    document.getElementById('userFormTitle').textContent = 'Add New User';
+    document.getElementById('userFormContainer').style.display = 'block';
+    document.getElementById('mu_username').focus();
+}
+
+function closeUserForm() {
+    document.getElementById('userFormContainer').style.display = 'none';
+}
+
+function editUser(id) {
+    const users = getUsers();
+    const u = users.find(x => x.id === id);
+    if (!u) return;
+    document.getElementById('editUserId').value = u.id;
+    document.getElementById('mu_username').value = u.username;
+    document.getElementById('mu_userType').value = u.userType;
+    document.getElementById('mu_password').value = u.pin;
+    document.getElementById('userFormTitle').textContent = `Edit User: ${u.username}`;
+    document.getElementById('userFormContainer').style.display = 'block';
+    document.getElementById('mu_username').focus();
+}
+
+function deleteUser(id) {
+    let users = getUsers();
+    if (users.length <= 1) {
+        alert("Cannot delete the only remaining user. Dealership requires at least one active user.");
+        return;
+    }
+    const target = users.find(u => u.id === id);
+    if (!target) return;
+    if (confirm(`Are you sure you want to delete user "${target.username}" (${target.userType})?`)) {
+        users = users.filter(u => u.id !== id);
+        saveUsers(users);
+        renderManageUsers();
+        renderLoginUserSelect();
+        showToast(`User ${target.username} deleted.`);
+    }
+}
+
+function saveUserFromForm() {
+    const idVal = document.getElementById('editUserId').value;
+    const username = document.getElementById('mu_username').value.trim();
+    const userType = document.getElementById('mu_userType').value;
+    const pin = document.getElementById('mu_password').value.trim();
+    
+    if (!username) {
+        alert("Please enter a username.");
+        return;
+    }
+    if (!pin) {
+        alert("Please enter a password or PIN.");
+        return;
+    }
+    
+    let users = getUsers();
+    if (idVal) {
+        // Edit existing
+        const targetId = parseInt(idVal);
+        const idx = users.findIndex(u => u.id === targetId);
+        if (idx !== -1) {
+            users[idx].username = username;
+            users[idx].userType = userType;
+            users[idx].pin = pin;
+        }
+    } else {
+        // Check duplicate username
+        if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+            alert("A user with this username already exists.");
+            return;
+        }
+        const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
+        users.push({
+            id: newId,
+            username: username,
+            userType: userType,
+            pin: pin
+        });
+    }
+    
+    saveUsers(users);
+    closeUserForm();
+    renderManageUsers();
+    renderLoginUserSelect();
+    showToast(`User ${username} saved successfully.`);
+}
+
 
 // Enter key to login
 document.addEventListener('DOMContentLoaded', () => {
@@ -3851,9 +4051,7 @@ function initSettings() {
     if (s.feeSmash) document.getElementById('cfg_feeSmash').value = s.feeSmash;
     if (s.feeLicence) document.getElementById('cfg_feeLicence').value = s.feeLicence;
     
-    const pins = getStoredPins();
-    if (pins['Jakes']) document.getElementById('cfg_pinJakes').value = pins['Jakes'];
-    if (pins['Sales Manager']) document.getElementById('cfg_pinManager').value = pins['Sales Manager'];
+    renderManageUsers();
 }
 
 function saveDealerSettings() {
@@ -3868,13 +4066,7 @@ function saveDealerSettings() {
     showToast("Dealership settings saved.");
 }
 
-function saveSecuritySettings() {
-    const pins = getStoredPins();
-    pins['Jakes'] = document.getElementById('cfg_pinJakes').value;
-    pins['Sales Manager'] = document.getElementById('cfg_pinManager').value;
-    localStorage.setItem(PINS_KEY, JSON.stringify(pins));
-    showToast("Security passcodes updated.");
-}
+
 
 </script>
 </body>
