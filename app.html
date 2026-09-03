@@ -413,6 +413,8 @@
         <nav class="nav">
             <div class="nav-section">Dashboard</div>
             <div class="nav-item active" onclick="switchView('dashboard',this)"><i class="fas fa-chart-line"></i> Command Center</div>
+            <div class="nav-section">Daily Operations</div>
+            <div class="nav-item" onclick="switchView('diary',this)"><i class="fas fa-calendar-day"></i> Daily Diary <span class="nav-badge" id="navDiaryCount">0</span></div>
             <div class="nav-section">Lead Management</div>
             <div class="nav-item" onclick="switchView('leads',this)"><i class="fas fa-users"></i> Lead Pipeline <span class="nav-badge" id="navLeadCount">0</span></div>
             <div class="nav-section">Tools & Resources</div>
@@ -557,6 +559,19 @@
         </div>
 
         <!-- LEADS VIEW -->
+        
+        <!-- DIARY VIEW -->
+        <div id="diaryView" class="view">
+            <div class="page-title">Daily Diary</div>
+            <div class="page-sub">AutoHUB-style Executive Deal Cards for today's follow-ups</div>
+            <div style="margin-bottom: 16px; display: flex; justify-content: space-between;">
+                <div style="color: var(--text-muted); font-size: 13px;">Follow-ups scheduled for today (or past due).</div>
+            </div>
+            <div id="diaryContainer" style="display: flex; flex-direction: column; gap: 16px;">
+                <!-- Diary Cards rendered via JS -->
+            </div>
+        </div>
+
         <div id="leadsView" class="view">
             <div class="page-title">Lead Pipeline</div>
             <div class="page-sub">Full prospect management</div>
@@ -640,7 +655,7 @@
             <div class="cc-header" style="flex:1;border:none;padding:0;margin:0;gap:10px;">
                 <button class="nav-arrow" onclick="navigateCC(-1)"><i class="fas fa-chevron-left"></i></button>
                 <div class="cc-avatar" id="ccAvatar">?</div>
-                <div class="cc-info"><h2 id="ccName">—</h2><span id="ccSub">—</span></div>
+                <div class="cc-info"><h2 id="ccName" style="display:flex;align-items:center;gap:10px;">— <span id="ccScoreBadge" style="font-size:11px;padding:3px 8px;border-radius:4px;background:var(--accent-red);color:#fff;">Score: 0%</span></h2><span id="ccSub">—</span></div>
                 <div class="cc-actions">
                     <button class="btn btn-secondary btn-sm" onclick="copyPhone()"><i class="fas fa-copy"></i> Copy</button>
                     <button class="btn btn-success btn-sm" onclick="openWhatsApp()"><i class="fab fa-whatsapp"></i> WA</button>
@@ -660,7 +675,25 @@
                 <button class="cc-tab" onclick="switchCCTab('application',this)"><i class="fas fa-file-signature"></i> Application</button>
             </div>
             <div id="ccPanel-details" class="cc-panel active"></div>
-            <div id="ccPanel-notes" class="cc-panel"></div>
+            <div id="ccPanel-notes" class="cc-panel">
+                <div class="card" style="margin-bottom: 16px; background: rgba(0, 212, 255, 0.05); border: 1px solid var(--accent-cyan);">
+                    <div class="card-title" style="color: var(--accent-cyan); margin-bottom: 12px;"><i class="fas fa-bolt"></i> Dual-Logging Action Form</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Logs touchpoint to ERA master file and moves diary follow-up date simultaneously.</div>
+                    <textarea id="dualLogNote" class="input" style="height: 60px; margin-bottom: 10px;" placeholder="Call outcome / Note..."></textarea>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-bottom:4px;">Next Follow-up</div>
+                            <input type="date" id="dualLogDate" class="input" style="width: 140px;">
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-size:10px; color:var(--text-muted); margin-bottom:4px;">New Heat Score (0-100)</div>
+                            <input type="number" id="dualLogScore" class="input" style="width: 100px;" min="0" max="100">
+                        </div>
+                        <button class="btn btn-primary" onclick="executeDualLog()" style="margin-top: 14px;"><i class="fas fa-save"></i> Execute Action</button>
+                    </div>
+                </div>
+                <div id="notesHistoryList"></div>
+            </div>
             <div id="ccPanel-qualification" class="cc-panel"></div>
             <div id="ccPanel-finance" class="cc-panel"></div>
             <div id="ccPanel-quote" class="cc-panel"></div>
@@ -902,6 +935,112 @@ function seedData() {
 }
 
 // ============================================================
+
+// ============================================================
+// DIARY & AUTOHUB FEATURES
+// ============================================================
+function renderDiary() {
+    const container = document.getElementById('diaryContainer');
+    container.innerHTML = '';
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Filter leads scheduled for today or earlier (past due)
+    const diaryLeads = db.leads.filter(l => l.followUpDate && l.followUpDate <= today && l.stage !== 'banked' && l.stage !== 'lost');
+    diaryLeads.sort((a,b) => (b.score||0) - (a.score||0)); // Sort by Heat Score DESC
+    
+    document.getElementById('navDiaryCount').textContent = diaryLeads.length;
+    
+    if (diaryLeads.length === 0) {
+        container.innerHTML = '<div class="empty-state">No follow-ups scheduled for today. You are caught up!</div>';
+        return;
+    }
+    
+    diaryLeads.forEach(l => {
+        const heatColor = (l.score >= 75) ? 'var(--accent-red)' : ((l.score >= 40) ? 'var(--accent-orange)' : 'var(--text-muted)');
+        const hist = l.noteHistory || [];
+        const lastNote = hist.length > 0 ? hist[hist.length-1] : null;
+        const timelineHtml = lastNote 
+            ? `<div style="font-size:11px; margin-top:8px;"><strong>⏱️ Last Touchpoint (${fmtDate(lastNote.date)}):</strong> ${lastNote.text}</div>`
+            : '';
+            
+        container.innerHTML += `
+            <div class="card" style="border-left: 4px solid ${heatColor}; cursor: pointer; transition: 0.2s;" onclick="openCC(${l.id})">
+                <div style="display:flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div style="font-size: 16px; font-weight: 700; display:flex; align-items:center; gap:8px;">
+                            👤 ${l.customer} 
+                            <span style="font-size:10px; background:${heatColor}; color:#fff; padding:2px 6px; border-radius:4px;">🔥 ${l.dealHeat || 'Unscored'} (Score: ${l.score || 0})</span>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">📞 ${l.phone}</div>
+                        <div style="font-size: 12px; color: var(--accent-cyan); margin-top: 2px;">🚗 ${l.vehicle || 'No vehicle'}</div>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); openWhatsApp()"><i class="fab fa-whatsapp"></i> Chat</button>
+                </div>
+                <div style="margin-top: 12px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">🎯 RECOMMENDED ACTION:</div>
+                    <div style="font-size: 12px; color: var(--accent-green);">👉 ${l.nextAction || 'Contact customer'}</div>
+                </div>
+                <div style="font-size:11px; margin-top:8px; display:flex; align-items:center; gap:6px;">
+                    <i class="fab fa-whatsapp" style="color:var(--accent-green);"></i> <strong>Snapshot:</strong> ${l.waSnapshot || 'No recent WA interaction.'}
+                </div>
+                ${timelineHtml}
+            </div>
+        `;
+    });
+}
+
+function executeDualLog() {
+    const text = document.getElementById('dualLogNote').value.trim();
+    const targetDate = document.getElementById('dualLogDate').value;
+    const score = parseInt(document.getElementById('dualLogScore').value);
+    
+    if (!text || !targetDate) { showToast('Please enter note and next date.'); return; }
+    
+    const lead = db.leads.find(l => l.id === ccState.id);
+    if (!lead) return;
+    
+    if (!lead.noteHistory) lead.noteHistory = [];
+    lead.noteHistory.push({
+        date: new Date().toISOString(),
+        text: text,
+        type: 'manual'
+    });
+    
+    lead.followUpDate = targetDate;
+    if (!isNaN(score)) {
+        lead.score = score;
+        if (score >= 80) lead.dealHeat = 'Stage 1: Hot Money';
+        else if (score >= 60) lead.dealHeat = 'Stage 2: Active';
+        else if (score >= 40) lead.dealHeat = 'Stage 3: Information';
+        else lead.dealHeat = 'Stage 4: Cold';
+    }
+    
+    saveDB();
+    showToast('Touchpoint Dual-Logged to ERA & Diary moved.');
+    
+    document.getElementById('dualLogNote').value = '';
+    
+    // Refresh UI
+    populateNotesTab(lead);
+    if (document.getElementById('diaryView').classList.contains('active')) {
+        renderDiary();
+    }
+}
+
+function populateNotesTab(lead) {
+    const hist = lead.noteHistory || [];
+    let html = '';
+    [...hist].reverse().forEach(n => {
+        const icon = n.type === 'wa' ? '<i class="fab fa-whatsapp" style="color:var(--accent-green);"></i>' : '<i class="fas fa-history" style="color:var(--text-muted);"></i>';
+        html += `<div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+            <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">${icon} ${fmtDate(n.date)}</div>
+            <div style="font-size: 13px;">${n.text}</div>
+        </div>`;
+    });
+    if (!html) html = '<div class="empty-state">No notes found.</div>';
+    document.getElementById('notesHistoryList').innerHTML = html;
+}
+
 // UI HELPERS
 // ============================================================
 function showToast(msg) {
@@ -945,7 +1084,7 @@ function switchView(name, el) {
     document.getElementById(name + 'View').classList.add('active');
     if (el) el.classList.add('active');
     if (name === 'dashboard') { if (!ccCharts.calls) initCCCharts(); updateDashboard(); }
-    if (name === 'leads') renderLeads();
+    if (name === 'leads') renderLeads(); renderDiary();
     if (name === 'agents') renderAgents();
     if (name === 'prequal') initPrequal();
     if (name === 'vehicleKB') initVehicleKB();
@@ -1256,7 +1395,7 @@ function addLead() {
     document.getElementById('newCustomer').value = '';
     document.getElementById('newPhone').value = '';
     document.getElementById('newVehicle').value = '';
-    renderLeads();
+    renderLeads(); renderDiary();
     updateDashboard();
     showToast('✓ Lead added: ' + customer);
 }
@@ -1337,6 +1476,11 @@ function openCC(id) {
     document.getElementById('ccName').textContent = lead.customer;
     document.getElementById('ccSub').textContent = `${lead.agent} · ${lead.vehicle||'No vehicle selected'}`;
     document.getElementById('ccCallLink').href = 'tel:' + lead.phone;
+    if (lead.score !== undefined) {
+        document.getElementById('ccScoreBadge').textContent = `Score: ${lead.score}%`;
+        document.getElementById('ccScoreBadge').style.background = (lead.score >= 75) ? 'var(--accent-red)' : 'var(--text-muted)';
+    }
+
 
     // Note count badge
     const nb = document.getElementById('notesBadge');
@@ -1474,7 +1618,7 @@ function detSaveVehicle() {
     else if (b && m) lead.vehicle = `${b} ${m}`;
     else if (b) lead.vehicle = b;
     document.getElementById('ccSub').textContent = `${lead.agent} · ${lead.vehicle||'No vehicle selected'}`;
-    saveDB(); renderLeads();
+    saveDB(); renderLeads(); renderDiary();
 }
 
 function makeEditable(el) {
@@ -1548,7 +1692,7 @@ function saveDetailsEdits() {
     }
     Object.assign(lead, ccState.edits);
     saveDB();
-    renderLeads();
+    renderLeads(); renderDiary();
     updateDashboard();
     closeCC();
     showToast('✓ Changes saved');
@@ -2059,7 +2203,7 @@ function pqSelectAlt(brand, model, variant) {
         if(!lead.financeData) lead.financeData={};
         lead.financeData.brand=brand; lead.financeData.model=model; lead.financeData.variant=variant;
         lead.vehicle=`${brand} ${model} ${variant}`;
-        saveDB(); renderLeads();
+        saveDB(); renderLeads(); renderDiary();
         document.getElementById('ccSub').textContent = `${lead.agent} · ${lead.vehicle}`;
     }
     // Refresh the vehicle reference display in finance panel
@@ -2670,7 +2814,7 @@ function importJSON(input) {
                 if(data.agents) localStorage.setItem(PROFILES_KEY,JSON.stringify(data.agents));
                 saveDB();
                 updateDashboard();
-                renderLeads();
+                renderLeads(); renderDiary();
                 showToast('✓ Data imported');
             });
         } catch(err) { showAlert('Error reading file: '+err.message); }
