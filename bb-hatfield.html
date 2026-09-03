@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BB Hatfield - Call Centre Agent Tool</title>
+    <title>AutoAI - Call Centre Agent Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -638,7 +638,7 @@
     <!-- SIDEBAR -->
     <aside class="sidebar">
         <div class="sidebar-header">
-            <div class="logo">BB Hatfield</div>
+            <div class="logo">Auto<span>AI</span></div>
             <div class="logo-sub">Agent Console</div>
             <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color);">
                 <label class="form-label" style="margin-bottom: 6px;">Your Name</label>
@@ -1360,16 +1360,16 @@ const VEHICLES_DATA = {
 
 const SCRIPTS_DATA = {
     enquiry: {
-        opener: "Good [morning/afternoon], [Customer Name]! Thank you for contacting BB Hatfield. How can I assist you with your vehicle purchase today?",
+        opener: "Good [morning/afternoon], [Customer Name]! Thank you for contacting AutoAI. How can I assist you with your vehicle purchase today?",
         qualifying: "1. What brings you in today?\n2. Are you looking to purchase new or used?\n3. What's your timeframe?\n4. Do you currently have a vehicle?\n5. Have you thought about budget?",
         objections: {
             "I need to think about it": "Absolutely, take your time. What specific aspect would help you decide? Let's schedule a follow-up call in 2-3 days.",
             "Your prices seem high": "Our pricing reflects full warranty and service plans. We can explore finance options that fit your budget.",
-            "I'll shop around first": "That's smart! Here's what makes BB Hatfield different: [key differentiators]. When you're ready, give us a call back.",
+            "I'll shop around first": "That's smart! Here's what makes AutoAI different: [key differentiators]. When you're ready, give us a call back.",
         }
     },
     application: {
-        opener: "Hi [Customer Name], this is [Agent Name] from BB Hatfield. Great news - your pre-qualification came through!",
+        opener: "Hi [Customer Name], this is [Agent Name] from AutoAI. Great news - your pre-qualification came through!",
         docs: "REQUIRED DOCS:\n☐ SA Identity (both sides)\n☐ Last 3 months payslips\n☐ Bank statement\n☐ Proof of residence\n☐ Employment letter (if needed)",
         objections: {
             "Bank says I need a guarantor": "A guarantor strengthens your application. It's typically a parent or spouse who co-signs.",
@@ -1382,8 +1382,8 @@ const SCRIPTS_DATA = {
         upsell: "Before you drive off: Extended Warranty, Service Plan, Smash & Grab Cover, Tracker, Interior Protection"
     },
     lost: {
-        opener: "Hi [Name], it's [Agent Name] from BB Hatfield. I noticed we haven't connected recently about your vehicle search.",
-        feedback: "1. What was the main deciding factor?\n2. Is there anything we could have done better?\n3. Keep BB Hatfield in mind for future vehicles?",
+        opener: "Hi [Name], it's [Agent Name] from AutoAI. I noticed we haven't connected recently about your vehicle search.",
+        feedback: "1. What was the main deciding factor?\n2. Is there anything we could have done better?\n3. Keep AutoAI in mind for future vehicles?",
     }
 };
 
@@ -2116,7 +2116,7 @@ When would be a good time for us to discuss the next steps?
 Looking forward to getting you into the right vehicle!
 
 Best regards,
-${currentAgent} - BB Hatfield
+${currentAgent} - AutoAI
 ☎️ Call for immediate assistance`;
 
     navigator.clipboard.writeText(template).then(() => {

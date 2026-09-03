@@ -1,5 +1,5 @@
 /**
- * BB Hatfield - Unified Vehicle Data
+ * AutoAI - Unified Vehicle Data
  * Merged from vehicle-comparison.html (full specs) and index.html (pricing)
  */
 
@@ -1223,7 +1223,7 @@ const VEHICLES = {
     },
     "safety_standard": [
       "Latest Gen Electronic Stability Program",
-      "4 airbags – additional Curtain Airbags for all rows (AX5)",
+      "4 airbags - additional Curtain Airbags for all rows (AX5)",
       "Personalized Safety Alerts"
     ],
     "safety_variants": {
@@ -1237,7 +1237,7 @@ const VEHICLES = {
         "Lane Keep Assist",
         "Traffic Sign Recognition",
         "High Beam Assist",
-        "6 airbags – additional side airbags",
+        "6 airbags - additional side airbags",
         "Tyre Pressure Monitoring System",
         "Driver Drowsiness Detection"
       ],
@@ -2080,7 +2080,7 @@ const VEHICLES = {
     },
     "transmission": [
       "5-speed Manual",
-      "5-speed AMT – Easy-R Technology"
+      "5-speed AMT - Easy-R Technology"
     ],
     "transmission_by_variant": {
       "LIFE": "Manual only",
@@ -2105,10 +2105,10 @@ const VEHICLES = {
       "kerb_kg": 736
     },
     "safety_standard": [
-      "Airbag – Driver and front passenger (dual airbags)",
+      "Airbag - Driver and front passenger (dual airbags)",
       "High safety Pro-Sense front seat belts",
       "ABS + EBD",
-      "Rear Park Distance Sensors – Ultra Sonic",
+      "Rear Park Distance Sensors - Ultra Sonic",
       "Seat belt reminder",
       "Front and rear seat belts"
     ],
@@ -2142,7 +2142,7 @@ const VEHICLES = {
       }
     },
     "interior": {
-      "ac": "Air conditioner and Heater – standard across all variants",
+      "ac": "Air conditioner and Heater - standard across all variants",
       "upholstery": {
         "LIFE": "Black and grey",
         "ZEN": "Crossway Black, red, grey",
@@ -2215,7 +2215,7 @@ const VEHICLES = {
       }
     },
     "warranty": {
-      "comprehensive": "5 years or 150 000km, whichever comes first – covers repair of any unexpected electronic or mechanical malfunctions",
+      "comprehensive": "5 years or 150 000km, whichever comes first - covers repair of any unexpected electronic or mechanical malfunctions",
       "body_corrosion": "6 years",
       "note": "Warranty does not cover wear and tear items such as shock absorbers, brake pads, clutch, cam belt, etc. T's and C's apply."
     },
@@ -2265,15 +2265,15 @@ const VEHICLES = {
       }
     ],
     "key_selling_points": [
-      "The Kwid gives you genuine SUV styling — raised ride height, bold grille, LED daytime running lights and 180mm ground clearance — at an entry-level price that makes it one of the most affordable ways to stand out on South African roads.",
-      "Boot space of 279 litres that expands to a class-leading 620 litres means you can pack for a weekend away, a school run or a shopping trip without compromise — no other car in this segment gives you that much space.",
+      "The Kwid gives you genuine SUV styling - raised ride height, bold grille, LED daytime running lights and 180mm ground clearance - at an entry-level price that makes it one of the most affordable ways to stand out on South African roads.",
+      "Boot space of 279 litres that expands to a class-leading 620 litres means you can pack for a weekend away, a school run or a shopping trip without compromise - no other car in this segment gives you that much space.",
       "The 8-inch MediaNav touchscreen with Apple CarPlay and Android Auto keeps your music, navigation and calls seamlessly integrated with your smartphone, so you stay connected without taking your eyes off the road.",
-      "With a combined fuel consumption from just 4.4 litres per 100km, the Kwid is one of the most cost-efficient cars on the market — ideal for beating rising fuel prices on your daily commute."
+      "With a combined fuel consumption from just 4.4 litres per 100km, the Kwid is one of the most cost-efficient cars on the market - ideal for beating rising fuel prices on your daily commute."
     ],
     "target": {
       "description": "First-time car buyers, young urban professionals and small families seeking an affordable, stylish and feature-rich entry-level vehicle",
       "lifestyle": "Urban commuters and young couples who want SUV presence, modern technology and practicality without the cost of a traditional SUV",
-      "positioning": "Value-for-money entry-level crossover hatchback with authentic SUV styling, best-in-class boot space and next-generation infotainment — positioned as the most feature-packed and design-forward car in the A-segment"
+      "positioning": "Value-for-money entry-level crossover hatchback with authentic SUV styling, best-in-class boot space and next-generation infotainment - positioned as the most feature-packed and design-forward car in the A-segment"
     }
   },
   "Renault::TRAFIC": {

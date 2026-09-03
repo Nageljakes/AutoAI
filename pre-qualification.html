@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BB Hatfield Pre-Qualification Form</title>
+    <title>AutoAI - Pre-Qualification Form</title>
     <style>
         * {
             margin: 0;
@@ -248,7 +248,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚗 BB HATFIELD PRE-QUALIFICATION FORM</h1>
+            <h1>🚗 AUTOAI PRE-QUALIFICATION FORM</h1>
             <p>Internet Lead Screening Tool | Renault • Suzuki • Mahindra • GAC Motor</p>
         </div>
         
@@ -272,7 +272,7 @@
                         <select id="leadSource">
                             <option value="">Select source...</option>
                             <option value="OEM Portal">OEM Portal</option>
-                            <option value="BB Hatfield Website">BB Hatfield Website</option>
+                            <option value="Dealership Website">Dealership Website</option>
                             <option value="AutoTrader">AutoTrader</option>
                             <option value="Cars.co.za">Cars.co.za</option>
                             <option value="Facebook">Facebook Campaign</option>
@@ -371,11 +371,11 @@
                         <select id="incomeRange">
                             <option value="">Select income range...</option>
                             <option value="under5000">Under R5,000 (Not likely to qualify)</option>
-                            <option value="5000-7499">R5,000 – R7,499</option>
-                            <option value="7500-10000">R7,500 – R10,000</option>
-                            <option value="10001-15000">R10,001 – R15,000</option>
-                            <option value="15001-20000">R15,001 – R20,000</option>
-                            <option value="20001-30000">R20,001 – R30,000</option>
+                            <option value="5000-7499">R5,000 - R7,499</option>
+                            <option value="7500-10000">R7,500 - R10,000</option>
+                            <option value="10001-15000">R10,001 - R15,000</option>
+                            <option value="15001-20000">R15,001 - R20,000</option>
+                            <option value="20001-30000">R20,001 - R30,000</option>
                             <option value="30001plus">R30,001+</option>
                         </select>
                     </div>
@@ -842,14 +842,14 @@
             
             const date = new Date().toISOString().split('T')[0];
             link.setAttribute('href', url);
-            link.setAttribute('download', `BB_Hatfield_PreQual_Records_${date}.csv`);
+            link.setAttribute('download', `AutoAI_PreQual_Records_${date}.csv`);
             link.style.visibility = 'hidden';
             
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             
-            alert(`✅ Exported ${records.length} records to Excel!\n\nFile: BB_Hatfield_PreQual_Records_${date}.csv\n\nOpen with Excel or Google Sheets.`);
+            alert(`✅ Exported ${records.length} records to Excel!\n\nFile: AutoAI_PreQual_Records_${date}.csv\n\nOpen with Excel or Google Sheets.`);
         }
         
         function viewAllRecords() {
@@ -863,7 +863,7 @@
             // Create summary
             const qualified = records.filter(r => r.hasLicense === 'Yes' && parseFloat(r.grossIncome) >= 7500);
             const summary = `
-📊 BB HATFIELD PRE-QUALIFICATION RECORDS
+📊 AUTOAI PRE-QUALIFICATION RECORDS
 
 Total Records: ${records.length}
 Qualified Leads: ${qualified.length}

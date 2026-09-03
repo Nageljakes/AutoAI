@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BB Hatfield — Vehicle Comparison</title>
+<title>AutoAI - Vehicle Comparison</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -144,7 +144,7 @@ select option{background:#1c1f27}
       </svg>
     </div>
     <div>
-      <div class="hdr-title">BB Hatfield — Vehicle Comparison</div>
+      <div class="hdr-title">AutoAI - Vehicle Comparison</div>
       <div class="hdr-sub">Renault · Suzuki · Mahindra · GAC Motor</div>
     </div>
   </div>
@@ -211,11 +211,11 @@ function renderRail() {
       </div>
       <div class="slot-selects">
         <select onchange="onBrandChange(${i},this.value)" id="brand-${i}">
-          <option value="">— Select Brand —</option>
+          <option value="">- Select Brand -</option>
           ${Object.keys(BRANDS).map(b=>`<option value="${b}" ${b===brand?'selected':''}>${b}</option>`).join('')}
         </select>
         <select onchange="onModelChange(${i},this.value)" id="model-${i}" ${!brand?'disabled':''}>
-          <option value="">— Select Model —</option>
+          <option value="">- Select Model -</option>
           ${brand ? Object.keys(BRANDS[brand]).map(m=>`<option value="${m}" ${m===slot.model?'selected':''}>${m}</option>`).join('') : ''}
         </select>
         <select onchange="onVariantChange(${i},this.value)" id="variant-${i}" ${!slot.model?'disabled':''}>
@@ -248,7 +248,7 @@ function clearAll() { slots=[{},{},{},{}]; renderRail(); renderComparison(); }
 // ── Helpers ────────────────────────────────────────────────────────────────────
 const fmt = n => n==null ? null : Number(n).toLocaleString('en-ZA');
 const fmtR = n => n==null ? null : 'R\u202F' + Number(n).toLocaleString('en-ZA');
-const nil = '<span class="val-null">—</span>';
+const nil = '<span class="val-null">-</span>';
 const fv = (v,cls='') => v==null ? nil : (cls ? `<span class="${cls}">${v}</span>` : v);
 
 function fuelConsDisplay(fc) {
@@ -489,7 +489,7 @@ function renderSafety(vehicles) {
     html += row(item.replace(/\(.*?\)/g,'').trim().substring(0,45), vehicles.map(vd=>{
       if(!vd) return null;
       const has = (vd.v.safety_standard||[]).includes(item);
-      return has ? '<span class="chip green">✓ Standard</span>' : '<span class="chip" style="color:var(--dim)">—</span>';
+      return has ? '<span class="chip green">✓ Standard</span>' : '<span class="chip" style="color:var(--dim)">-</span>';
     }));
   });
   
@@ -509,7 +509,7 @@ function renderSafety(vehicles) {
         for(const [variant, items] of Object.entries(vd.v.safety_variants||{})){
           if(items.includes(item)) return `<span class="chip amber">${variant}</span>`;
         }
-        return '<span class="chip" style="color:var(--dim)">—</span>';
+        return '<span class="chip" style="color:var(--dim)">-</span>';
       }));
     });
   }
@@ -557,7 +557,7 @@ function renderTech(vehicles) {
     if(!vd) return null;
     const has = checkFeature(vd.v.infotainment, ['carplay','apple_carplay']);
     const wireless = checkFeature(vd.v.infotainment, ['wireless carplay','wireless_apple']);
-    if(!has) return '<span class="chip" style="color:var(--dim)">—</span>';
+    if(!has) return '<span class="chip" style="color:var(--dim)">-</span>';
     return wireless ? '<span class="chip green">✓ Wireless</span>' : '<span class="chip blue">✓ Wired</span>';
   }));
   
@@ -565,26 +565,26 @@ function renderTech(vehicles) {
     if(!vd) return null;
     const has = checkFeature(vd.v.infotainment, ['android_auto','android auto']);
     const wireless = JSON.stringify(vd.v.infotainment||{}).toLowerCase().includes('wireless android');
-    if(!has) return '<span class="chip" style="color:var(--dim)">—</span>';
+    if(!has) return '<span class="chip" style="color:var(--dim)">-</span>';
     return wireless ? '<span class="chip green">✓ Wireless</span>' : '<span class="chip blue">✓ Wired</span>';
   }));
   
   html += row('Bluetooth', vehicles.map(vd=>{
     if(!vd) return null;
     const has = checkFeature(vd.v.infotainment, ['bluetooth']);
-    return has ? '<span class="chip green">✓</span>' : '<span class="chip" style="color:var(--dim)">—</span>';
+    return has ? '<span class="chip green">✓</span>' : '<span class="chip" style="color:var(--dim)">-</span>';
   }));
   
   html += row('Wireless Charging', vehicles.map(vd=>{
     if(!vd) return null;
     const has = checkFeature(vd.v.infotainment, ['wireless_charg','wireless charger','wireless charg']);
-    return has ? '<span class="chip green">✓</span>' : '<span class="chip" style="color:var(--dim)">—</span>';
+    return has ? '<span class="chip green">✓</span>' : '<span class="chip" style="color:var(--dim)">-</span>';
   }));
   
   html += row('Reverse Camera', vehicles.map(vd=>{
     if(!vd) return null;
     const has = checkFeature(vd.v.infotainment, ['reverse camera','rearview','rear view','360']);
-    return has ? '<span class="chip green">✓</span>' : '<span class="chip" style="color:var(--dim)">—</span>';
+    return has ? '<span class="chip green">✓</span>' : '<span class="chip" style="color:var(--dim)">-</span>';
   }));
   
   html += sRow('TARGET & POSITIONING', nc);
@@ -600,7 +600,7 @@ function renderPricing(vehicles) {
   const nc = vehicles.length+1;
   let html = `<table class="comp-table"><thead>${renderHeader(vehicles)}</thead><tbody>`;
   
-  html += sRow('RETAIL PRICING (INCL VAT) — ' + getPriceDate(vehicles), nc);
+  html += sRow('RETAIL PRICING (INCL VAT) - ' + getPriceDate(vehicles), nc);
   
   // Find max number of pricing trims
   const maxTrims = Math.max(...vehicles.map(vd=>vd?(vd.v.pricing||[]).length:0), 1);
@@ -613,7 +613,7 @@ function renderPricing(vehicles) {
     html += row(trim.length>35?trim.substring(0,35)+'…':trim, vehicles.map(vd=>{
       if(!vd) return null;
       const found = (vd.v.pricing||[]).find(p=>p.trim===trim);
-      if(!found||!found.price) return '<span class="val-null">—</span>';
+      if(!found||!found.price) return '<span class="val-null">-</span>';
       return `<span class="val-price">${fmtR(found.price)}</span>`;
     }));
   });
@@ -623,7 +623,7 @@ function renderPricing(vehicles) {
     html += row(trim.length>35?trim.substring(0,35)+'…':trim, vehicles.map(vd=>{
       if(!vd) return null;
       const found = (vd.v.pricing||[]).find(p=>p.trim===trim);
-      if(!found||!found.excl) return '<span class="val-null">—</span>';
+      if(!found||!found.excl) return '<span class="val-null">-</span>';
       return `<span class="val-num" style="font-size:11px;color:var(--muted)">${fmtR(found.excl)}</span>`;
     }));
   });

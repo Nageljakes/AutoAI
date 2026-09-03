@@ -1,4 +1,4 @@
-# BB Hatfield Call Centre Agent Tool
+# AutoAI Dealership Platform
 
 ## 🚀 Quick Start
 
@@ -7,23 +7,23 @@
 This is a production-ready call centre agent tool built as a single `bb-hatfield.html` file. It works offline, stores all data in localStorage, and is optimized for Cloudflare Pages.
 
 ### Files
-- **`bb-hatfield.html`** — The entire application (72KB, 1,720 lines)
+- **`bb-hatfield.html`** - The entire application (72KB, 1,720 lines)
 - Drop it anywhere, open in browser, start using immediately
 
 ## 📋 Features
 
 ### For Agents
-- **My Dashboard** — Personal KPIs: active leads, conversions, GP, avg deal value
-- **My Leads Pipeline** — All your leads by stage (enquiry → application → banked → lost)
-- **Pre-Qualification Tool** — NCA-grade calculator (gross income, DTI, deemed expenses)
-- **Vehicle Finder** — Catalog of 12+ vehicles with specs and pricing
-- **Sales Scripts** — Proven scripts for enquiry, application, banked, and lost leads
-- **Activity Log** — Track all your leads, closed deals, and conversion rate
+- **My Dashboard** - Personal KPIs: active leads, conversions, GP, avg deal value
+- **My Leads Pipeline** - All your leads by stage (enquiry → application → banked → lost)
+- **Pre-Qualification Tool** - NCA-grade calculator (gross income, DTI, deemed expenses)
+- **Vehicle Finder** - Catalog of 12+ vehicles with specs and pricing
+- **Sales Scripts** - Proven scripts for enquiry, application, banked, and lost leads
+- **Activity Log** - Track all your leads, closed deals, and conversion rate
 
 ### Data Management
-- **Snapshots** — Save up to 10 snapshots of your data to restore later
-- **Export/Import** — Backup all leads as JSON, restore anytime
-- **Agent Selector** — Switch between agents (Rudi, Lesedi, Tiisetso) to see their data
+- **Snapshots** - Save up to 10 snapshots of your data to restore later
+- **Export/Import** - Backup all leads as JSON, restore anytime
+- **Agent Selector** - Switch between agents (Rudi, Lesedi, Tiisetso) to see their data
 
 ### Tech Stack
 - Pure HTML5 + CSS3 + Vanilla JavaScript
@@ -132,7 +132,7 @@ Save snapshots of your data at any point:
 - "End of week"
 - "Before major change"
 
-Restore any snapshot instantly—reverts all leads and history to that moment.
+Restore any snapshot instantly-reverts all leads and history to that moment.
 
 ---
 
@@ -202,7 +202,7 @@ Max 10 snapshots per domain. Oldest automatically removed when limit reached.
 | Charts not showing | Check internet (Chart.js CDN required) or refresh page |
 | Agent selector empty | Refresh page, select agent again |
 | Slow performance | Clear localStorage if >50 leads: DevTools > Application > Clear Storage |
-| Lost data | Check snapshots—restore previous snapshot if needed |
+| Lost data | Check snapshots-restore previous snapshot if needed |
 
 ---
 
@@ -250,7 +250,7 @@ Issues or questions? Check:
 
 ## 📄 License
 
-This tool is for BB Hatfield internal use.
+This tool is for AutoAI internal use.
 
 ---
 

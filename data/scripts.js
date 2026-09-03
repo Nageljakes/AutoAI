@@ -1,11 +1,11 @@
 /**
- * BB Hatfield - Conversation Guide Scripts
+ * AutoAI - Conversation Guide Scripts
  * Sales scripts and objection handling by lead stage
  */
 
 const SCRIPTS = {
   enquiry: {
-    opener: `Good [morning/afternoon], [Customer Name]! Thank you for contacting BB Hatfield.
+    opener: `Good [morning/afternoon], [Customer Name]! Thank you for contacting AutoAI.
 How can I assist you with your vehicle purchase today?`,
 
     qualifying_questions: `
@@ -50,7 +50,7 @@ Shall we start with the pre-qualification?"`,
       service plan, and quality assurance we provide. Plus, we can explore finance options that fit your budget.
       If I show you a payment plan at [X]% interest over [60/72/84] months, would that work better for you?"`,
 
-      "I'll shop around first": `"That's smart - you should compare! Here's what makes BB Hatfield different:
+      "I'll shop around first": `"That's smart - you should compare! Here's what makes AutoAI different:
       [1-2 key differentiators: e.g., 'Parts availability same-day', 'Extended service warranty']
       When you're ready, give us a call back. We'll make sure you get the best deal."`,
 
@@ -65,7 +65,7 @@ Shall we start with the pre-qualification?"`,
   },
 
   application: {
-    opener: `Hi [Customer Name], this is [Agent Name] from BB Hatfield.
+    opener: `Hi [Customer Name], this is [Agent Name] from AutoAI.
 Great news - your pre-qualification came through! I'm excited to move forward with your application.`,
 
     docs_checklist: `
@@ -164,7 +164,7 @@ REFERRAL CLOSE:
 family, friends, colleagues - please send them my way. We treat every customer like you:
 attentive, honest, and committed to the best deal.
 
-Here's my card + WhatsApp: [Number]. Tell them you referred BB Hatfield!"`,
+Here's my card + WhatsApp: [Number]. Tell them you referred AutoAI!"`,
 
     post_delivery_follow_up: `
 DAY 1 POST-DELIVERY:
@@ -183,7 +183,7 @@ Just confirming your insurance is active & tracker (if ordered) is functioning."
   lost: {
     recovery_script: `
 RECOVERY OUTREACH (If Lead Was Lost During Enquiry/Application):
-"Hi [Name], it's [Agent Name] from BB Hatfield.
+"Hi [Name], it's [Agent Name] from AutoAI.
 I noticed we haven't connected in a few weeks about your vehicle search.
 Can I help clarify anything that may have caused you to pause?"
 
@@ -205,7 +205,7 @@ If customer confirms "No, I bought elsewhere" or "Not going forward":
 2. "Is there anything we could have done better?"
    → [Listen - this is gold for improvement]
 
-3. "Would you keep BB Hatfield in mind for future vehicles?"
+3. "Would you keep AutoAI in mind for future vehicles?"
    → [Build for future / referral]
 
 4. "Thanks for your feedback. If anything changes, here's my number..."`,
