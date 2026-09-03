@@ -478,7 +478,7 @@
 
         <div class="login-field">
             <label>Security Passcode / PIN</label>
-            <input type="password" id="loginPinInput" class="login-input" placeholder="Enter PIN (Default: 2470)" maxlength="8">
+            <input type="password" id="loginPinInput" class="login-input" placeholder="Enter PIN" maxlength="8">
         </div>
 
         <button class="login-btn" onclick="attemptLogin()"><i class="fas fa-lock-open"></i> Authenticate &amp; Launch</button>
@@ -3492,9 +3492,8 @@ function renderSnapshots() {
 // Show snapshot footer and load initial snapshots
 document.getElementById('snapshotFooter').style.display = 'flex';
 renderSnapshots();
-</script>
-</body>
-</html>
+
+
 
 // ============================================================
 // ENTERPRISE AUTHENTICATION & LOGIN GATE
@@ -3902,3 +3901,7 @@ function saveSecuritySettings() {
     localStorage.setItem(PINS_KEY, JSON.stringify(pins));
     showToast("Security passcodes updated.");
 }
+
+</script>
+</body>
+</html>
