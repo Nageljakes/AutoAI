@@ -931,6 +931,80 @@
     </div>
 </div>
 
+
+<!-- TRANSFER SINGLE LEAD MODAL (Management Only) -->
+<div id="transferLeadModal" class="modal-overlay">
+    <div class="modal modal-sm">
+        <div class="modal-hdr">
+            <h2 style="display:flex; align-items:center; gap:8px; color:var(--text-main);"><i class="fas fa-random"></i> Transfer Lead Assignment</h2>
+            <button class="modal-close" onclick="closeTransferModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div style="font-size:13px; color:var(--text-muted); margin-bottom:14px;">
+                Customer: <strong id="transferLeadCustomer" style="color:var(--text-main);"></strong><br>
+                Current Assignee: <strong id="transferLeadCurrentAgent" style="color:var(--accent-orange);"></strong>
+            </div>
+            <div class="app-field" style="margin-bottom:14px;">
+                <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:6px;">Reassign To Salesperson</label>
+                <select id="transferLeadTargetAgent" class="cc-input" style="width:100%;">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+            <div class="app-field" style="margin-bottom:16px;">
+                <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:6px;">Transfer Reason / Note</label>
+                <input type="text" id="transferLeadReason" class="cc-input" style="width:100%; box-sizing:border-box;" placeholder="e.g. Consultant unavailable, workload reallocation">
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
+                <button class="btn btn-secondary" onclick="closeTransferModal()">Cancel</button>
+                <button class="btn" style="background:var(--accent-purple); color:#fff;" onclick="confirmLeadTransfer()"><i class="fas fa-check"></i> Confirm Reassignment</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- BULK CUSTOMER BASE REASSIGNMENT MODAL (Management Only) -->
+<div id="bulkTransferModal" class="modal-overlay">
+    <div class="modal modal-sm">
+        <div class="modal-hdr">
+            <h2 style="display:flex; align-items:center; gap:8px; color:var(--text-main);"><i class="fas fa-users-cog"></i> Reassign Entire Customer Base</h2>
+            <button class="modal-close" onclick="closeBulkTransferModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="bulkSourceAgent">
+            <div style="background:rgba(234, 179, 8, 0.1); border:1px solid var(--accent-yellow); border-radius:6px; padding:12px; margin-bottom:16px;">
+                <div style="font-weight:700; color:var(--accent-yellow); font-size:13px;" id="bulkTransferTitle">Reassign Customer Base</div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;" id="bulkLeadCountInfo">Scanning customer records...</div>
+            </div>
+
+            <div class="app-field" style="margin-bottom:16px;">
+                <label style="font-size:12px; font-weight:700; color:var(--text-main); display:block; margin-bottom:8px;">Transfer Strategy</label>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+                        <input type="radio" name="bulkTransferType" value="even" checked onchange="toggleBulkTransferType()">
+                        <span><strong>Distribute evenly</strong> across all Sales &amp; Senior Sales Executives</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+                        <input type="radio" name="bulkTransferType" value="specific" onchange="toggleBulkTransferType()">
+                        <span>Transfer entire customer base to a <strong>specific person</strong></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="app-field" id="bulkSpecificAgentContainer" style="display:none; margin-bottom:16px;">
+                <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:6px;">Select Recipient Consultant</label>
+                <select id="bulkTargetSpecificAgent" class="cc-input" style="width:100%;">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
+                <button class="btn btn-secondary" onclick="closeBulkTransferModal()">Cancel</button>
+                <button class="btn btn-warning" onclick="confirmBulkTransfer()"><i class="fas fa-share-alt"></i> Execute Reassignment</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- CONTACT CARD MODAL -->
 <div id="ccModal" class="modal-overlay">
     <div class="modal modal-lg">
@@ -943,6 +1017,7 @@
                     <button class="btn btn-secondary btn-sm" onclick="copyPhone()"><i class="fas fa-copy"></i> Copy</button>
                     <button class="btn btn-success btn-sm" onclick="openWhatsApp()"><i class="fab fa-whatsapp"></i> WA</button>
                     <a id="ccCallLink" class="btn btn-secondary btn-sm" href="#"><i class="fas fa-phone"></i> Call</a>
+                    <button id="ccTransferBtn" class="btn btn-secondary btn-sm" onclick="openTransferModal()" style="display:none; background:var(--accent-purple); color:#fff; border:none;"><i class="fas fa-random"></i> Transfer</button>
                 </div>
                 <button class="nav-arrow" onclick="navigateCC(1)"><i class="fas fa-chevron-right"></i></button>
             </div>
@@ -1826,7 +1901,7 @@ function renderLeads() {
     const user = getCurrentUser();
     
     let leads = [...getAccessibleLeads()];
-    if (search) leads = leads.filter(l => l.customer.toLowerCase().includes(search) || l.phone.includes(search) || (l.vehicle||'').toLowerCase().includes(search));
+    if (search) leads = leads.filter(l => l.customer.toLowerCase().includes(search) || (l.phone||"").includes(search) || (l.vehicle||'').toLowerCase().includes(search));
     if (stageFilter) leads = leads.filter(l => l.stage === stageFilter);
     if (agentFilter) leads = leads.filter(l => l.agent === agentFilter);
     leads.sort((a,b) => new Date(b.created)-new Date(a.created));
@@ -1896,6 +1971,11 @@ function openCC(id) {
     document.getElementById('ccAvatar').textContent = initials;
     document.getElementById('ccName').innerHTML = `${lead.customer} <span id="ccScoreBadge" style="font-size:11px;padding:3px 8px;border-radius:4px;display:none;"></span>`;
     document.getElementById('ccSub').textContent = `${lead.agent} · ${lead.vehicle||'No vehicle selected'}`;
+    const user = getCurrentUser();
+    const transferBtn = document.getElementById('ccTransferBtn');
+    if (transferBtn) {
+        transferBtn.style.display = isManagerRole(user.role) ? 'inline-flex' : 'none';
+    }
     document.getElementById('ccCallLink').href = 'tel:' + lead.phone;
     if (lead.score !== undefined) {
         const badge = document.getElementById('ccScoreBadge');
@@ -2045,6 +2125,11 @@ function detSaveVehicle() {
     else if (b && m) lead.vehicle = `${b} ${m}`;
     else if (b) lead.vehicle = b;
     document.getElementById('ccSub').textContent = `${lead.agent} · ${lead.vehicle||'No vehicle selected'}`;
+    const user = getCurrentUser();
+    const transferBtn = document.getElementById('ccTransferBtn');
+    if (transferBtn) {
+        transferBtn.style.display = isManagerRole(user.role) ? 'inline-flex' : 'none';
+    }
     saveDB(); renderLeads(); renderDiary();
 }
 
@@ -3519,6 +3604,183 @@ renderSnapshots();
 
 
 
+
+// ============================================================
+// MANAGEMENT LEAD REASSIGNMENT & BULK TRANSFER ENGINE
+// ============================================================
+function openTransferModal() {
+    if (!isManagerRole(getCurrentUser().role)) {
+        alert("Management authorization required to transfer leads.");
+        return;
+    }
+    const lead = db.leads.find(l => l.id === ccState.id);
+    if (!lead) return;
+    
+    document.getElementById('transferLeadCustomer').textContent = lead.customer;
+    document.getElementById('transferLeadCurrentAgent').textContent = lead.agent || 'Unassigned';
+    document.getElementById('transferLeadReason').value = '';
+    
+    const select = document.getElementById('transferLeadTargetAgent');
+    select.innerHTML = '';
+    const users = getUsers();
+    users.forEach(u => {
+        if (u.username.toLowerCase() !== (lead.agent || '').toLowerCase()) {
+            const opt = document.createElement('option');
+            opt.value = u.username;
+            opt.textContent = `${u.username} (${u.userType})`;
+            select.appendChild(opt);
+        }
+    });
+    
+    document.getElementById('transferLeadModal').classList.add('open');
+}
+
+function closeTransferModal() {
+    document.getElementById('transferLeadModal').classList.remove('open');
+}
+
+function confirmLeadTransfer() {
+    if (!isManagerRole(getCurrentUser().role)) {
+        alert("Management authorization required.");
+        return;
+    }
+    const lead = db.leads.find(l => l.id === ccState.id);
+    if (!lead) return;
+    
+    const targetAgent = document.getElementById('transferLeadTargetAgent').value;
+    const reason = document.getElementById('transferLeadReason').value.trim() || 'Management reallocation';
+    const oldAgent = lead.agent || 'Unassigned';
+    
+    if (!targetAgent) {
+        alert("Please select a target salesperson.");
+        return;
+    }
+    
+    lead.agent = targetAgent;
+    if (!lead.noteHistory) lead.noteHistory = [];
+    lead.noteHistory.push({
+        date: new Date().toISOString(),
+        text: `[Transfer] Reassigned from ${oldAgent} to ${targetAgent} by ${getCurrentUser().name}. Reason: ${reason}`
+    });
+    
+    saveDB();
+    closeTransferModal();
+    
+    document.getElementById('ccSub').textContent = `${lead.agent} · ${lead.vehicle||'No vehicle selected'}`;
+    renderDiary();
+    renderLeads();
+    renderWhiteboard();
+    updateDashboard();
+    
+    showToast(`Lead ${lead.customer} transferred to ${targetAgent}.`);
+}
+
+function openBulkTransferModal(sourceUsername) {
+    if (!isManagerRole(getCurrentUser().role)) {
+        alert("Management authorization required to reassign customer bases.");
+        return;
+    }
+    
+    const leads = db.leads.filter(l => l.agent && l.agent.toLowerCase() === sourceUsername.toLowerCase() && l.stage !== 'lost');
+    
+    document.getElementById('bulkSourceAgent').value = sourceUsername;
+    document.getElementById('bulkTransferTitle').textContent = `Reassign ${sourceUsername}'s Customer Base`;
+    document.getElementById('bulkLeadCountInfo').textContent = `Found ${leads.length} active lead(s) currently assigned to ${sourceUsername}.`;
+    
+    const select = document.getElementById('bulkTargetSpecificAgent');
+    select.innerHTML = '';
+    const users = getUsers();
+    users.forEach(u => {
+        if (u.username.toLowerCase() !== sourceUsername.toLowerCase()) {
+            const opt = document.createElement('option');
+            opt.value = u.username;
+            opt.textContent = `${u.username} (${u.userType})`;
+            select.appendChild(opt);
+        }
+    });
+    
+    document.querySelector('input[name="bulkTransferType"][value="even"]').checked = true;
+    toggleBulkTransferType();
+    
+    document.getElementById('bulkTransferModal').classList.add('open');
+}
+
+function closeBulkTransferModal() {
+    document.getElementById('bulkTransferModal').classList.remove('open');
+}
+
+function toggleBulkTransferType() {
+    const isSpecific = document.querySelector('input[name="bulkTransferType"]:checked').value === 'specific';
+    document.getElementById('bulkSpecificAgentContainer').style.display = isSpecific ? 'block' : 'none';
+}
+
+function confirmBulkTransfer() {
+    if (!isManagerRole(getCurrentUser().role)) {
+        alert("Management authorization required.");
+        return;
+    }
+    const sourceAgent = document.getElementById('bulkSourceAgent').value;
+    const isSpecific = document.querySelector('input[name="bulkTransferType"]:checked').value === 'specific';
+    
+    const leads = db.leads.filter(l => l.agent && l.agent.toLowerCase() === sourceAgent.toLowerCase() && l.stage !== 'lost');
+    if (leads.length === 0) {
+        alert(`No active leads found for ${sourceAgent}.`);
+        closeBulkTransferModal();
+        return;
+    }
+    
+    const currentUser = getCurrentUser();
+    const allUsers = getUsers();
+    
+    if (isSpecific) {
+        const targetAgent = document.getElementById('bulkTargetSpecificAgent').value;
+        if (!targetAgent) {
+            alert("Please select a recipient consultant.");
+            return;
+        }
+        leads.forEach(l => {
+            const old = l.agent;
+            l.agent = targetAgent;
+            if (!l.noteHistory) l.noteHistory = [];
+            l.noteHistory.push({
+                date: new Date().toISOString(),
+                text: `[Bulk Reassignment] Transferred from ${old} to ${targetAgent} by Management (${currentUser.name}).`
+            });
+        });
+        showToast(`Reassigned ${leads.length} leads to ${targetAgent}.`);
+    } else {
+        // Distribute evenly across all Sales & Senior Sales Executives
+        const eligibleStaff = allUsers.filter(u => {
+            const ut = u.userType.toLowerCase();
+            return (ut.includes('sales') || ut.includes('executive')) && u.username.toLowerCase() !== sourceAgent.toLowerCase();
+        });
+        
+        if (eligibleStaff.length === 0) {
+            alert("No available Sales or Senior Sales Executives found to receive leads. Please create or assign sales staff first.");
+            return;
+        }
+        
+        leads.forEach((l, idx) => {
+            const target = eligibleStaff[idx % eligibleStaff.length];
+            const old = l.agent;
+            l.agent = target.username;
+            if (!l.noteHistory) l.noteHistory = [];
+            l.noteHistory.push({
+                date: new Date().toISOString(),
+                text: `[Bulk Even Reassignment] Transferred from ${old} to ${target.username} by Management (${currentUser.name}).`
+            });
+        });
+        showToast(`Evenly distributed ${leads.length} leads across ${eligibleStaff.length} sales staff.`);
+    }
+    
+    saveDB();
+    closeBulkTransferModal();
+    renderDiary();
+    renderLeads();
+    renderWhiteboard();
+    updateDashboard();
+}
+
 // ============================================================
 // ENTERPRISE USER MANAGEMENT & AUTHENTICATION
 // ============================================================
@@ -3678,6 +3940,7 @@ function renderManageUsers() {
                 </td>
                 <td style="padding:10px 8px; text-align:right;">
                     <button class="btn btn-secondary btn-sm" onclick="editUser(${u.id})" style="margin-right:4px;"><i class="fas fa-edit"></i> Edit</button>
+                    <button class="btn btn-sm" style="background:var(--accent-purple); color:#fff; margin-right:4px;" onclick="openBulkTransferModal('${u.username}')" title="Transfer Customer Base"><i class="fas fa-random"></i> Transfer Base</button>
                     <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>
