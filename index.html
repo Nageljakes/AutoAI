@@ -506,10 +506,6 @@
             <div class="nav-item" onclick="switchView('inbox',this)"><i class="fas fa-inbox"></i> Lead Inbox <span class="nav-badge" id="navInboxCount">0</span></div>
             <div class="nav-section">Dealership Operations</div>
             <div class="nav-item" onclick="switchView('settings',this)"><i class="fas fa-sliders-h"></i> Dealership Setup</div>
-            <div class="nav-section">Tools & Resources</div>
-            <div class="nav-item" onclick="switchView('prequal',this)"><i class="fas fa-clipboard-check"></i> Pre-Qualification</div>
-            <div class="nav-item" onclick="switchView('vehicleKB',this)"><i class="fas fa-car"></i> Vehicle Knowledge Base</div>
-            <div class="nav-item" onclick="switchView('guide',this)"><i class="fas fa-book"></i> Conversation Guide</div>
             <div class="nav-section">Agent Management</div>
             <div class="nav-item" onclick="switchView('agents',this)"><i class="fas fa-user-tie"></i> Agent Performance</div>
             <div class="nav-section">Data</div>
@@ -864,26 +860,7 @@
                 </table>
             </div>
         </div>
-        <!-- PRE-QUALIFICATION VIEW -->
-        <div id="prequalView" class="view">
-            <div class="page-title">Pre-Qualification</div>
-            <div class="page-sub">NCA-grade affordability assessment & qualification</div>
-            <div id="prequalForm" style="display:none;">Loading pre-qualification form...</div>
-        </div>
 
-        <!-- VEHICLE KNOWLEDGE BASE VIEW -->
-        <div id="vehicleKBView" class="view">
-            <div class="page-title">Vehicle Knowledge Base</div>
-            <div class="page-sub">Browse vehicles, compare specs, check pricing</div>
-            <div id="vehicleKBContent">Loading vehicle database...</div>
-        </div>
-
-        <!-- CONVERSATION GUIDE VIEW -->
-        <div id="guideView" class="view">
-            <div class="page-title">Conversation Guide</div>
-            <div class="page-sub">Sales scripts and objection handling by lead stage</div>
-            <div id="guideContent">Loading conversation scripts...</div>
-        </div>
     </main>
 </div>
 
@@ -1464,9 +1441,6 @@ function switchView(name, el) {
     if (name === 'inbox') { renderInbox(); }
     if (name === 'settings') { initSettings(); }
     if (name === 'agents') renderAgents();
-    if (name === 'prequal') initPrequal();
-    if (name === 'vehicleKB') initVehicleKB();
-    if (name === 'guide') initConversationGuide();
 }
 
 // ============================================================
