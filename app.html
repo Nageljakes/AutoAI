@@ -850,52 +850,6 @@ let quizViewMonth = new Date();
 let dialogCallback = null;
 
 // VEHICLE DATABASE
-const vehicleData = {
-    "SUZUKI": {
-        "CELERIO": [{v:"1.0 GA MT",p:188900},{v:"1.0 GL MT",p:210900},{v:"1.0 GL AMT",p:225900}],
-        "SWIFT": [{v:"1.2i GL MT",p:224900},{v:"1.2i GL+ MT",p:245900},{v:"1.2i GL+ CVT",p:265900},{v:"1.2 GLX MT",p:271900},{v:"1.2 GLX CVT",p:291900}],
-        "FRONX": [{v:"1.5 GL 5MT",p:298900},{v:"1.5 GL 4AT",p:319900},{v:"1.5 GLX 5MT",p:342900},{v:"1.5 GLX 4AT",p:362900}],
-        "GRAND VITARA": [{v:"1.5 GL 5MT",p:358900},{v:"1.5 GL 4AT",p:381900},{v:"1.5 GLX 4AT",p:453900}],
-        "JIMNY": [{v:"1.5 GLX 5MT",p:432900},{v:"1.5 GLX 4AT",p:454900}],
-        "BALENO": [{v:"1.5 GL 5MT",p:266900},{v:"1.5 GL 4AT",p:288900},{v:"1.5 GLX 5MT",p:319900},{v:"1.5 GLX 4AT",p:339900}],
-        "ERTIGA": [{v:"1.5 GA MT",p:299900},{v:"1.5 GL MT",p:339900},{v:"1.5 GL AT",p:358900}],
-        "CIAZ": [{v:"1.5 GL MT",p:294900},{v:"1.5 GL AT",p:311900},{v:"1.5 GLX MT",p:339900},{v:"1.5 GLX AT",p:356900}],
-        "S-PRESSO": [{v:"1.0 GL MT",p:178900},{v:"1.0 GL AMT",p:192900},{v:"1.0 GL+ MT",p:189900},{v:"1.0 GL+ AMT",p:203900}],
-        "DZIRE": [{v:"1.2 GA MT",p:224900},{v:"1.2 GL+ MT",p:246900},{v:"1.2 GL+ CVT",p:266900}],
-        "IGNIS": [{v:"1.2 GL MT",p:237900},{v:"1.2 GLX MT",p:276900},{v:"1.2 GLX AMT",p:293900}],
-        "XL6": [{v:"1.5 GL 5MT",p:357900},{v:"1.5 GL 4AT",p:376900},{v:"1.5 GLX 5MT",p:374900},{v:"1.5 GLX 4AT",p:393900}],
-        "JIMNY 5-DOOR": [{v:"1.5 GL 5MT",p:434900},{v:"1.5 GLX 5MT",p:462900},{v:"1.5 GLX 4AT",p:484900}],
-        "SWIFT SPORT": [{v:"1.4 TURBO MT",p:463900},{v:"1.4 TURBO AT",p:487900}]
-    },
-    "MAHINDRA": {
-        "XUV3X0": [{v:"MX2 1.2T MT",p:259999},{v:"MX2 1.2T AT",p:279999},{v:"MX3 1.2T MT",p:279999},{v:"MX3 1.2T AT",p:300899},{v:"AX5 1.2T MT",p:319999},{v:"AX5 1.2T AT",p:344999},{v:"AX5L 1.2T AT",p:374999},{v:"AX7L 1.2T AT",p:404999}],
-        "XUV700": [{v:"AX5 2.0T AT",p:495199},{v:"AX7 2.0T AT",p:551399},{v:"AX7L 2.0T AT",p:599999}],
-        "Scorpio-N": [{v:"Z4 2.2 D AT",p:489999},{v:"Z8 2.2 D AT",p:536999},{v:"Z8 2.2 D 4x4 AT",p:587999},{v:"Z8L 2.2 D 4x4 AT",p:665999}],
-        "Bolero": [{v:"2.5 D Maxi Truck",p:215999}],
-        "Pik Up": [{v:"2.2 D S4 S/Cab",p:289249},{v:"2.2 D S4 S/Cab AC",p:303549}],
-        "Thar": [{v:"2.0T 4x4 AT",p:489999},{v:"2.2 D 4x4 AT",p:519999}],
-        "Scorpio Classic": [{v:"2.2 D S7 7-Seat",p:436999},{v:"2.2 D S11 7-Seat",p:464999}],
-        "KUV100": [{v:"1.2 G80 K6+",p:189999},{v:"1.2 G80 K8",p:208999}]
-    },
-    "RENAULT": {
-        "KWID": [{v:"1.0 Xtreme",p:186900},{v:"1.0 Climber",p:191900},{v:"1.0 Climber AMT",p:206900}],
-        "KIGER": [{v:"1.0 Zen MT",p:229900},{v:"1.0 Zen CVT",p:249900},{v:"1.0T Intens CVT",p:309900},{v:"1.0T Intens EDC",p:324900}],
-        "TRIBER": [{v:"1.0 Expression",p:216900},{v:"1.0 Dynamique",p:235900},{v:"1.0 Dynamique CVT",p:256900},{v:"1.0 Prestige",p:256900},{v:"1.0 Prestige CVT",p:277900}],
-        "SANDERO": [{v:"66kW Turbo Stepway",p:289900}],
-        "DUSTER": [{v:"1.5 dCi Dynamique 4x2",p:359900},{v:"1.5 dCi Dynamique 4x4",p:429900}],
-        "KOLEOS": [{v:"2.5 Dynamique 4x4",p:599900}],
-        "KANGOO": [{v:"1.5 dCi Panel Van",p:329900}],
-        "CLIO": [{v:"IV 66kW Turbo Expression",p:289900},{v:"IV 66kW Turbo Dynamique",p:314900}],
-        "CAPTUR": [{v:"66kW Turbo Expression",p:349900},{v:"66kW Turbo Dynamique",p:379900}],
-        "ARKANA": [{v:"1.3T Zen EDC",p:429900},{v:"1.3T Intens EDC",p:469900}]
-    },
-    "GAC": {
-        "GS3 Emzoom": [{v:"1.5T Comfort MT",p:289999},{v:"1.5T Comfort DCT",p:309999},{v:"1.5T Elite MT",p:319999},{v:"1.5T Elite DCT",p:339999}],
-        "GS8": [{v:"2.0T Luxury 7-Seat",p:749999},{v:"2.0T Elite 7-Seat",p:849999}],
-        "Emkoo": [{v:"1.5T Comfort DCT",p:399999},{v:"1.5T Elite DCT",p:459999}],
-        "M8": [{v:"2.0T Luxury 7-Seat",p:749999},{v:"2.0T Elite 7-Seat",p:849999}]
-    }
-};
 
 // ============================================================
 // STORAGE
@@ -1084,7 +1038,8 @@ function switchView(name, el) {
     document.getElementById(name + 'View').classList.add('active');
     if (el) el.classList.add('active');
     if (name === 'dashboard') { if (!ccCharts.calls) initCCCharts(); updateDashboard(); }
-    if (name === 'leads') renderLeads(); renderDiary();
+    if (name === 'leads') { renderLeads(); }
+    if (name === 'diary') { renderDiary(); }
     if (name === 'agents') renderAgents();
     if (name === 'prequal') initPrequal();
     if (name === 'vehicleKB') initVehicleKB();
@@ -1473,12 +1428,16 @@ function openCC(id) {
 
     const initials = lead.customer.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
     document.getElementById('ccAvatar').textContent = initials;
-    document.getElementById('ccName').textContent = lead.customer;
+    document.getElementById('ccName').innerHTML = `${lead.customer} <span id="ccScoreBadge" style="font-size:11px;padding:3px 8px;border-radius:4px;display:none;"></span>`;
     document.getElementById('ccSub').textContent = `${lead.agent} · ${lead.vehicle||'No vehicle selected'}`;
     document.getElementById('ccCallLink').href = 'tel:' + lead.phone;
     if (lead.score !== undefined) {
-        document.getElementById('ccScoreBadge').textContent = `Score: ${lead.score}%`;
-        document.getElementById('ccScoreBadge').style.background = (lead.score >= 75) ? 'var(--accent-red)' : 'var(--text-muted)';
+        const badge = document.getElementById('ccScoreBadge');
+        if (badge) {
+            badge.style.display = 'inline-block';
+            badge.textContent = `Score: ${lead.score}%`;
+            badge.style.background = (lead.score >= 75) ? 'var(--accent-red)' : 'var(--text-muted)';
+        }
     }
 
 

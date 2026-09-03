@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BB Hatfield CRM v8.0</title>
+    <title>BB Hatfield - Unified Agent App</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
@@ -399,6 +399,10 @@
     </style>
 </head>
 <body>
+<!-- Data files: Vehicle database and conversation scripts -->
+<script src="data/vehicles.js"></script>
+<script src="data/scripts.js"></script>
+
 <div class="layout">
     <!-- SIDEBAR -->
     <aside class="sidebar">
@@ -409,8 +413,14 @@
         <nav class="nav">
             <div class="nav-section">Dashboard</div>
             <div class="nav-item active" onclick="switchView('dashboard',this)"><i class="fas fa-chart-line"></i> Command Center</div>
+            <div class="nav-section">Daily Operations</div>
+            <div class="nav-item" onclick="switchView('diary',this)"><i class="fas fa-calendar-day"></i> Daily Diary <span class="nav-badge" id="navDiaryCount">0</span></div>
             <div class="nav-section">Lead Management</div>
             <div class="nav-item" onclick="switchView('leads',this)"><i class="fas fa-users"></i> Lead Pipeline <span class="nav-badge" id="navLeadCount">0</span></div>
+            <div class="nav-section">Tools & Resources</div>
+            <div class="nav-item" onclick="switchView('prequal',this)"><i class="fas fa-clipboard-check"></i> Pre-Qualification</div>
+            <div class="nav-item" onclick="switchView('vehicleKB',this)"><i class="fas fa-car"></i> Vehicle Knowledge Base</div>
+            <div class="nav-item" onclick="switchView('guide',this)"><i class="fas fa-book"></i> Conversation Guide</div>
             <div class="nav-section">Agent Management</div>
             <div class="nav-item" onclick="switchView('agents',this)"><i class="fas fa-user-tie"></i> Agent Performance</div>
             <div class="nav-section">Data</div>
@@ -549,13 +559,26 @@
         </div>
 
         <!-- LEADS VIEW -->
+        
+        <!-- DIARY VIEW -->
+        <div id="diaryView" class="view">
+            <div class="page-title">Daily Diary</div>
+            <div class="page-sub">AutoHUB-style Executive Deal Cards for today's follow-ups</div>
+            <div style="margin-bottom: 16px; display: flex; justify-content: space-between;">
+                <div style="color: var(--text-muted); font-size: 13px;">Follow-ups scheduled for today (or past due).</div>
+            </div>
+            <div id="diaryContainer" style="display: flex; flex-direction: column; gap: 16px;">
+                <!-- Diary Cards rendered via JS -->
+            </div>
+        </div>
+
         <div id="leadsView" class="view">
             <div class="page-title">Lead Pipeline</div>
             <div class="page-sub">Full prospect management</div>
             <div class="card">
                 <div class="card-header"><div class="card-title">Add New Lead</div></div>
                 <div class="form-grid">
-                    <div class="form-field"><div class="form-label">Agent *</div><select id="newAgent" class="input"><option value="">Select...</option></select></div>
+                    <div class="form-field"><div class="form-label">Agent *</div><select id="newAgent" class="input"><option value="">Select...</option><option>Rudi</option><option>Lesedi</option><option>Tiisetso</option></select></div>
                     <div class="form-field"><div class="form-label">Customer Name *</div><input type="text" id="newCustomer" class="input" placeholder="Full name"></div>
                     <div class="form-field"><div class="form-label">Phone *</div><input type="text" id="newPhone" class="input" placeholder="0821234567"></div>
                     <div class="form-field"><div class="form-label">Vehicle</div><input type="text" id="newVehicle" class="input" placeholder="e.g. Suzuki Swift"></div>
@@ -577,6 +600,7 @@
                         </select>
                         <select id="filterAgent" class="input" onchange="renderLeads()" style="width:120px;">
                             <option value="">All Agents</option>
+                            <option>Rudi</option><option>Lesedi</option><option>Tiisetso</option>
                         </select>
                         <input type="text" id="leadSearch" class="input" placeholder="Search..." style="width:200px;" oninput="renderLeads()">
                     </div>
@@ -590,42 +614,36 @@
 
         <!-- AGENTS VIEW -->
         <div id="agentsView" class="view">
-            <div class="page-title">Agent Management</div>
-            <div class="page-sub">Manage agents and view performance metrics</div>
-            
-            <div style="display: grid; grid-template-columns: 280px 1fr; gap: 20px;">
-                <!-- LEFT PANE: Agent Management -->
-                <div class="card" style="margin:0; height: fit-content;">
-                    <div class="card-header">
-                        <div class="card-title"><i class="fas fa-users-cog"></i> Agent Management</div>
-                    </div>
-                    
-                    <div class="form-field" style="margin-bottom: 16px;">
-                        <div class="form-label">Add New Agent</div>
-                        <div style="display: flex; gap: 8px; margin-top: 8px;">
-                            <input type="text" id="newAgentName" class="input" placeholder="Agent name" style="flex: 1;" onkeypress="if(event.key==='Enter') addNewAgent()">
-                            <button class="btn btn-primary btn-sm" onclick="addNewAgent()"><i class="fas fa-plus"></i></button>
-                        </div>
-                    </div>
-                    
-                    <div style="border-top: 1px solid var(--border); padding-top: 12px;">
-                        <div class="form-label" style="margin-bottom: 10px;">Active Agents <span id="agentCount" style="color: var(--accent-cyan); font-weight: 700;">0</span></div>
-                        <div id="agentListContainer" style="max-height: 400px; overflow-y: auto;"></div>
-                    </div>
-                </div>
-                
-                <!-- RIGHT PANE: Agent Performance -->
-                <div>
-                    <div class="metrics-grid" id="agentCards"></div>
-                    <div class="card">
-                        <div class="card-header"><div class="card-title">Agent Leads & Performance</div></div>
-                        <table>
-                            <thead><tr><th>Agent</th><th>Leads</th><th>Enquiries</th><th>Applications</th><th>Banked</th><th>Lost</th><th>GP</th><th></th></tr></thead>
-                            <tbody id="agentTable"></tbody>
-                        </table>
-                    </div>
-                </div>
+            <div class="page-title">Agent Performance</div>
+            <div class="page-sub">Click an agent to open their profile</div>
+            <div class="metrics-grid" id="agentCards"></div>
+            <div class="card">
+                <div class="card-header"><div class="card-title">Agent Leads</div></div>
+                <table>
+                    <thead><tr><th>Agent</th><th>Leads</th><th>Enquiries</th><th>Applications</th><th>Banked</th><th>Lost</th><th>GP</th><th></th></tr></thead>
+                    <tbody id="agentTable"></tbody>
+                </table>
             </div>
+        </div>
+        <!-- PRE-QUALIFICATION VIEW -->
+        <div id="prequalView" class="view">
+            <div class="page-title">Pre-Qualification</div>
+            <div class="page-sub">NCA-grade affordability assessment & qualification</div>
+            <div id="prequalForm" style="display:none;">Loading pre-qualification form...</div>
+        </div>
+
+        <!-- VEHICLE KNOWLEDGE BASE VIEW -->
+        <div id="vehicleKBView" class="view">
+            <div class="page-title">Vehicle Knowledge Base</div>
+            <div class="page-sub">Browse vehicles, compare specs, check pricing</div>
+            <div id="vehicleKBContent">Loading vehicle database...</div>
+        </div>
+
+        <!-- CONVERSATION GUIDE VIEW -->
+        <div id="guideView" class="view">
+            <div class="page-title">Conversation Guide</div>
+            <div class="page-sub">Sales scripts and objection handling by lead stage</div>
+            <div id="guideContent">Loading conversation scripts...</div>
         </div>
     </main>
 </div>
@@ -637,7 +655,7 @@
             <div class="cc-header" style="flex:1;border:none;padding:0;margin:0;gap:10px;">
                 <button class="nav-arrow" onclick="navigateCC(-1)"><i class="fas fa-chevron-left"></i></button>
                 <div class="cc-avatar" id="ccAvatar">?</div>
-                <div class="cc-info"><h2 id="ccName">—</h2><span id="ccSub">—</span></div>
+                <div class="cc-info"><h2 id="ccName" style="display:flex;align-items:center;gap:10px;">— <span id="ccScoreBadge" style="font-size:11px;padding:3px 8px;border-radius:4px;background:var(--accent-red);color:#fff;">Score: 0%</span></h2><span id="ccSub">—</span></div>
                 <div class="cc-actions">
                     <button class="btn btn-secondary btn-sm" onclick="copyPhone()"><i class="fas fa-copy"></i> Copy</button>
                     <button class="btn btn-success btn-sm" onclick="openWhatsApp()"><i class="fab fa-whatsapp"></i> WA</button>
@@ -657,7 +675,25 @@
                 <button class="cc-tab" onclick="switchCCTab('application',this)"><i class="fas fa-file-signature"></i> Application</button>
             </div>
             <div id="ccPanel-details" class="cc-panel active"></div>
-            <div id="ccPanel-notes" class="cc-panel"></div>
+            <div id="ccPanel-notes" class="cc-panel">
+                <div class="card" style="margin-bottom: 16px; background: rgba(0, 212, 255, 0.05); border: 1px solid var(--accent-cyan);">
+                    <div class="card-title" style="color: var(--accent-cyan); margin-bottom: 12px;"><i class="fas fa-bolt"></i> Dual-Logging Action Form</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Logs touchpoint to ERA master file and moves diary follow-up date simultaneously.</div>
+                    <textarea id="dualLogNote" class="input" style="height: 60px; margin-bottom: 10px;" placeholder="Call outcome / Note..."></textarea>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <div>
+                            <div style="font-size:10px; color:var(--text-muted); margin-bottom:4px;">Next Follow-up</div>
+                            <input type="date" id="dualLogDate" class="input" style="width: 140px;">
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-size:10px; color:var(--text-muted); margin-bottom:4px;">New Heat Score (0-100)</div>
+                            <input type="number" id="dualLogScore" class="input" style="width: 100px;" min="0" max="100">
+                        </div>
+                        <button class="btn btn-primary" onclick="executeDualLog()" style="margin-top: 14px;"><i class="fas fa-save"></i> Execute Action</button>
+                    </div>
+                </div>
+                <div id="notesHistoryList"></div>
+            </div>
             <div id="ccPanel-qualification" class="cc-panel"></div>
             <div id="ccPanel-finance" class="cc-panel"></div>
             <div id="ccPanel-quote" class="cc-panel"></div>
@@ -770,71 +806,25 @@
 <!-- HIDDEN INPUTS -->
 <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importJSON(this)">
 
+<!-- SNAPSHOT FOOTER -->
+<div id="snapshotFooter" style="position:fixed;bottom:0;left:0;right:0;background:var(--bg-card);border-top:1px solid var(--border);padding:12px 16px;display:none;flex-direction:column;gap:10px;max-height:200px;overflow-y:auto;font-size:11px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div style="font-weight:700;color:var(--text-main);">Snapshots</div>
+        <button class="btn btn-sm btn-primary" onclick="createSnapshot()"><i class="fas fa-save"></i> Save Snapshot</button>
+    </div>
+    <div id="snapshotList" style="display:flex;flex-direction:column;gap:6px;"></div>
+</div>
+
 <script>
 // ============================================================
 // CONFIG & STATE
 // ============================================================
-let AGENTS = ['Rudi', 'Lesedi', 'Tiisetso'];
+const AGENTS = ['Rudi', 'Lesedi', 'Tiisetso'];
 const PQ_VAT = 0.15;
 const PQ_FEE_SERVICE = 6500;
 const PQ_FEE_SMASH = 3500;
 const STORAGE_KEY = 'bbh_crm_v8';
 const PROFILES_KEY = 'bbh_v8_profiles';
-const AGENTS_STORAGE_KEY = 'bbh_v8_agents';
-
-// Load agents from localStorage or use defaults
-function loadAgents() {
-    try {
-        const stored = localStorage.getItem(AGENTS_STORAGE_KEY);
-        if (stored) {
-            AGENTS = JSON.parse(stored);
-        }
-    } catch(e) { console.error('Failed to load agents:', e); }
-}
-loadAgents();
-
-// Save agents to localStorage
-function saveAgents() {
-    try {
-        localStorage.setItem(AGENTS_STORAGE_KEY, JSON.stringify(AGENTS));
-    } catch(e) { console.error('Failed to save agents:', e); }
-}
-
-// Add new agent
-function addNewAgent() {
-    const input = document.getElementById('newAgentName');
-    const name = input.value.trim();
-    if (!name) return;
-    if (AGENTS.includes(name)) {
-        showToast('Agent already exists!');
-        input.value = '';
-        return;
-    }
-    AGENTS.push(name);
-    saveAgents();
-    input.value = '';
-    renderAgentList();
-    renderAgents();
-    renderLeads(); // Update agent dropdowns
-    showToast(`Agent "${name}" added successfully!`);
-}
-
-// Remove agent
-function removeAgent(agentName) {
-    const leadCount = db.leads.filter(l => l.agent === agentName).length;
-    if (leadCount > 0) {
-        showDialog(`Cannot remove "${agentName}" - they have ${leadCount} lead(s) assigned. Reassign or delete leads first.`, false);
-        return;
-    }
-    showDialog(`Are you sure you want to remove "${agentName}"? This cannot be undone.`, true, () => {
-        AGENTS = AGENTS.filter(a => a !== agentName);
-        saveAgents();
-        renderAgentList();
-        renderAgents();
-        renderLeads(); // Update agent dropdowns
-        showToast(`Agent "${agentName}" removed.`);
-    });
-}
 
 let db = { leads: [] };
 let ccState = { id: null, edits: {} };
@@ -860,52 +850,6 @@ let quizViewMonth = new Date();
 let dialogCallback = null;
 
 // VEHICLE DATABASE
-const vehicleData = {
-    "SUZUKI": {
-        "CELERIO": [{v:"1.0 GA MT",p:188900},{v:"1.0 GL MT",p:210900},{v:"1.0 GL AMT",p:225900}],
-        "SWIFT": [{v:"1.2i GL MT",p:224900},{v:"1.2i GL+ MT",p:245900},{v:"1.2i GL+ CVT",p:265900},{v:"1.2 GLX MT",p:271900},{v:"1.2 GLX CVT",p:291900}],
-        "FRONX": [{v:"1.5 GL 5MT",p:298900},{v:"1.5 GL 4AT",p:319900},{v:"1.5 GLX 5MT",p:342900},{v:"1.5 GLX 4AT",p:362900}],
-        "GRAND VITARA": [{v:"1.5 GL 5MT",p:358900},{v:"1.5 GL 4AT",p:381900},{v:"1.5 GLX 4AT",p:453900}],
-        "JIMNY": [{v:"1.5 GLX 5MT",p:432900},{v:"1.5 GLX 4AT",p:454900}],
-        "BALENO": [{v:"1.5 GL 5MT",p:266900},{v:"1.5 GL 4AT",p:288900},{v:"1.5 GLX 5MT",p:319900},{v:"1.5 GLX 4AT",p:339900}],
-        "ERTIGA": [{v:"1.5 GA MT",p:299900},{v:"1.5 GL MT",p:339900},{v:"1.5 GL AT",p:358900}],
-        "CIAZ": [{v:"1.5 GL MT",p:294900},{v:"1.5 GL AT",p:311900},{v:"1.5 GLX MT",p:339900},{v:"1.5 GLX AT",p:356900}],
-        "S-PRESSO": [{v:"1.0 GL MT",p:178900},{v:"1.0 GL AMT",p:192900},{v:"1.0 GL+ MT",p:189900},{v:"1.0 GL+ AMT",p:203900}],
-        "DZIRE": [{v:"1.2 GA MT",p:224900},{v:"1.2 GL+ MT",p:246900},{v:"1.2 GL+ CVT",p:266900}],
-        "IGNIS": [{v:"1.2 GL MT",p:237900},{v:"1.2 GLX MT",p:276900},{v:"1.2 GLX AMT",p:293900}],
-        "XL6": [{v:"1.5 GL 5MT",p:357900},{v:"1.5 GL 4AT",p:376900},{v:"1.5 GLX 5MT",p:374900},{v:"1.5 GLX 4AT",p:393900}],
-        "JIMNY 5-DOOR": [{v:"1.5 GL 5MT",p:434900},{v:"1.5 GLX 5MT",p:462900},{v:"1.5 GLX 4AT",p:484900}],
-        "SWIFT SPORT": [{v:"1.4 TURBO MT",p:463900},{v:"1.4 TURBO AT",p:487900}]
-    },
-    "MAHINDRA": {
-        "XUV3X0": [{v:"MX2 1.2T MT",p:259999},{v:"MX2 1.2T AT",p:279999},{v:"MX3 1.2T MT",p:279999},{v:"MX3 1.2T AT",p:300899},{v:"AX5 1.2T MT",p:319999},{v:"AX5 1.2T AT",p:344999},{v:"AX5L 1.2T AT",p:374999},{v:"AX7L 1.2T AT",p:404999}],
-        "XUV700": [{v:"AX5 2.0T AT",p:495199},{v:"AX7 2.0T AT",p:551399},{v:"AX7L 2.0T AT",p:599999}],
-        "Scorpio-N": [{v:"Z4 2.2 D AT",p:489999},{v:"Z8 2.2 D AT",p:536999},{v:"Z8 2.2 D 4x4 AT",p:587999},{v:"Z8L 2.2 D 4x4 AT",p:665999}],
-        "Bolero": [{v:"2.5 D Maxi Truck",p:215999}],
-        "Pik Up": [{v:"2.2 D S4 S/Cab",p:289249},{v:"2.2 D S4 S/Cab AC",p:303549}],
-        "Thar": [{v:"2.0T 4x4 AT",p:489999},{v:"2.2 D 4x4 AT",p:519999}],
-        "Scorpio Classic": [{v:"2.2 D S7 7-Seat",p:436999},{v:"2.2 D S11 7-Seat",p:464999}],
-        "KUV100": [{v:"1.2 G80 K6+",p:189999},{v:"1.2 G80 K8",p:208999}]
-    },
-    "RENAULT": {
-        "KWID": [{v:"1.0 Xtreme",p:186900},{v:"1.0 Climber",p:191900},{v:"1.0 Climber AMT",p:206900}],
-        "KIGER": [{v:"1.0 Zen MT",p:229900},{v:"1.0 Zen CVT",p:249900},{v:"1.0T Intens CVT",p:309900},{v:"1.0T Intens EDC",p:324900}],
-        "TRIBER": [{v:"1.0 Expression",p:216900},{v:"1.0 Dynamique",p:235900},{v:"1.0 Dynamique CVT",p:256900},{v:"1.0 Prestige",p:256900},{v:"1.0 Prestige CVT",p:277900}],
-        "SANDERO": [{v:"66kW Turbo Stepway",p:289900}],
-        "DUSTER": [{v:"1.5 dCi Dynamique 4x2",p:359900},{v:"1.5 dCi Dynamique 4x4",p:429900}],
-        "KOLEOS": [{v:"2.5 Dynamique 4x4",p:599900}],
-        "KANGOO": [{v:"1.5 dCi Panel Van",p:329900}],
-        "CLIO": [{v:"IV 66kW Turbo Expression",p:289900},{v:"IV 66kW Turbo Dynamique",p:314900}],
-        "CAPTUR": [{v:"66kW Turbo Expression",p:349900},{v:"66kW Turbo Dynamique",p:379900}],
-        "ARKANA": [{v:"1.3T Zen EDC",p:429900},{v:"1.3T Intens EDC",p:469900}]
-    },
-    "GAC": {
-        "GS3 Emzoom": [{v:"1.5T Comfort MT",p:289999},{v:"1.5T Comfort DCT",p:309999},{v:"1.5T Elite MT",p:319999},{v:"1.5T Elite DCT",p:339999}],
-        "GS8": [{v:"2.0T Luxury 7-Seat",p:749999},{v:"2.0T Elite 7-Seat",p:849999}],
-        "Emkoo": [{v:"1.5T Comfort DCT",p:399999},{v:"1.5T Elite DCT",p:459999}],
-        "M8": [{v:"2.0T Luxury 7-Seat",p:749999},{v:"2.0T Elite 7-Seat",p:849999}]
-    }
-};
 
 // ============================================================
 // STORAGE
@@ -945,6 +889,112 @@ function seedData() {
 }
 
 // ============================================================
+
+// ============================================================
+// DIARY & AUTOHUB FEATURES
+// ============================================================
+function renderDiary() {
+    const container = document.getElementById('diaryContainer');
+    container.innerHTML = '';
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Filter leads scheduled for today or earlier (past due)
+    const diaryLeads = db.leads.filter(l => l.followUpDate && l.followUpDate <= today && l.stage !== 'banked' && l.stage !== 'lost');
+    diaryLeads.sort((a,b) => (b.score||0) - (a.score||0)); // Sort by Heat Score DESC
+    
+    document.getElementById('navDiaryCount').textContent = diaryLeads.length;
+    
+    if (diaryLeads.length === 0) {
+        container.innerHTML = '<div class="empty-state">No follow-ups scheduled for today. You are caught up!</div>';
+        return;
+    }
+    
+    diaryLeads.forEach(l => {
+        const heatColor = (l.score >= 75) ? 'var(--accent-red)' : ((l.score >= 40) ? 'var(--accent-orange)' : 'var(--text-muted)');
+        const hist = l.noteHistory || [];
+        const lastNote = hist.length > 0 ? hist[hist.length-1] : null;
+        const timelineHtml = lastNote 
+            ? `<div style="font-size:11px; margin-top:8px;"><strong>⏱️ Last Touchpoint (${fmtDate(lastNote.date)}):</strong> ${lastNote.text}</div>`
+            : '';
+            
+        container.innerHTML += `
+            <div class="card" style="border-left: 4px solid ${heatColor}; cursor: pointer; transition: 0.2s;" onclick="openCC(${l.id})">
+                <div style="display:flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div style="font-size: 16px; font-weight: 700; display:flex; align-items:center; gap:8px;">
+                            👤 ${l.customer} 
+                            <span style="font-size:10px; background:${heatColor}; color:#fff; padding:2px 6px; border-radius:4px;">🔥 ${l.dealHeat || 'Unscored'} (Score: ${l.score || 0})</span>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">📞 ${l.phone}</div>
+                        <div style="font-size: 12px; color: var(--accent-cyan); margin-top: 2px;">🚗 ${l.vehicle || 'No vehicle'}</div>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); openWhatsApp()"><i class="fab fa-whatsapp"></i> Chat</button>
+                </div>
+                <div style="margin-top: 12px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">🎯 RECOMMENDED ACTION:</div>
+                    <div style="font-size: 12px; color: var(--accent-green);">👉 ${l.nextAction || 'Contact customer'}</div>
+                </div>
+                <div style="font-size:11px; margin-top:8px; display:flex; align-items:center; gap:6px;">
+                    <i class="fab fa-whatsapp" style="color:var(--accent-green);"></i> <strong>Snapshot:</strong> ${l.waSnapshot || 'No recent WA interaction.'}
+                </div>
+                ${timelineHtml}
+            </div>
+        `;
+    });
+}
+
+function executeDualLog() {
+    const text = document.getElementById('dualLogNote').value.trim();
+    const targetDate = document.getElementById('dualLogDate').value;
+    const score = parseInt(document.getElementById('dualLogScore').value);
+    
+    if (!text || !targetDate) { showToast('Please enter note and next date.'); return; }
+    
+    const lead = db.leads.find(l => l.id === ccState.id);
+    if (!lead) return;
+    
+    if (!lead.noteHistory) lead.noteHistory = [];
+    lead.noteHistory.push({
+        date: new Date().toISOString(),
+        text: text,
+        type: 'manual'
+    });
+    
+    lead.followUpDate = targetDate;
+    if (!isNaN(score)) {
+        lead.score = score;
+        if (score >= 80) lead.dealHeat = 'Stage 1: Hot Money';
+        else if (score >= 60) lead.dealHeat = 'Stage 2: Active';
+        else if (score >= 40) lead.dealHeat = 'Stage 3: Information';
+        else lead.dealHeat = 'Stage 4: Cold';
+    }
+    
+    saveDB();
+    showToast('Touchpoint Dual-Logged to ERA & Diary moved.');
+    
+    document.getElementById('dualLogNote').value = '';
+    
+    // Refresh UI
+    populateNotesTab(lead);
+    if (document.getElementById('diaryView').classList.contains('active')) {
+        renderDiary();
+    }
+}
+
+function populateNotesTab(lead) {
+    const hist = lead.noteHistory || [];
+    let html = '';
+    [...hist].reverse().forEach(n => {
+        const icon = n.type === 'wa' ? '<i class="fab fa-whatsapp" style="color:var(--accent-green);"></i>' : '<i class="fas fa-history" style="color:var(--text-muted);"></i>';
+        html += `<div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+            <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">${icon} ${fmtDate(n.date)}</div>
+            <div style="font-size: 13px;">${n.text}</div>
+        </div>`;
+    });
+    if (!html) html = '<div class="empty-state">No notes found.</div>';
+    document.getElementById('notesHistoryList').innerHTML = html;
+}
+
 // UI HELPERS
 // ============================================================
 function showToast(msg) {
@@ -988,8 +1038,12 @@ function switchView(name, el) {
     document.getElementById(name + 'View').classList.add('active');
     if (el) el.classList.add('active');
     if (name === 'dashboard') { if (!ccCharts.calls) initCCCharts(); updateDashboard(); }
-    if (name === 'leads') renderLeads();
+    if (name === 'leads') { renderLeads(); }
+    if (name === 'diary') { renderDiary(); }
     if (name === 'agents') renderAgents();
+    if (name === 'prequal') initPrequal();
+    if (name === 'vehicleKB') initVehicleKB();
+    if (name === 'guide') initConversationGuide();
 }
 
 // ============================================================
@@ -1296,15 +1350,12 @@ function addLead() {
     document.getElementById('newCustomer').value = '';
     document.getElementById('newPhone').value = '';
     document.getElementById('newVehicle').value = '';
-    renderLeads();
+    renderLeads(); renderDiary();
     updateDashboard();
     showToast('✓ Lead added: ' + customer);
 }
 
 function renderLeads() {
-    // Populate agent dropdowns dynamically
-    populateAgentDropdowns();
-    
     const search = (document.getElementById('leadSearch').value || '').toLowerCase();
     const stageFilter = document.getElementById('filterStage').value;
     const agentFilter = document.getElementById('filterAgent').value;
@@ -1332,33 +1383,6 @@ function renderLeads() {
     });
 }
 
-// Populate agent dropdowns dynamically from AGENTS array
-function populateAgentDropdowns() {
-    const newAgentSelect = document.getElementById('newAgent');
-    const filterAgentSelect = document.getElementById('filterAgent');
-    if (!newAgentSelect || !filterAgentSelect) return;
-    
-    // Save current selection
-    const currentNewAgent = newAgentSelect.value;
-    const currentFilterAgent = filterAgentSelect.value;
-    
-    // Clear and rebuild newAgent dropdown
-    newAgentSelect.innerHTML = '<option value="">Select...</option>';
-    AGENTS.forEach(agent => {
-        newAgentSelect.innerHTML += `<option value="${agent}">${agent}</option>`;
-    });
-    
-    // Clear and rebuild filterAgent dropdown
-    filterAgentSelect.innerHTML = '<option value="">All Agents</option>';
-    AGENTS.forEach(agent => {
-        filterAgentSelect.innerHTML += `<option value="${agent}">${agent}</option>`;
-    });
-    
-    // Restore selections if still valid
-    if (AGENTS.includes(currentNewAgent)) newAgentSelect.value = currentNewAgent;
-    if (AGENTS.includes(currentFilterAgent)) filterAgentSelect.value = currentFilterAgent;
-}
-
 // ============================================================
 // AGENTS VIEW
 // ============================================================
@@ -1367,10 +1391,6 @@ function renderAgents() {
     const tbody = document.getElementById('agentTable');
     cards.innerHTML = '';
     tbody.innerHTML = '';
-    
-    // Also render the agent list in the left pane
-    renderAgentList();
-    
     AGENTS.forEach(agent => {
         const aLeads = db.leads.filter(l => l.agent === agent);
         const enq = aLeads.filter(l => l.stage === 'enquiry').length;
@@ -1396,34 +1416,6 @@ function renderAgents() {
     });
 }
 
-// Render agent list in left pane
-function renderAgentList() {
-    const container = document.getElementById('agentListContainer');
-    const countEl = document.getElementById('agentCount');
-    if (!container || !countEl) return;
-    
-    countEl.textContent = AGENTS.length;
-    container.innerHTML = '';
-    
-    AGENTS.forEach(agent => {
-        const leadCount = db.leads.filter(l => l.agent === agent).length;
-        container.innerHTML += `
-            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.03);">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 32px; height: 32px; background: rgba(0,212,255,0.1); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--accent-cyan); font-weight: 700; font-size: 12px;">
-                        ${agent.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase()}
-                    </div>
-                    <div>
-                        <div style="font-size: 13px; font-weight: 600;">${agent}</div>
-                        <div style="font-size: 10px; color: var(--text-muted);">${leadCount} lead(s)</div>
-                    </div>
-                </div>
-                <button class="btn-icon" onclick="removeAgent('${agent}')" title="Remove agent"><i class="fas fa-trash"></i></button>
-            </div>
-        `;
-    });
-}
-
 // ============================================================
 // CONTACT CARD
 // ============================================================
@@ -1436,9 +1428,18 @@ function openCC(id) {
 
     const initials = lead.customer.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
     document.getElementById('ccAvatar').textContent = initials;
-    document.getElementById('ccName').textContent = lead.customer;
+    document.getElementById('ccName').innerHTML = `${lead.customer} <span id="ccScoreBadge" style="font-size:11px;padding:3px 8px;border-radius:4px;display:none;"></span>`;
     document.getElementById('ccSub').textContent = `${lead.agent} · ${lead.vehicle||'No vehicle selected'}`;
     document.getElementById('ccCallLink').href = 'tel:' + lead.phone;
+    if (lead.score !== undefined) {
+        const badge = document.getElementById('ccScoreBadge');
+        if (badge) {
+            badge.style.display = 'inline-block';
+            badge.textContent = `Score: ${lead.score}%`;
+            badge.style.background = (lead.score >= 75) ? 'var(--accent-red)' : 'var(--text-muted)';
+        }
+    }
+
 
     // Note count badge
     const nb = document.getElementById('notesBadge');
@@ -1576,7 +1577,7 @@ function detSaveVehicle() {
     else if (b && m) lead.vehicle = `${b} ${m}`;
     else if (b) lead.vehicle = b;
     document.getElementById('ccSub').textContent = `${lead.agent} · ${lead.vehicle||'No vehicle selected'}`;
-    saveDB(); renderLeads();
+    saveDB(); renderLeads(); renderDiary();
 }
 
 function makeEditable(el) {
@@ -1650,7 +1651,7 @@ function saveDetailsEdits() {
     }
     Object.assign(lead, ccState.edits);
     saveDB();
-    renderLeads();
+    renderLeads(); renderDiary();
     updateDashboard();
     closeCC();
     showToast('✓ Changes saved');
@@ -2161,7 +2162,7 @@ function pqSelectAlt(brand, model, variant) {
         if(!lead.financeData) lead.financeData={};
         lead.financeData.brand=brand; lead.financeData.model=model; lead.financeData.variant=variant;
         lead.vehicle=`${brand} ${model} ${variant}`;
-        saveDB(); renderLeads();
+        saveDB(); renderLeads(); renderDiary();
         document.getElementById('ccSub').textContent = `${lead.agent} · ${lead.vehicle}`;
     }
     // Refresh the vehicle reference display in finance panel
@@ -2772,7 +2773,7 @@ function importJSON(input) {
                 if(data.agents) localStorage.setItem(PROFILES_KEY,JSON.stringify(data.agents));
                 saveDB();
                 updateDashboard();
-                renderLeads();
+                renderLeads(); renderDiary();
                 showToast('✓ Data imported');
             });
         } catch(err) { showAlert('Error reading file: '+err.message); }
@@ -2797,6 +2798,102 @@ window.onload = function() {
 // Close modals on overlay click
 document.getElementById('ccModal').addEventListener('click', e=>{ if(e.target===document.getElementById('ccModal')) closeCC(); });
 document.getElementById('agentProfileModal').addEventListener('click', e=>{ if(e.target===document.getElementById('agentProfileModal')) closeAgentProfile(); });
+
+// ============================================================
+// NEW VIEWS: Pre-Qualification, Vehicle KB, Conversation Guide
+// ============================================================
+const SNAPSHOTS_KEY = 'bbh_snapshots_v1';
+
+function initPrequal() {
+    document.getElementById('prequalForm').style.display = 'block';
+    document.getElementById('prequalForm').innerHTML = '<p style="color:var(--text-muted);padding:20px;">Pre-qualification module coming soon. This will integrate the NCA-grade affordability calculator.</p>';
+}
+
+function initVehicleKB() {
+    const content = document.getElementById('vehicleKBContent');
+    if (!window.VEHICLES) {
+        content.innerHTML = '<p style="color:var(--text-muted);padding:20px;">Vehicle database not loaded. Please refresh the page.</p>';
+        return;
+    }
+    content.innerHTML = '<p style="color:var(--text-muted);padding:20px;">Vehicle Knowledge Base coming soon. This will show ' + Object.keys(window.VEHICLES).length + ' vehicles ready to browse and compare.</p>';
+}
+
+function initConversationGuide() {
+    const content = document.getElementById('guideContent');
+    if (!window.SCRIPTS) {
+        content.innerHTML = '<p style="color:var(--text-muted);padding:20px;">Scripts not loaded. Please refresh the page.</p>';
+        return;
+    }
+    const stages = Object.keys(window.SCRIPTS);
+    content.innerHTML = '<p style="color:var(--text-muted);padding:20px;">Conversation Guide coming soon. This will provide sales scripts for: ' + stages.join(', ') + '</p>';
+}
+
+// Snapshot System
+function createSnapshot() {
+    const label = prompt('Snapshot name:', 'Snapshot ' + new Date().toLocaleString());
+    if (!label) return;
+
+    const snapshot = {
+        id: Date.now(),
+        label: label,
+        timestamp: new Date().toISOString(),
+        data: JSON.parse(JSON.stringify(db))
+    };
+
+    let snapshots = JSON.parse(localStorage.getItem(SNAPSHOTS_KEY) || '[]');
+    snapshots.unshift(snapshot);
+    if (snapshots.length > 10) snapshots.pop(); // Keep only 10 latest
+    localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(snapshots));
+
+    renderSnapshots();
+    showToast('Snapshot saved: ' + label);
+}
+
+function restoreSnapshot(id) {
+    const snapshots = JSON.parse(localStorage.getItem(SNAPSHOTS_KEY) || '[]');
+    const snapshot = snapshots.find(s => s.id === id);
+    if (!snapshot) return;
+
+    db = JSON.parse(JSON.stringify(snapshot.data));
+    saveDB();
+    location.reload();
+}
+
+function deleteSnapshot(id) {
+    if (!confirm('Delete this snapshot?')) return;
+    let snapshots = JSON.parse(localStorage.getItem(SNAPSHOTS_KEY) || '[]');
+    snapshots = snapshots.filter(s => s.id !== id);
+    localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(snapshots));
+    renderSnapshots();
+    showToast('Snapshot deleted');
+}
+
+function renderSnapshots() {
+    const list = document.getElementById('snapshotList');
+    const snapshots = JSON.parse(localStorage.getItem(SNAPSHOTS_KEY) || '[]');
+
+    if (snapshots.length === 0) {
+        list.innerHTML = '<div style="color:var(--text-muted);padding:8px;">No snapshots yet. Save one to get started.</div>';
+        return;
+    }
+
+    list.innerHTML = snapshots.map(s => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:var(--bg-hover);border-radius:4px;border:1px solid var(--border);">
+            <div>
+                <div style="font-weight:600;color:var(--accent-cyan);">${s.label}</div>
+                <div style="font-size:9px;color:var(--text-muted);">${new Date(s.timestamp).toLocaleString()}</div>
+            </div>
+            <div style="display:flex;gap:6px;">
+                <button class="btn btn-sm" style="background:var(--accent-green);color:#fff;" onclick="restoreSnapshot(${s.id})">Restore</button>
+                <button class="btn-icon" onclick="deleteSnapshot(${s.id})"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Show snapshot footer and load initial snapshots
+document.getElementById('snapshotFooter').style.display = 'flex';
+renderSnapshots();
 </script>
 </body>
 </html>
