@@ -562,15 +562,39 @@
         
         <!-- DIARY VIEW -->
         <div id="diaryView" class="view">
-            <div class="page-title">Daily Diary</div>
-            <div class="page-sub">AutoHUB-style Executive Deal Cards for today's follow-ups</div>
-            <div style="margin-bottom: 16px; display: flex; justify-content: space-between;">
-                <div style="color: var(--text-muted); font-size: 13px;">Follow-ups scheduled for today (or past due).</div>
+    <div class="page-title">Daily Diary</div>
+    <div class="page-sub">AutoHUB-style Executive Deal Cards for today's follow-ups</div>
+    <div style="margin-bottom: 16px; display: flex; justify-content: space-between;">
+        <div style="color: var(--text-muted); font-size: 13px;" id="diarySubtitle">Select a date to view scheduled follow-ups.</div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start;">
+        <!-- Physical Calendar UI -->
+        <div class="card" style="position: sticky; top: 16px; background: rgba(30,41,59,0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <button class="btn-icon" onclick="changeDiaryMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                <div id="diaryMonthLabel" style="font-weight: 700; font-size: 15px; color: var(--accent-cyan);"></div>
+                <button class="btn-icon" onclick="changeDiaryMonth(1)"><i class="fas fa-chevron-right"></i></button>
             </div>
-            <div id="diaryContainer" style="display: flex; flex-direction: column; gap: 16px;">
-                <!-- Diary Cards rendered via JS -->
+            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 10px; color: var(--text-muted); font-weight: 700; margin-bottom: 8px;">
+                <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+            </div>
+            <div id="diaryCalendarGrid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;">
+                <!-- Calendar Days rendered via JS -->
+            </div>
+            <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-muted);">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--accent-green);"></span> Today</div>
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--accent-cyan);"></span> Selected</div>
+                <div style="display:flex; align-items:center; gap:8px;"><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--accent-orange);"></span> Pending Follow-ups</div>
             </div>
         </div>
+
+        <!-- Diary Entries -->
+        <div id="diaryContainer" style="display: flex; flex-direction: column; gap: 16px;">
+            <!-- Diary Cards rendered via JS -->
+        </div>
+    </div>
+</div>
 
         <div id="leadsView" class="view">
             <div class="page-title">Lead Pipeline</div>
@@ -673,6 +697,7 @@
                 <button class="cc-tab" onclick="switchCCTab('finance',this)"><i class="fas fa-calculator"></i> Pre-Qual</button>
                 <button class="cc-tab" onclick="switchCCTab('quote',this)"><i class="fas fa-file-alt"></i> Quote</button>
                 <button class="cc-tab" onclick="switchCCTab('application',this)"><i class="fas fa-file-signature"></i> Application</button>
+                <button class="cc-tab" onclick="switchCCTab('otp',this)"><i class="fas fa-file-contract"></i> OTP</button>
             </div>
             <div id="ccPanel-details" class="cc-panel active"></div>
             <div id="ccPanel-notes" class="cc-panel">
@@ -698,6 +723,7 @@
             <div id="ccPanel-finance" class="cc-panel"></div>
             <div id="ccPanel-quote" class="cc-panel"></div>
             <div id="ccPanel-application" class="cc-panel"></div>
+            <div id="ccPanel-otp" class="cc-panel"></div>
         </div>
     </div>
 </div>
@@ -893,19 +919,111 @@ function seedData() {
 // ============================================================
 // DIARY & AUTOHUB FEATURES
 // ============================================================
+let currentDiaryMonth = new Date();
+currentDiaryMonth.setDate(1);
+let selectedDiaryDate = new Date().toISOString().split('T')[0];
+
+function changeDiaryMonth(delta) {
+    currentDiaryMonth.setMonth(currentDiaryMonth.getMonth() + delta);
+    renderCalendar();
+}
+
+function selectDiaryDate(dateString) {
+    selectedDiaryDate = dateString;
+    renderCalendar(); // Update styles
+    renderDiary();
+}
+
+function renderCalendar() {
+    const grid = document.getElementById('diaryCalendarGrid');
+    const label = document.getElementById('diaryMonthLabel');
+    if (!grid || !label) return;
+    
+    grid.innerHTML = '';
+    const year = currentDiaryMonth.getFullYear();
+    const month = currentDiaryMonth.getMonth();
+    label.textContent = currentDiaryMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = new Date().toISOString().split('T')[0];
+    
+    const followUpCounts = {};
+    db.leads.forEach(l => {
+        if (l.followUpDate && l.stage !== 'banked' && l.stage !== 'lost') {
+            followUpCounts[l.followUpDate] = (followUpCounts[l.followUpDate] || 0) + 1;
+        }
+    });
+
+    for (let i = 0; i < firstDay; i++) { grid.innerHTML += `<div></div>`; }
+    
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dStr = String(d).padStart(2, '0');
+        const mStr = String(month + 1).padStart(2, '0');
+        const fullDate = `${year}-${mStr}-${dStr}`;
+        
+        const count = followUpCounts[fullDate] || 0;
+        let badgeHtml = count > 0 ? `<div style="position:absolute; top:-4px; right:-4px; background:var(--accent-orange); color:#fff; font-size:9px; width:14px; height:14px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 2px var(--bg-card); font-weight:800;">${count}</div>` : '';
+        
+        let bg = 'rgba(255,255,255,0.03)';
+        let border = '1px solid transparent';
+        let color = 'var(--text-main)';
+        
+        if (fullDate === selectedDiaryDate) {
+            bg = 'rgba(0, 212, 255, 0.15)';
+            border = '1px solid var(--accent-cyan)';
+            color = '#fff';
+        } else if (fullDate === today) {
+            border = '1px solid var(--accent-green)';
+            color = 'var(--accent-green)';
+        }
+        
+        grid.innerHTML += `
+            <div style="position:relative; background:${bg}; border:${border}; color:${color}; border-radius:4px; padding:8px 0; text-align:center; cursor:pointer; font-size:12px; transition:0.2s;" 
+                 onclick="selectDiaryDate('${fullDate}')" 
+                 onmouseover="if(this.style.background!=='rgba(0, 212, 255, 0.15)') this.style.background='rgba(255,255,255,0.08)'" 
+                 onmouseout="if(this.style.background!=='rgba(0, 212, 255, 0.15)') this.style.background='${bg}'">
+                ${d}
+                ${badgeHtml}
+            </div>
+        `;
+    }
+}
+
+let calendarInitialized = false;
 function renderDiary() {
+    if (!calendarInitialized) {
+        renderCalendar();
+        calendarInitialized = true;
+    }
     const container = document.getElementById('diaryContainer');
+    if (!container) return;
     container.innerHTML = '';
     const today = new Date().toISOString().split('T')[0];
     
-    // Filter leads scheduled for today or earlier (past due)
-    const diaryLeads = db.leads.filter(l => l.followUpDate && l.followUpDate <= today && l.stage !== 'banked' && l.stage !== 'lost');
-    diaryLeads.sort((a,b) => (b.score||0) - (a.score||0)); // Sort by Heat Score DESC
+    // Update nav badge to ALWAYS show today & past-due count
+    const pastDueLeads = db.leads.filter(l => l.followUpDate && l.followUpDate <= today && l.stage !== 'banked' && l.stage !== 'lost');
+    document.getElementById('navDiaryCount').textContent = pastDueLeads.length;
     
-    document.getElementById('navDiaryCount').textContent = diaryLeads.length;
+    const isToday = (selectedDiaryDate === today);
+    const subEl = document.getElementById('diarySubtitle');
+    if (subEl) {
+        subEl.textContent = isToday 
+            ? "Follow-ups scheduled for today (or past due)." 
+            : `Follow-ups scheduled for ${selectedDiaryDate}.`;
+    }
+
+    // Filter leads scheduled for the selected date (if today, include past due)
+    let diaryLeads = db.leads.filter(l => {
+        if (!l.followUpDate || l.stage === 'banked' || l.stage === 'lost') return false;
+        if (isToday) return l.followUpDate <= today;
+        return l.followUpDate === selectedDiaryDate;
+    });
+    
+    diaryLeads.sort((a,b) => (b.score||0) - (a.score||0));
     
     if (diaryLeads.length === 0) {
-        container.innerHTML = '<div class="empty-state">No follow-ups scheduled for today. You are caught up!</div>';
+        container.innerHTML = '<div class="empty-state">No follow-ups scheduled for this date. You are caught up!</div>';
         return;
     }
     
@@ -918,7 +1036,7 @@ function renderDiary() {
             : '';
             
         container.innerHTML += `
-            <div class="card" style="border-left: 4px solid ${heatColor}; cursor: pointer; transition: 0.2s;" onclick="openCC(${l.id})">
+            <div class="card" style="border-left: 4px solid ${heatColor}; cursor: pointer; transition: 0.2s; position:relative;" onclick="openCC(${l.id})">
                 <div style="display:flex; justify-content: space-between; align-items: flex-start;">
                     <div>
                         <div style="font-size: 16px; font-weight: 700; display:flex; align-items:center; gap:8px;">
@@ -1138,9 +1256,28 @@ function updateDashboard() {
     const totalGP = banked.reduce((s,l) => s+(l.gp||0), 0);
     const active = prospects.length;
 
+    // Calculate Calls (Interactions)
+    let totalCalls = 0;
+    const agentCalls = {};
+    AGENTS.forEach(a => agentCalls[a] = 0);
+
+    leads.forEach(l => {
+        if (l.noteHistory) {
+            l.noteHistory.forEach(n => {
+                const nd = new Date(n.date);
+                if (nd >= mStart && nd <= viewDateEnd) {
+                    totalCalls++;
+                    if (l.agent && agentCalls[l.agent] !== undefined) {
+                        agentCalls[l.agent]++;
+                    }
+                }
+            });
+        }
+    });
+
     // Update metric cards
     const sv = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
-    sv('v45Calls', '0'); sv('v45Prospects', prospects.length);
+    sv('v45Calls', totalCalls); sv('v45Prospects', prospects.length);
     sv('v45ProspectSub', `${prospects.filter(l=>l.temperature==='Hot').length} Hot · ${prospects.filter(l=>l.temperature==='Warm').length} Warm`);
     sv('v45Apps', apps.length); sv('v45Units', banked.length);
     sv('v45GP', fmtR(totalGP)); sv('v45Lost', lost.length);
@@ -1172,7 +1309,7 @@ function updateDashboard() {
             const unitColor = aBanked.length >= 4 ? 'var(--accent-green)' : aBanked.length >= 2 ? 'var(--accent-orange)' : 'var(--accent-red)';
             tbody.innerHTML += `<tr>
                 <td><span class="apf-agent-link" onclick="openAgentProfile('${agent}')">${agent}</span></td>
-                <td style="color:var(--text-muted);font-family:'JetBrains Mono',monospace;">0 / 158</td>
+                <td style=\"color:var(--text-muted);font-family:'JetBrains Mono',monospace;\">${agentCalls[agent] || 0} / 158</td>
                 <td style="font-family:'JetBrains Mono',monospace;">${aProspects.length} / 133</td>
                 <td style="font-family:'JetBrains Mono',monospace;">${aApps.length} / 38</td>
                 <td style="color:${unitColor};font-family:'JetBrains Mono',monospace;font-weight:700;">${aBanked.length} / 4</td>
@@ -1481,6 +1618,7 @@ function switchCCTab(name, btn) {
     if (name === 'finance') populateFinancePanel(lead);
     if (name === 'quote') populateQuotePanel(lead);
     if (name === 'application') populateApplicationPanel(lead);
+    if (name === 'otp') populateOTPPanel(lead);
 }
 
 // -- DETAILS PANEL --
@@ -2469,6 +2607,95 @@ function populateApplicationPanel(lead) {
     const bc=document.getElementById('app_ownerBonded'), bs=document.getElementById('app_bondSection');
     if(bc&&bs) bc.addEventListener('change',()=>{ bs.style.display=bc.checked?'grid':'none'; });
 }
+
+function populateOTPPanel(lead) {
+    const p = document.getElementById('ccPanel-otp');
+    p.dataset.populated = '1';
+    const otp = lead.otpData || {};
+    
+    p.innerHTML = `
+    <div class="app-toolbar">
+        <div class="app-toolbar-left">
+            <button class="quote-print-btn" style="background:var(--accent-green);" onclick="saveOTPData()"><i class="fas fa-save"></i> Save OTP Details</button>
+        </div>
+        <span class="app-status-badge ${otp.signed?'saved':'draft'}" id="otpSavedBadge">${otp.signed?'Signed & Active':'Pending'}</span>
+    </div>
+    
+    <div class="card" style="margin-bottom:16px;">
+        <div class="app-section-title">Offer to Purchase Details</div>
+        <div class="app-grid cols-2">
+            <div class="app-field">
+                <label>F&I Approval Status</label>
+                <select id="otp_fniStatus" class="cc-input">
+                    <option value="Pending" ${otp.fniStatus==='Pending'?'selected':''}>Pending / Submitting</option>
+                    <option value="Approved" ${otp.fniStatus==='Approved'?'selected':''}>Approved</option>
+                    <option value="Declined" ${otp.fniStatus==='Declined'?'selected':''}>Declined</option>
+                    <option value="Cash" ${otp.fniStatus==='Cash'?'selected':''}>Cash Deal</option>
+                </select>
+            </div>
+            <div class="app-field">
+                <label>Expected Delivery Date</label>
+                <input type="date" id="otp_deliveryDate" class="cc-input" value="${otp.deliveryDate||''}">
+            </div>
+        </div>
+        
+        <div class="app-grid cols-2" style="margin-top:16px;">
+            <div class="app-field">
+                <label>Trade-in Value (Final)</label>
+                <input type="number" id="otp_tradeInFinal" class="cc-input" value="${otp.tradeInFinal||''}">
+            </div>
+            <div class="app-field">
+                <label>Deposit Paid</label>
+                <input type="number" id="otp_depositPaid" class="cc-input" value="${otp.depositPaid||''}">
+            </div>
+        </div>
+
+        <div class="app-section-title" style="margin-top:20px;">Signatures & Documentation</div>
+        <div class="app-checkbox-row" style="margin-bottom:16px;">
+            <label><input type="checkbox" id="otp_signed" ${otp.signed?'checked':''}> Customer Signed OTP</label>
+            <label><input type="checkbox" id="otp_docsReceived" ${otp.docsReceived?'checked':''}> FICA/KYC Received</label>
+            <label><input type="checkbox" id="otp_managerSigned" ${otp.managerSigned?'checked':''}> Manager Approved</label>
+        </div>
+        
+        <div class="app-field">
+            <label>Internal OTP Notes</label>
+            <textarea id="otp_notes" class="cc-input" style="height:80px;">${otp.notes||''}</textarea>
+        </div>
+    </div>
+    `;
+}
+
+function saveOTPData() {
+    const lead = db.leads.find(l => l.id === ccState.id);
+    if (!lead) return;
+    
+    lead.otpData = {
+        fniStatus: document.getElementById('otp_fniStatus').value,
+        deliveryDate: document.getElementById('otp_deliveryDate').value,
+        tradeInFinal: document.getElementById('otp_tradeInFinal').value,
+        depositPaid: document.getElementById('otp_depositPaid').value,
+        signed: document.getElementById('otp_signed').checked,
+        docsReceived: document.getElementById('otp_docsReceived').checked,
+        managerSigned: document.getElementById('otp_managerSigned').checked,
+        notes: document.getElementById('otp_notes').value
+    };
+    
+    // Automatically flag stage as banked if signed and delivered/approved
+    if (lead.otpData.signed && (lead.otpData.fniStatus === 'Approved' || lead.otpData.fniStatus === 'Cash') && lead.stage !== 'banked') {
+        if (confirm("OTP is signed and F&I Approved. Move this deal to 'Banked' (Sold)?")) {
+            lead.stage = 'banked';
+            lead.bankedDate = new Date().toISOString();
+        }
+    }
+    
+    saveDB();
+    populateOTPPanel(lead);
+    updateDashboard();
+    renderLeads();
+    renderDiary();
+    showToast("OTP data saved successfully.");
+}
+
 
 function saveApplicationData() {
     const lead=db.leads.find(l=>l.id===ccState.id); if(!lead) return;
